@@ -1,0 +1,43 @@
+<html xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <title>Air Quality Project</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <link href='custom.css' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+</head>
+
+<body>
+    <div class="container" align="center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <img src="images/logo.jpg" style="max-width: 100px; display: inline-block; float: left; margin: 20px;">
+                <h1>Shared Air, Shared Action</h1>
+                <h3>Click a station to view its data.</h3>
+            </div>
+        </div>
+        <span><input type="checkbox" class="manufacturer" id="metone" checked> Met One </input></span>
+        <span><input type="checkbox" class="manufacturer" id="airbeam"> Airbeam </input></span>
+        <span><input type="checkbox" class="manufacturer" id="terrier"> Terrier </input></span>
+        <span><input type="checkbox" class="manufacturer" id="purpleair"> Purple AIR </input></span>
+        <span><input type="checkbox" class="manufacturer" id="aeroqual"> Aeroqual </input></span>
+
+    </div>
+
+    <div id="map"></div>
+    <h2 align="center">RAW DATA</h2>
+    <div id="chart"></div>
+
+
+    <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.9.1/d3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="airquality.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAaXa0hQduSjUxxBFeW19u06x8KKCS1IVQ&callback=initMap"></script>
+</body>
+
+</html>
