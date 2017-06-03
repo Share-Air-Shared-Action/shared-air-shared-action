@@ -1,7 +1,7 @@
 <?php
 
 // Import the keys/secret variables
-include("../keys.php");
+include("../../keys.php");
 
 // Set the header Content-Type for JSON
 header('Content-Type: application/json');
@@ -10,7 +10,7 @@ header('Content-Type: application/json');
 $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpass) or die(return_error("Could not connect to database.", pg_last_error()));
 
 // Build the SQL query
-$query = 'SELECT DISTINCT device, latitude, longitude FROM metone';
+$query = 'SELECT DISTINCT metone.unit_id, stationarylocations.latitude, stationarylocations.longitude FROM metone INNER JOIN stationarylocations ON (metone.unit_id = stationarylocations.unit_id)';
 
 // Run the query
 $result = pg_query($query) or die (return_error("Query failed.", pg_last_error()));
