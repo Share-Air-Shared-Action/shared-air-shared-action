@@ -1,7 +1,7 @@
 <?php
 
 // Import the keys/secret variables
-include("../keys.php");
+include("../../keys.php");
 
 // Set the header Content-Type for JSON
 header('Content-Type: application/json');
@@ -13,7 +13,7 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 $device = intval(preg_replace('/[^0-9]+/', '', $_GET['device']), 10);
 
 // Build the SQL query
-$query = 'SELECT time AS x, data AS y FROM metone WHERE device = ' . $device;
+$query = 'SELECT time AS x, pm25_ugm3 AS y FROM metone WHERE device = ' . $device . ' ORDER BY time';
 
 // Run the query
 $result = pg_query($query) or die (return_error("Query failed.", pg_last_error()));
