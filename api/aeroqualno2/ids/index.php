@@ -10,7 +10,7 @@ header('Content-Type: application/json');
 $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpass) or die(return_error("Could not connect to database.", pg_last_error()));
 
 // Build the SQL query
-$query = 'SELECT DISTINCT aeroqualno2.unit_id, stationarylocations.latitude, stationarylocations.longitude FROM aeroqualno2 INNER JOIN stationarylocations ON (aeroqualno2.unit_id = stationarylocations.unit_id)';
+$query = 'SELECT DISTINCT aeroqualno2.unit_id as device, stationarylocations.latitude, stationarylocations.longitude FROM aeroqualno2 INNER JOIN stationarylocations ON (aeroqualno2.unit_id = stationarylocations.unit_id)';
 
 // Run the query
 $result = pg_query($query) or die (return_error("Query failed.", pg_last_error()));
