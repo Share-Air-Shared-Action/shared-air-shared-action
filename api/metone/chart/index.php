@@ -10,13 +10,16 @@ header('Content-Type: application/json');
 $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpass) or die(return_error("Could not connect to database.", pg_last_error()));
 
 // Get the device ID from the URL parameter, and store only numbers into a variable (help prevent SQL injection)
-$device = intval(preg_replace('/[^0-9]+/', '', $_GET['device']), 10);
+$device = $_GET['device'];
+
+// Get the season to be searching for
+$season = $_GET['season'];
 
 // Build the SQL query
-$query = 'SELECT time AS x, pm25_ugm3 AS y FROM metone WHERE device = ' . $device . ' ORDER BY time';
+$query = 'SELECT time AS x, pm25_ugm3 AS y FROM metone WHERE unit_id = $1 ORDER BY time';
 
 // Run the query
-$result = pg_query($query) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($device)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
