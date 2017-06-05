@@ -10,7 +10,7 @@ header('Content-Type: application/json');
 $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpass) or die(return_error("Could not connect to database.", pg_last_error()));
 
 // Build the SQL query
-$query = "SELECT DISTINCT session_title, SUBSTRING(session_title, 1, 2) as community FROM airterrier WHERE measurement_type = 'CO concentration'";
+$query = "SELECT DISTINCT session_title, SUBSTRING(session_title, 1, 2) as community, season FROM airterrier WHERE measurement_type = 'CO concentration'";
 
 // Run the query
 $result = pg_query($query) or die (return_error("Query failed.", pg_last_error()));
