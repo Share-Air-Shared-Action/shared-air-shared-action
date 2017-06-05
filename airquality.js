@@ -11,15 +11,15 @@ function initMap() {
     var mapCanvas = document.getElementById('map');
 
     // Center the map on the Chicago area
-    var centerloc = new google.maps.LatLng(41.7923412,-87.6030669);
+    var centerloc = new google.maps.LatLng(41.7923412, -87.6030669);
 
     // Set the map options
     var mapOptions = {
-            center: centerloc,
-            zoom: 10,
-            panControl: true,
-            scrollwheel: false,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+        center: centerloc,
+        zoom: 10,
+        panControl: true,
+        scrollwheel: false,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
     // Create the map and store it in the variable
@@ -27,13 +27,12 @@ function initMap() {
 
 }
 
-
 // This function creates the markers from the API
 function createMarkers(manufacturer, community) {
     // Send the request to the api for the specified manufacturer
     $.getJSON("/airquality/api/" + manufacturer + "/ids/", function(devices) {
         // For each device returned
-    	$.each(devices, function(key,device) {
+        $.each(devices, function(key, device) {
             // If the device is in the community
             if (device.community == community) {
                 // Get the device's lat and long and create a Google Maps LatLng
@@ -56,72 +55,118 @@ function createMarkers(manufacturer, community) {
                 markers.push(marker);
 
                 // Populate the menu
-                $("#dropdown-sensor-container ul").append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + marker.title +  '", new google.maps.LatLng(' + device.latitude + ', ' + device.longitude + '));' + "'>" + deviceTitle + "</a></li>");
+                $("#dropdown-sensor-container ul").append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + marker.title + '", new google.maps.LatLng(' + device.latitude + ', ' + device.longitude + '));' + "'>" + deviceTitle + "</a></li>");
             }
             if (markers.length > 0) {
                 fitMaptoMarkers();
-                $("#dropdown-sensor-container").css("display","initial");
+                $("#dropdown-sensor-container").css("display", "initial");
                 $("#dropdown-helptext").text("Now choose which station to display on the map or in the menu.");
             } else {
-                $("#dropdown-sensor-container").css("display","none");
+                $("#dropdown-sensor-container").css("display", "none");
                 $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
             }
 
-    	});
+        });
     });
 }
 
 // This function builds the Plot.ly chart
-// TODO: Add season functionality (function parameter passed as [+ "&season=" + season] in the url)
 function buildChart(manufacturer, device_id, pollutant, season) {
-	var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device_id + "&season=" + season;
-	d3.json(url, function(error, data) {
-	      if (error) {
-	              return console.warn(error);
-	      }
-          var max_date = data.x[data.x.length - 1];
-          var min_date = data.x['0'];
+    var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device_id + "&season=" + season;
+    d3.json(url, function(error, data) {
+        if (error) {
+            return console.warn(error);
+        }
+        var max_date = data.x[data.x.length - 1];
+        var min_date = data.x['0'];
 
-	  var chart_width = $("#chart").width();
+        var chart_width = $("#chart").width();
 
-	      var layout = {
-              barmode: 'group',
-              yaxis: {
-                  //range: [0, 60],
-                  title: pollutant
-              },
-              xaxis: {
-                  range: [min_date, max_date],
-                  title: 'Date and Time'
-              },
-	      width: chart_width - 25,
-	      height: 600,
-	      autosize: false
-          };
+        var layout = {
+            barmode: 'group',
+            yaxis: {
+                title: pollutant
+            },
+            xaxis: {
+                range: [min_date, max_date],
+                title: 'Date and Time'
+            },
+            width: chart_width - 25,
+            height: 600,
+            autosize: false
+        };
+        console.log(layout);
 
-          // These variables represent the AQI for the data.
-          var aqi_good = { x:["1980-01-01 00:00:00", "2500-01-01 00:00:00"], y:[12.0,12.0],fill:'tozeroy',type:'scatter',mode:'none',name:'0.0 - 12.0 - Good',fillcolor:'rgba(0,228,0,0.5)'};
-          var aqi_moderate = { x:["1980-01-01 00:00:00", "2500-01-01 00:00:00"], y:[35.4,35.4],fill:'tonexty',type:'scatter',mode:'none',name:'12.1 - 35.4 - Moderate',fillcolor:'rgba(255,255,0,0.5)'};
-          var aqi_unhfsg = { x:["1980-01-01 00:00:00", "2500-01-01 00:00:00"], y:[55.4,55.4],fill:'tonexty',type:'scatter',mode:'none',name:'35.5-55.4 - Unhealthy for Sensitive Groups',fillcolor:'rgba(255,126,0,0.5)'};
-          var aqi_unhealthy = { x:["1980-01-01 00:00:00", "2500-01-01 00:00:00"], y:[150.4,150.4],fill:'tonexty',type:'scatter',mode:'none',name:'55.5-150.4 - Unhealthy',fillcolor:'rgba(255,0,0,0.5)'};
-          var aqi_veryunhealthy = { x:["1980-01-01 00:00:00", "2500-01-01 00:00:00"], y:[250.4,250.4],fill:'tonexty',type:'scatter',mode:'none',name:'150.5-250.4 - Very Unhealthy',fillcolor:'rgba(153,0,76,0.5)'};
-          var aqi_hazardous = { x:["1980-01-01 00:00:00", "2500-01-01 00:00:00"], y:[99999,99999],fill:'tonexty',type:'scatter',mode:'none',name:'250.5+ - Hazardous',fillcolor:'rgba(126,0,35,0.5)'};
-          // Removing the scale temporarily
-          // , aqi_good, aqi_moderate, aqi_unhfsg, aqi_unhealthy, aqi_veryunhealthy, aqi_hazardous
+        // These variables represent the AQI for the data.
+        var aqi_pm25_good = {
+            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
+            y: [12.0, 12.0],
+            fill: 'tozeroy',
+            type: 'scatter',
+            mode: 'none',
+            name: '0.0 - 12.0 - Good',
+            fillcolor: 'rgba(0,228,0,0.5)'
+        };
+        var aqi_pm25_moderate = {
+            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
+            y: [35.4, 35.4],
+            fill: 'tonexty',
+            type: 'scatter',
+            mode: 'none',
+            name: '12.1 - 35.4 - Moderate',
+            fillcolor: 'rgba(255,255,0,0.5)'
+        };
+        var aqi_pm25_unhfsg = {
+            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
+            y: [55.4, 55.4],
+            fill: 'tonexty',
+            type: 'scatter',
+            mode: 'none',
+            name: '35.5-55.4 - Unhealthy for Sensitive Groups',
+            fillcolor: 'rgba(255,126,0,0.5)'
+        };
+        var aqi_pm25_unhealthy = {
+            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
+            y: [150.4, 150.4],
+            fill: 'tonexty',
+            type: 'scatter',
+            mode: 'none',
+            name: '55.5-150.4 - Unhealthy',
+            fillcolor: 'rgba(255,0,0,0.5)'
+        };
+        var aqi_pm25_veryunhealthy = {
+            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
+            y: [250.4, 250.4],
+            fill: 'tonexty',
+            type: 'scatter',
+            mode: 'none',
+            name: '150.5-250.4 - Very Unhealthy',
+            fillcolor: 'rgba(153,0,76,0.5)'
+        };
+        var aqi_pm25_hazardous = {
+            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
+            y: [99999, 99999],
+            fill: 'tonexty',
+            type: 'scatter',
+            mode: 'none',
+            name: '250.5+ - Hazardous',
+            fillcolor: 'rgba(126,0,35,0.5)'
+        };
 
-          // Plot the data
-	      Plotly.newPlot("chart", [data], layout);
+        // Plot the data
+        if (pollutant == "PM2.5") {
+            layout.yaxis.range = [0, 60];
+            Plotly.newPlot("chart", [data, aqi_pm25_good, aqi_pm25_moderate, aqi_pm25_unhfsg, aqi_pm25_unhealthy, aqi_pm25_veryunhealthy, aqi_pm25_hazardous], layout);
+        } else {
+            Plotly.newPlot("chart", [data], layout);
+        }
 
-          // Scroll to the chart
-          $('html, body').animate({
-              scrollTop: $("#chart").offset().top
-          }, 1000);
-	});
+        // Scroll to the chart
+        $('html, body').animate({
+            scrollTop: $("#chart").offset().top
+        }, 1000);
+    });
 }
-
-
-
-
 
 // Load in the communities into the dropdown
 $.getJSON("/airquality/api/communities/", function(communities) {
@@ -139,10 +184,10 @@ $.getJSON("/airquality/api/communities/", function(communities) {
             // Set the menu text to the text of the clicked item
             $("#selected-community").text($(this).text());
             // Unhide the next menu and re-hide the other following menus
-            $("#dropdown-season-container").css("display","initial");
-            $("#dropdown-sensorcategory-container").css("display","none");
-            $("#dropdown-pollutant-container").css("display","none");
-            $("#dropdown-sensor-container").css("display","none");
+            $("#dropdown-season-container").css("display", "initial");
+            $("#dropdown-sensorcategory-container").css("display", "none");
+            $("#dropdown-pollutant-container").css("display", "none");
+            $("#dropdown-sensor-container").css("display", "none");
             // Tell the user to choose the next item
             $("#dropdown-helptext").text("Now choose a season.");
             $("#selected-season").text("Season");
@@ -160,9 +205,9 @@ $("#dropdown-season-container ul li").each(function() {
         // Set the menu text to the text of the clicked item
         $("#selected-season").text($(this).text());
         // Unhide the next menu and re-hide the other following menus
-        $("#dropdown-sensorcategory-container").css("display","initial");
-        $("#dropdown-pollutant-container").css("display","none");
-        $("#dropdown-sensor-container").css("display","none");
+        $("#dropdown-sensorcategory-container").css("display", "initial");
+        $("#dropdown-pollutant-container").css("display", "none");
+        $("#dropdown-sensor-container").css("display", "none");
         // Tell the user to choose the next item
         $("#dropdown-helptext").text("Now choose between stationary sensors or mobile sensors.");
         $("selected-sensorcategory").text("Sensor Category");
@@ -177,8 +222,8 @@ $("#dropdown-sensorcategory-container ul li").each(function() {
         // Set the menu text to the text of the clicked item
         $("#selected-sensorcategory").text($(this).text());
         // re-hide the other following menus and show the next menu
-        $("#dropdown-pollutant-container").css("display","initial");
-        $("#dropdown-sensor-container").css("display","none");
+        $("#dropdown-pollutant-container").css("display", "initial");
+        $("#dropdown-sensor-container").css("display", "none");
         // Tell the user to choose the next item
         $("#dropdown-helptext").text("Now choose which pollutant to display.");
         $("#selected-pollutant").text("Pollutant");
@@ -201,7 +246,7 @@ $("#dropdown-pollutant-container ul li").each(function() {
                 // Load aeroqualno2
                 createMarkers("aeroqualno2", $("#selected-community").text());
             } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                $("#dropdown-sensor-container").css("display","none");
+                $("#dropdown-sensor-container").css("display", "none");
                 $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
             }
 
@@ -210,7 +255,7 @@ $("#dropdown-pollutant-container ul li").each(function() {
                 // Load aeroqualo3
                 createMarkers("aeroqualo3", $("#selected-community").text());
             } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                $("#dropdown-sensor-container").css("display","none");
+                $("#dropdown-sensor-container").css("display", "none");
                 $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
             }
 
@@ -219,7 +264,7 @@ $("#dropdown-pollutant-container ul li").each(function() {
                 // Load purpleairprimary_pm1
                 createMarkers("purpleairprimary_pm1", $("#selected-community").text());
             } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                $("#dropdown-sensor-container").css("display","none");
+                $("#dropdown-sensor-container").css("display", "none");
                 $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
             }
 
@@ -238,12 +283,12 @@ $("#dropdown-pollutant-container ul li").each(function() {
                 // Load purpleairprimary_pm10
                 createMarkers("purpleairprimary_pm10", $("#selected-community").text());
             } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                $("#dropdown-sensor-container").css("display","none");
+                $("#dropdown-sensor-container").css("display", "none");
                 $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
             }
         } else if ($(this).find("a").html() == "CO") {
             if ($("#selected-sensorcategory").text() == "Stationary") {
-                $("#dropdown-sensor-container").css("display","none");
+                $("#dropdown-sensor-container").css("display", "none");
                 $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
             } else if ($("#selected-sensorcategory").text() == "Mobile") {
                 loadMobile("airterrier_co", $("#selected-community").text(), $("#selected-season").text());
@@ -266,7 +311,6 @@ function fitMaptoMarkers() {
     airQualityMap.fitBounds(bounds);
 }
 
-
 function handleSensorClick(manufacturer, title, position) {
     // Get the selected pollutant from the page
     var selectedPollutant = $("#selected-pollutant").text();
@@ -283,7 +327,6 @@ function handleSensorClick(manufacturer, title, position) {
         airQualityMap.setZoom(18);
     }
 }
-
 
 function resetMapAndChart() {
     // Clear markers from map
@@ -305,11 +348,6 @@ function resetMapAndChart() {
     $("#selected-sensor").text("Sensor");
 }
 
-
-
-
-
-
 function loadMobile(manufacturer, community, season) {
     var bounds = new google.maps.LatLngBounds();
     $.getJSON("/airquality/api/" + manufacturer + "/ids/", function(eachroute) {
@@ -321,19 +359,17 @@ function loadMobile(manufacturer, community, season) {
     });
 }
 
-
-
 // This function creates the markers from the API
 function createLine(manufacturer, route) {
     var polylinedata = [];
     // Send the request to the api for the specified manufacturer
     $.getJSON("/airquality/api/" + manufacturer + "/routes/?route=" + route, function(devices) {
         // For each device returned
-    	$.each(devices, function(key,device) {
+        $.each(devices, function(key, device) {
             // put the data into the array
             var thislatlng = new google.maps.LatLng(device.latitude, device.longitude);
             polylinedata.push(thislatlng);
-    	});
+        });
         if (polylinedata.length > 0) {
             var line = new google.maps.Polyline({
                 path: polylinedata,
@@ -349,25 +385,16 @@ function createLine(manufacturer, route) {
             });
 
             // Populate the menu
-            $("#dropdown-sensor-container ul").append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + route +  '",null);' + "'>" + route + "</a></li>");
+            $("#dropdown-sensor-container ul").append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + route + '",null);' + "'>" + route + "</a></li>");
         }
         if (routes.length > 0) {
             fitMaptoMarkers();
-            $("#dropdown-sensor-container").css("display","initial");
+            $("#dropdown-sensor-container").css("display", "initial");
             $("#selected-sensor").text("Route");
             $("#dropdown-helptext").text("Now choose which route to display from the map or in the menu.");
         } else {
-            $("#dropdown-sensor-container").css("display","none");
+            $("#dropdown-sensor-container").css("display", "none");
             $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
         }
     });
 }
-
-
-
-
-
-
-
-
-//
