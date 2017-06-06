@@ -69,7 +69,7 @@ function createMarkers(manufacturer, community) {
         });
     });
 }
-
+var aqiscales;
 // This function builds the Plot.ly chart
 function buildChart(manufacturer, device_id, pollutant, season) {
     var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device_id + "&season=" + season;
@@ -153,18 +153,20 @@ function buildChart(manufacturer, device_id, pollutant, season) {
             fillcolor: 'rgba(126,0,35,0.5)'
         };
 
-        // Plot the data
-        if (pollutant == "PM2.5") {
-            layout.yaxis.range = [0, 60];
-            Plotly.newPlot("chart", [data, aqi_pm25_good, aqi_pm25_moderate, aqi_pm25_unhfsg, aqi_pm25_unhealthy, aqi_pm25_veryunhealthy, aqi_pm25_hazardous], layout);
-        } else {
-            Plotly.newPlot("chart", [data], layout);
-        }
-
-        // Scroll to the chart
-        $('html, body').animate({
-            scrollTop: $("#chart").offset().top
-        }, 1000);
+        // Plot the data with AQI scale
+        $.getJSON("/airquality/api/aqi/", function(aqivals) {
+            aqiscales = aqivals;
+            if(aqivals.hasOwnProperty(pollutant)) {
+                layout.yaxis.range = aqivals[pollutant].range;
+                Plotly.newPlot("chart", [data, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+            } else {
+                Plotly.newPlot("chart", [data], layout);
+            }
+            // Scroll to the chart
+            $('html, body').animate({
+                scrollTop: $("#chart").offset().top
+            }, 1000);
+        });
     });
 }
 
