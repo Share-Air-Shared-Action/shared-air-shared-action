@@ -159,12 +159,14 @@ function selectSeason(season) {
     selected_season = season;
     $("#selected-season").text(season);
     resetMapAndChart();
+    resetPollutantandSensor();
 }
 
 function selectCommunity(community) {
     selected_community = community;
     $("#selected-community").text(community);
     resetMapAndChart();
+    resetPollutantandSensor();
 }
 
 function selectSensorCategory(category) {
@@ -172,9 +174,13 @@ function selectSensorCategory(category) {
     $("#selected-sensorcategory").text(category);
     loadAvailablePollutants(category);
     resetMapAndChart();
-
     // Show the pollutant picker
     $("#dropdown-pollutant-container").css("display","inherit");
+    resetPollutantandSensor();
+
+}
+
+function resetPollutantandSensor() {
     $("#selected-pollutant").text("Pollutant");
     selected_pollutant = "";
 
@@ -191,7 +197,11 @@ function selectPollutant(pollutant) {
 
     // Show the sensor picker
     $("#dropdown-sensor-container").css("display","inherit");
-    $("#selected-sensor").text("Sensor");
+    if (selected_sensorcategory == "Stationary") {
+        $("#selected-sensor").text("Sensor");
+    } else {
+        $("#selected-sensor").text("Route");
+    }
     selected_sensor = "";
 }
 
@@ -334,7 +344,11 @@ function resetMapAndChart() {
 
     // Reset the sensor list
     $("#dropdown-sensor-container li").remove();
-    $("#selected-sensor").text("Sensor");
+    if (selected_sensorcategory == "Stationary") {
+        $("#selected-sensor").text("Sensor");
+    } else {
+        $("#selected-sensor").text("Route");
+    }
 }
 
 function loadMobile(manufacturer, community, season) {
