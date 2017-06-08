@@ -84,6 +84,7 @@ function buildChart(manufacturer, device_id, pollutant, season) {
 
         var layout = {
             barmode: 'group',
+            title: device_id + " data for " + season + " season",
             yaxis: {
                 title: pollutant
             },
@@ -92,73 +93,25 @@ function buildChart(manufacturer, device_id, pollutant, season) {
                 title: 'Date and Time'
             },
             width: chart_width - 25,
-            height: 600,
+            height: 700,
             autosize: false
         };
-        console.log(layout);
 
-        // These variables represent the AQI for the data.
-        var aqi_pm25_good = {
-            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-            y: [12.0, 12.0],
-            fill: 'tozeroy',
-            type: 'scatter',
-            mode: 'none',
-            name: '0.0 - 12.0 - Good',
-            fillcolor: 'rgba(0,228,0,0.5)'
-        };
-        var aqi_pm25_moderate = {
-            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-            y: [35.4, 35.4],
-            fill: 'tonexty',
-            type: 'scatter',
-            mode: 'none',
-            name: '12.1 - 35.4 - Moderate',
-            fillcolor: 'rgba(255,255,0,0.5)'
-        };
-        var aqi_pm25_unhfsg = {
-            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-            y: [55.4, 55.4],
-            fill: 'tonexty',
-            type: 'scatter',
-            mode: 'none',
-            name: '35.5-55.4 - Unhealthy for Sensitive Groups',
-            fillcolor: 'rgba(255,126,0,0.5)'
-        };
-        var aqi_pm25_unhealthy = {
-            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-            y: [150.4, 150.4],
-            fill: 'tonexty',
-            type: 'scatter',
-            mode: 'none',
-            name: '55.5-150.4 - Unhealthy',
-            fillcolor: 'rgba(255,0,0,0.5)'
-        };
-        var aqi_pm25_veryunhealthy = {
-            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-            y: [250.4, 250.4],
-            fill: 'tonexty',
-            type: 'scatter',
-            mode: 'none',
-            name: '150.5-250.4 - Very Unhealthy',
-            fillcolor: 'rgba(153,0,76,0.5)'
-        };
-        var aqi_pm25_hazardous = {
-            x: ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-            y: [99999, 99999],
-            fill: 'tonexty',
-            type: 'scatter',
-            mode: 'none',
-            name: '250.5+ - Hazardous',
-            fillcolor: 'rgba(126,0,35,0.5)'
-        };
-
-        // Plot the data with AQI scale
+        // Plot the data with AQI scale, unit, and range if they are available
         $.getJSON("/airquality/api/aqi/", function(aqivals) {
             aqiscales = aqivals;
-            if(aqivals.hasOwnProperty(pollutant)) {
-                layout.yaxis.range = aqivals[pollutant].range;
-                Plotly.newPlot("chart", [data, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+            if (aqivals.hasOwnProperty(pollutant)) {
+                if (aqivals[pollutant].hasOwnProperty("range")) {
+                    layout.yaxis.range = aqivals[pollutant].range;
+                }
+                if (aqivals[pollutant].hasOwnProperty("unit")) {
+                    layout.yaxis.title = aqivals[pollutant].unit;
+                }
+                if (aqivals[pollutant].hasOwnProperty("scale")) {
+                    Plotly.newPlot("chart", [data, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+                } else {
+                    Plotly.newPlot("chart", [data], layout);
+                }
             } else {
                 Plotly.newPlot("chart", [data], layout);
             }
@@ -243,52 +196,7 @@ $("#dropdown-pollutant-container ul li").each(function() {
         resetMapAndChart();
 
         // Update the map to display pollutants of this type in the selected neighborhood
-        if ($(this).find("a").html() == "NO<sub>2</sub>") {
-            if ($("#selected-sensorcategory").text() == "Stationary") {
-                // Load aeroqualno2
-                createMarkers("aeroqualno2", $("#selected-community").text());
-            } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                $("#dropdown-sensor-container").css("display", "none");
-                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
-            }
-
-        } else if ($(this).find("a").html() == "O<sub>3</sub>") {
-            if ($("#selected-sensorcategory").text() == "Stationary") {
-                // Load aeroqualo3
-                createMarkers("aeroqualo3", $("#selected-community").text());
-            } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                $("#dropdown-sensor-container").css("display", "none");
-                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
-            }
-
-        } else if ($(this).find("a").html() == "PM<sub>1</sub>") {
-            if ($("#selected-sensorcategory").text() == "Stationary") {
-                // Load purpleairprimary_pm1
-                createMarkers("purpleairprimary_pm1", $("#selected-community").text());
-            } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                $("#dropdown-sensor-container").css("display", "none");
-                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
-            }
-
-        } else if ($(this).find("a").html() == "PM<sub>2.5</sub>") {
-            if ($("#selected-sensorcategory").text() == "Stationary") {
-                // Load purpleairprimary_pm1
-                createMarkers("purpleairprimary_pm2.5", $("#selected-community").text());
-                // Load metone
-                createMarkers("metone", $("#selected-community").text());
-            } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                loadMobile("airterrier_pm2.5", $("#selected-community").text(), $("#selected-season").text());
-            }
-
-        } else if ($(this).find("a").html() == "PM<sub>10</sub>") {
-            if ($("#selected-sensorcategory").text() == "Stationary") {
-                // Load purpleairprimary_pm10
-                createMarkers("purpleairprimary_pm10", $("#selected-community").text());
-            } else if ($("#selected-sensorcategory").text() == "Mobile") {
-                $("#dropdown-sensor-container").css("display", "none");
-                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
-            }
-        } else if ($(this).find("a").html() == "CO") {
+        if ($(this).find("a").html() == "CO") {
             if ($("#selected-sensorcategory").text() == "Stationary") {
                 $("#dropdown-sensor-container").css("display", "none");
                 $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
@@ -301,6 +209,47 @@ $("#dropdown-pollutant-container ul li").each(function() {
                 $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
             } else if ($("#selected-sensorcategory").text() == "Mobile") {
                 loadMobile("airterrier_co2", $("#selected-community").text(), $("#selected-season").text());
+            }
+        } else if ($(this).find("a").html() == "NO<sub>2</sub>") {
+            if ($("#selected-sensorcategory").text() == "Stationary") {
+                // Load aeroqualno2
+                createMarkers("aeroqualno2", $("#selected-community").text());
+            } else if ($("#selected-sensorcategory").text() == "Mobile") {
+                $("#dropdown-sensor-container").css("display", "none");
+                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+            }
+        } else if ($(this).find("a").html() == "O<sub>3</sub>") {
+            if ($("#selected-sensorcategory").text() == "Stationary") {
+                // Load aeroqualo3
+                createMarkers("aeroqualo3", $("#selected-community").text());
+            } else if ($("#selected-sensorcategory").text() == "Mobile") {
+                $("#dropdown-sensor-container").css("display", "none");
+                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+            }
+        } else if ($(this).find("a").html() == "PM<sub>1.0</sub>") {
+            if ($("#selected-sensorcategory").text() == "Stationary") {
+                // Load purpleairprimary_pm1
+                createMarkers("purpleairprimary_pm1", $("#selected-community").text());
+            } else if ($("#selected-sensorcategory").text() == "Mobile") {
+                $("#dropdown-sensor-container").css("display", "none");
+                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+            }
+        } else if ($(this).find("a").html() == "PM<sub>2.5</sub>") {
+            if ($("#selected-sensorcategory").text() == "Stationary") {
+                // Load purpleairprimary_pm1
+                createMarkers("purpleairprimary_pm2.5", $("#selected-community").text());
+                // Load metone
+                createMarkers("metone", $("#selected-community").text());
+            } else if ($("#selected-sensorcategory").text() == "Mobile") {
+                loadMobile("airterrier_pm2.5", $("#selected-community").text(), $("#selected-season").text());
+            }
+        } else if ($(this).find("a").html() == "PM<sub>10</sub>") {
+            if ($("#selected-sensorcategory").text() == "Stationary") {
+                // Load purpleairprimary_pm10
+                createMarkers("purpleairprimary_pm10", $("#selected-community").text());
+            } else if ($("#selected-sensorcategory").text() == "Mobile") {
+                $("#dropdown-sensor-container").css("display", "none");
+                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
             }
         }
     });
