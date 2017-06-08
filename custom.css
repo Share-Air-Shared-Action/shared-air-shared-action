@@ -18,3 +18,7 @@ body {
 .dropdown-menu {
     width: 100%;
 }
+
+.container {
+    width: 98% !important;
+}
