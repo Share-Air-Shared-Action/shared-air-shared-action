@@ -9,14 +9,14 @@ header('Content-Type: application/json');
 // Open connection to database using variables set in keys
 $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpass) or die(return_error("Could not connect to database.", pg_last_error()));
 
-// Get the device ID from the URL parameter, and store only numbers into a variable (help prevent SQL injection)
+// Get the device ID from the URL parameter
 $device = $_GET['device'];
 
-// Get the season to be searching for
+// Get the season from the URL parameter
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = 'SELECT time AS x, pm25_ugm3 AS y FROM metone WHERE unit_id = $1 AND season = $2 ORDER BY time';
+$query = 'SELECT date AS x, o3ppm AS y FROM aeroqualo3 WHERE unit_id = $1 and season = $2 ORDER BY date';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
@@ -34,7 +34,7 @@ foreach($resultArray as $item) {
 }
 
 // Build the return array with X, Y, type, and name for plot.ly
-$returnarray = ["x" => $xarray, "y" => $yarray, "type" => "scatter", "name" => "Sensor ID #" . $device];
+$returnarray = ["x" => $xarray, "y" => $yarray, "type" => "scatter", "name" => "O<sub>3</sub> (ppm)"];
 
 // Encode the array as JSON and return it.
 echo json_encode($returnarray);

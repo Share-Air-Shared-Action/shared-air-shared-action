@@ -16,7 +16,7 @@ $device = $_GET['device'];
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = 'SELECT date AS x, o3ppm AS y FROM aeroqualo3 WHERE unit_id = $1 and season = $2 ORDER BY date';
+$query = 'SELECT date AS x, no2ppm AS y FROM aeroqualno2 WHERE unit_id = $1 AND season = $2 ORDER BY date';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
@@ -34,7 +34,7 @@ foreach($resultArray as $item) {
 }
 
 // Build the return array with X, Y, type, and name for plot.ly
-$returnarray = ["x" => $xarray, "y" => $yarray, "type" => "scatter", "name" => "Sensor ID #" . $device];
+$returnarray = ["x" => $xarray, "y" => $yarray, "type" => "scatter", "name" => "NO<sub>2</sub> (ppb)"];
 
 // Encode the array as JSON and return it.
 echo json_encode($returnarray);
