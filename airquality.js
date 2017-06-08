@@ -210,6 +210,13 @@ $("#dropdown-pollutant-container ul li").each(function() {
             } else if ($("#selected-sensorcategory").text() == "Mobile") {
                 loadMobile("airterrier_co2", $("#selected-community").text(), $("#selected-season").text());
             }
+        } else if ($(this).find("a").html() == "NO") {
+            if ($("#selected-sensorcategory").text() == "Stationary") {
+                $("#dropdown-sensor-container").css("display", "none");
+                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+            } else if ($("#selected-sensorcategory").text() == "Mobile") {
+                loadMobile("airterrier_no", $("#selected-community").text(), $("#selected-season").text());
+            }
         } else if ($(this).find("a").html() == "NO<sub>2</sub>") {
             if ($("#selected-sensorcategory").text() == "Stationary") {
                 // Load aeroqualno2

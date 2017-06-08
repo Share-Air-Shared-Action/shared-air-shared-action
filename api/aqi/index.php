@@ -68,7 +68,9 @@ header('Content-Type: application/json');
     "CO2": {
         "unit": "CO<sub>2</sub> (ppm)"
     },
-
+    "NO": {
+        "unit": "NO (ppb)"
+    },
     "NO2": {
         "scale": {
             "good": {
