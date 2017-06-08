@@ -62,7 +62,8 @@ header('Content-Type: application/json');
                 "fillcolor": "rgba(126,0,35,0.5)"
             }
         },
-        "range": [0, 60]
+        "range": [0, 60],
+        "unit": "&mu;g/m<sup>3</sup>"
     },
     "PM10": {
         "scale": {
@@ -121,7 +122,8 @@ header('Content-Type: application/json');
                 "fillcolor": "rgba(126,0,35,0.5)"
             }
         },
-        "range": [0, 400]
+        "range": [0, 400],
+        "unit": "&mu;g/m<sup>3</sup>"
     },
     "CO": {
         "scale": {
@@ -180,13 +182,14 @@ header('Content-Type: application/json');
                 "fillcolor": "rgba(126,0,35,0.5)"
             }
         },
-        "range": [0, 20]
+        "range": [0, 20],
+        "unit": "ppm"
     },
     "NO2": {
         "scale": {
             "good": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [53, 53],
+                "y": [0.053, 0.053],
                 "fill": "tozeroy",
                 "type": "scatter",
                 "mode": "none",
@@ -195,7 +198,7 @@ header('Content-Type: application/json');
             },
             "moderate": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [100, 100],
+                "y": [0.1, 0.1],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
@@ -204,7 +207,7 @@ header('Content-Type: application/json');
             },
             "unhfsg": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [360, 360],
+                "y": [0.36, 0.36],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
@@ -213,7 +216,7 @@ header('Content-Type: application/json');
             },
             "unhealthy": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [649, 649],
+                "y": [0.649, 0.649],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
@@ -222,7 +225,7 @@ header('Content-Type: application/json');
             },
             "veryunhealthy": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [1249, 1249],
+                "y": [1.249, 1.249],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
@@ -239,7 +242,8 @@ header('Content-Type: application/json');
                 "fillcolor": "rgba(126,0,35,0.5)"
             }
         },
-        "range": [0, 660]
+        "range": [0, 0.7],
+        "unit": "ppb"
     },
     "03": {
         "scale": {
@@ -298,6 +302,7 @@ header('Content-Type: application/json');
                 "fillcolor": "rgba(126,0,35,0.5)"
             }
         },
-        "range": [0, 115]
+        "range": [0, 115],
+        "unit": "ppb"
     }
 }
