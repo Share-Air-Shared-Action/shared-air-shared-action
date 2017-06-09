@@ -16,7 +16,7 @@ $device = $_GET['device'];
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = 'SELECT DATE(date), avg(o3ppm) as average, max(o3ppm) as max, min(o3ppm) as min FROM aeroqualo3 WHERE unit_id = $1 AND season = $2 GROUP BY DATE(date) ORDER BY DATE(date)';
+$query = "SELECT DATE(time), avg(measured_value) as average, max(measured_value) as max, min(measured_value) as min FROM airterrier WHERE measurement_type = 'CO concentration' AND session_title = $1 AND season = $2 GROUP BY DATE(time) ORDER BY DATE(time)";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
