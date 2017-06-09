@@ -16,7 +16,7 @@ $device = $_GET['device'];
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = 'SELECT time AS x, pm25_ugm3 AS y FROM metone WHERE unit_id = $1 AND season = $2 ORDER BY time';
+$query = "SELECT time AS x, pm25_ugm3 AS y FROM metone WHERE unit_id = $1 AND season = $2 AND conc = 'conc' ORDER BY time";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
