@@ -316,6 +316,7 @@ function fitMaptoMarkers() {
 function handleSensorClick(manufacturer, title, position) {
     // Build the chart
     buildChart(manufacturer, title, selected_pollutant, selected_season);
+    createSummaryTable(manufacturer, title, selected_season, selected_pollutant);
 
     // Set the menu to show the selected Sensor
     $("#selected-sensor").text(title);
@@ -341,6 +342,9 @@ function resetMapAndChart() {
 
     // Hide the chart
     $("#chart").html("");
+
+    // Hide the summary table
+    $("#summary-table-container").html("");
 
     // Reset the sensor list
     $("#dropdown-sensor-container li").remove();
@@ -397,5 +401,30 @@ function createLine(manufacturer, route) {
         } else {
             $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
         }
+    });
+}
+
+
+function createSummaryTable(manufacturer, device, season, pollutant) {
+    var summaryUrl = "/airquality/api/" + manufacturer + "/summary/?device=" + device + "&season=" + season;
+
+    // Create the table
+    $("#summary-table-container").html("<table id='summary-table'><thead><th>Date</th><th>Average</th><th>Max</th><th>Min</th></thead><tbody></tbody></table>");
+
+    // Load the data into the table
+    $('#summary-table').dynatable({
+     features: {
+       paginate: false,
+       recordCount: false
+     },
+     dataset: {
+       ajax: true,
+       ajaxOnLoad: true,
+       ajaxUrl: summaryUrl,
+       records: []
+     },
+     params: {
+       records: '_root'
+     }
     });
 }
