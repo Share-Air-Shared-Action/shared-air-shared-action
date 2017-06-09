@@ -185,7 +185,7 @@ function resetPollutantandSensor() {
     selected_pollutant = "";
 
     // Hide the sensor picker
-    $("#dropdown-sensor-container").css("display","hidden");
+    $("#dropdown-sensor-container").css("display","none");
     selected_sensor = "";
 }
 
@@ -194,15 +194,6 @@ function selectPollutant(pollutant) {
     $("#selected-pollutant").html(pollutant);
     resetMapAndChart();
     updateMapForPollutant(selected_pollutant);
-
-    // Show the sensor picker
-    $("#dropdown-sensor-container").css("display","inherit");
-    if (selected_sensorcategory == "Stationary") {
-        $("#selected-sensor").text("Sensor");
-    } else {
-        $("#selected-sensor").text("Route");
-    }
-    selected_sensor = "";
 }
 
 function loadAvailablePollutants(category) {
@@ -239,17 +230,18 @@ function loadAvailablePollutants(category) {
 }
 
 function updateMapForPollutant(pollutant) {
+    var shouldShowPicker = true;
     if (pollutant == "CO") {
         if (selected_sensorcategory == "Mobile") {
-            loadMobile("airterrier_co", selected_community, selected_season);
+            shouldShowPicker = loadMobile("airterrier_co", selected_community, selected_season);
         }
     } else if (selected_pollutant == "CO2") {
         if (selected_sensorcategory == "Mobile") {
-            loadMobile("airterrier_co2", selected_community, selected_season);
+            shouldShowPicker = loadMobile("airterrier_co2", selected_community, selected_season);
         }
     } else if (selected_pollutant == "NO") {
         if (selected_sensorcategory == "Mobile") {
-            loadMobile("airterrier_no", selected_community, selected_season);
+            shouldShowPicker = loadMobile("airterrier_no", selected_community, selected_season);
         }
     } else if (selected_pollutant == "NO2") {
         if (selected_sensorcategory == "Stationary") {
@@ -268,13 +260,23 @@ function updateMapForPollutant(pollutant) {
             createMarkers("purpleairprimary_pm2.5", selected_community);
             createMarkers("metone_pm2.5", selected_community);
         } else if (selected_sensorcategory == "Mobile") {
-            loadMobile("airterrier_pm2.5", selected_community, selected_season);
+            shouldShowPicker = loadMobile("airterrier_pm2.5", selected_community, selected_season);
         }
     } else if (selected_pollutant == "PM10") {
         if (selected_sensorcategory == "Stationary") {
             // Load purpleairprimary_pm10
             createMarkers("purpleairprimary_pm10", selected_community);
         }
+    }
+    // Show the sensor picker if ok to
+    if (shouldShowPicker) {
+        $("#dropdown-sensor-container").css("display","inherit");
+        if (selected_sensorcategory == "Stationary") {
+            $("#selected-sensor").text("Sensor");
+        } else {
+            $("#selected-sensor").text("Route");
+        }
+        selected_sensor = "";
     }
 }
 
@@ -358,11 +360,19 @@ function resetMapAndChart() {
 function loadMobile(manufacturer, community, season) {
     var bounds = new google.maps.LatLngBounds();
     $.getJSON("/airquality/api/" + manufacturer + "/ids/", function(eachroute) {
+        var numRoutesDisplayed = 0;
         $.each(eachroute, function(route) {
             if (eachroute[route].community == community && eachroute[route].season == season) {
                 createLine(manufacturer, eachroute[route].session_title);
+                numRoutesDisplayed++;
             }
         });
+        if (numRoutesDisplayed == 0) {
+            $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+            return false;
+        } else {
+            return true;
+        }
     });
 }
 
@@ -415,6 +425,7 @@ function createSummaryTable(manufacturer, device, season, pollutant) {
     $('#summary-table').dynatable({
      features: {
        paginate: false,
+       search: false,
        recordCount: false
      },
      dataset: {

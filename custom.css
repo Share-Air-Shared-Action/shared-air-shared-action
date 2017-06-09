@@ -28,11 +28,11 @@ table {
 }
 
 th {
-    padding: 5px;
+    padding: 5px !important;
 }
 
 td {
-    padding:5px;
+    padding:5px !important;
 }
 
 #summary-table-container {
