@@ -91,6 +91,9 @@ function buildChart(manufacturer, device_id, pollutant, season) {
         var max_date = data.x[data.x.length - 1];
         var min_date = data.x['0'];
 
+        // Max data point
+        var max_data = Math.max.apply(null,data.y);
+
         // Set the chart width to the width of the chart's HTML element
         var chart_width = $("#chart").width();
 
@@ -99,7 +102,8 @@ function buildChart(manufacturer, device_id, pollutant, season) {
             barmode: 'group',
             title: device_id + " data for " + season + " season",
             yaxis: {
-                title: pollutant
+                title: pollutant,
+                range: [0, max_data + (0.1 * max_data)]
             },
             xaxis: {
                 range: [min_date, max_date],
@@ -113,9 +117,6 @@ function buildChart(manufacturer, device_id, pollutant, season) {
         // Plot the data with AQI scale, unit, and range if they are available
         $.getJSON("/airquality/api/aqi/", function(aqivals) {
             if (aqivals.hasOwnProperty(pollutant)) {
-                if (aqivals[pollutant].hasOwnProperty("range")) {
-                    layout.yaxis.range = aqivals[pollutant].range;
-                }
                 if (aqivals[pollutant].hasOwnProperty("unit")) {
                     layout.yaxis.title = aqivals[pollutant].unit;
                 }
