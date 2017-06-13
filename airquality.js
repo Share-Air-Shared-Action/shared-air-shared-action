@@ -419,7 +419,7 @@ function createSummaryTable(manufacturer, device, season, pollutant) {
     var summaryUrl = "/airquality/api/" + manufacturer + "/summary/?device=" + device + "&season=" + season;
 
     // Create the table
-    $("#summary-table-container").html("<table id='summary-table'><thead><th>Date</th><th>Average</th><th>Max</th><th>Min</th></thead><tbody></tbody></table>");
+    $("#summary-table-container").html("<table id='summary-table'><thead><th>Date</th><th>Average</th><th>Max</th><th>Min</th><th>Average Temperature</th><th>Relative Humidity</th><th>Average Wind Speed</th></thead><tbody></tbody></table>");
 
     // Load the data into the table
     $('#summary-table').dynatable({
