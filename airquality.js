@@ -231,7 +231,6 @@ function loadAvailablePollutants(category) {
 }
 
 function updateMapForPollutant(pollutant) {
-    var shouldShowPicker = true;
     if (pollutant == "CO") {
         if (selected_sensorcategory == "Mobile") {
             shouldShowPicker = loadMobile("airterrier_co", selected_community, selected_season);
@@ -247,19 +246,23 @@ function updateMapForPollutant(pollutant) {
     } else if (selected_pollutant == "NO2") {
         if (selected_sensorcategory == "Stationary") {
             createMarkers("aeroqual_no2", selected_community);
+            showSensorPicker();
         }
     } else if (selected_pollutant == "O3") {
         if (selected_sensorcategory == "Stationary") {
             createMarkers("aeroqual_o3", selected_community);
+            showSensorPicker();
         }
     } else if (selected_pollutant == "PM1.0") {
         if (selected_sensorcategory == "Stationary") {
             createMarkers("purpleairprimary_pm1.0", selected_community);
+            showSensorPicker();
         }
     } else if (selected_pollutant == "PM2.5") {
         if (selected_sensorcategory == "Stationary") {
             createMarkers("purpleairprimary_pm2.5", selected_community);
             createMarkers("metone_pm2.5", selected_community);
+            showSensorPicker();
         } else if (selected_sensorcategory == "Mobile") {
             shouldShowPicker = loadMobile("airterrier_pm2.5", selected_community, selected_season);
         }
@@ -267,20 +270,20 @@ function updateMapForPollutant(pollutant) {
         if (selected_sensorcategory == "Stationary") {
             // Load purpleairprimary_pm10
             createMarkers("purpleairprimary_pm10", selected_community);
+            showSensorPicker();
         }
-    }
-    // Show the sensor picker if ok to
-    if (shouldShowPicker) {
-        $("#dropdown-sensor-container").css("display","inherit");
-        if (selected_sensorcategory == "Stationary") {
-            $("#selected-sensor").text("Sensor");
-        } else {
-            $("#selected-sensor").text("Route");
-        }
-        selected_sensor = "";
     }
 }
 
+function showSensorPicker() {
+    $("#dropdown-sensor-container").css("display","inherit");
+    if (selected_sensorcategory == "Stationary") {
+        $("#selected-sensor").text("Sensor");
+    } else {
+        $("#selected-sensor").text("Route");
+    }
+    selected_sensor = "";
+}
 
 
 // Create the event handlers for the dropdown selectors
@@ -370,9 +373,8 @@ function loadMobile(manufacturer, community, season) {
         });
         if (numRoutesDisplayed == 0) {
             $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
-            return false;
         } else {
-            return true;
+            showSensorPicker();
         }
     });
 }
