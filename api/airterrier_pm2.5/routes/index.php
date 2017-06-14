@@ -13,7 +13,7 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 $route = $_GET['route'];
 
 // Build the SQL query
-$query = "SELECT latitude, longitude FROM airterrier WHERE measurement_type = 'Particulate Matter' AND session_title = $1 ORDER BY time";
+$query = "SELECT latitude, longitude, measured_value as data FROM airterrier WHERE measurement_type = 'Particulate Matter' AND session_title = $1 ORDER BY time";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($route)) or die (return_error("Query failed.", pg_last_error()));

@@ -331,6 +331,8 @@ function handleSensorClick(manufacturer, title, position) {
         // Center the map on the selected sensor
         airQualityMap.setCenter(position);
         airQualityMap.setZoom(18);
+    } else {
+        selectLine(manufacturer, title, selected_pollutant);
     }
 }
 
@@ -345,6 +347,9 @@ function resetMapAndChart() {
         routes[i].setMap(null);
     }
     routes = [];
+
+    // Reset any selected line
+    resetSelectedLine();
 
     // Hide the chart
     $("#chart").html("");
@@ -394,9 +399,9 @@ function createLine(manufacturer, route) {
             var line = new google.maps.Polyline({
                 path: polylinedata,
                 geodesic: true,
-                strokeColor: '#F76458',
-                strokeOpacity: 1.0,
-                strokeWeight: 4,
+                strokeColor: '#000000',
+                strokeOpacity: 0.3,
+                strokeWeight: 2,
                 map: airQualityMap
             });
             routes.push(line);
@@ -415,6 +420,113 @@ function createLine(manufacturer, route) {
             $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
         }
     });
+}
+
+var selectedLineData = [];
+function selectLine(manufacturer, route, pollutant) {
+    // Reset the selected line
+    resetSelectedLine()
+    var aqi = {
+        unknown: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#000000',
+            fillOpacity: 0.5,
+            scale: 2.0,
+            strokeWeight: 0
+        },
+        good: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#00e400',
+            fillOpacity: 0.5,
+            scale: 2.0,
+            strokeWeight: 0
+        },
+        moderate: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FFFF00',
+            fillOpacity: 0.5,
+            scale: 2.0,
+            strokeWeight: 0
+        },
+        unhfsg: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF7E00',
+            fillOpacity: 0.5,
+            scale: 2.0,
+            strokeWeight: 0
+        },
+        unhealthy: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF0000',
+            fillOpacity: 0.5,
+            scale: 2.0,
+            strokeWeight: 0
+        },
+        veryunhealthy: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#99004C',
+            fillOpacity: 0.5,
+            scale: 2.0,
+            strokeWeight: 0
+        },
+        hazardous: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#7E0023',
+            fillOpacity: 0.5,
+            scale: 2.0,
+            strokeWeight: 0
+        }
+    };
+    // Plot the data with AQI scale, unit, and range if they are available
+    $.getJSON("/airquality/api/aqi/", function(aqivals) {
+        // Send the request to the api for the specified manufacturer
+        $.getJSON("/airquality/api/" + manufacturer + "/routes/?route=" + route, function(devices) {
+            var bounds = new google.maps.LatLngBounds();
+            // For each device returned
+            $.each(devices, function(key, device) {
+                // put the data into the array
+                var thislatlng = new google.maps.LatLng(device.latitude, device.longitude);
+                var marker = new google.maps.Marker({
+                    position: thislatlng,
+                    map: airQualityMap,
+                    icon: aqi.unknown
+                });
+                bounds.extend(thislatlng);
+
+                if (aqivals.hasOwnProperty(pollutant)) {
+                    if (aqivals[pollutant].hasOwnProperty("scale")) {
+                        if (device.data <= aqivals[pollutant].scale.good.y[0]) {
+                            marker.icon = aqi.good;
+                        } else if (device.data <= aqivals[pollutant].scale.moderate.y[0]) {
+                            marker.icon = aqi.moderate;
+                        } else if (device.data <= aqivals[pollutant].scale.unhfsg.y[0]) {
+                            marker.icon = aqi.unhfsg;
+                        } else if (device.data <= aqivals[pollutant].scale.unhealthy.y[0]) {
+                            marker.icon = aqi.unhealthy;
+                        } else if (device.data <= aqivals[pollutant].scale.veryunhealthy.y[0]) {
+                            marker.icon = aqi.veryunhealthy;
+                        } else if (device.data > aqivals[pollutant].scale.veryunhealthy.y[0] ) {
+                            marker.icon = aqi.hazardous;
+                        } else {
+                            marker.icon = aqi.unknown;
+                        }
+                    }
+                } else {
+                    marker.icon = aqi.unknown;
+                }
+                selectedLineData.push(marker);
+            });
+            // Zoom to the plotted points
+            airQualityMap.fitBounds(bounds);
+        });
+    });
+}
+
+function resetSelectedLine() {
+    for (var i = 0; i < selectedLineData.length; i++) {
+        selectedLineData[i].setMap(null);
+    }
+    selectedLineData = [];
 }
 
 
