@@ -16,7 +16,7 @@ $device = $_GET['device'];
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = "SELECT DATE(time), avg(pm25_ugm3) as average, max(pm25_ugm3) as max, min(pm25_ugm3) as min FROM metone WHERE unit_id = $1 AND season = $2 AND conc = 'conc' GROUP BY DATE(time) ORDER BY DATE(time)";
+$query = "SELECT DATE(time), round(cast(avg(pm25_ugm3) as numeric),3) as average, round(cast(max(pm25_ugm3) as numeric),3) as max, round(cast(min(pm25_ugm3) as numeric),3) as min FROM metone WHERE unit_id = $1 AND season = $2 AND conc = 'conc' GROUP BY DATE(time) ORDER BY DATE(time)";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
