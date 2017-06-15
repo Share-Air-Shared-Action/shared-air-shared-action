@@ -76,7 +76,7 @@ function createMarkers(manufacturer, community) {
 }
 
 // This function builds the Plot.ly chart
-function buildChart(manufacturer, device_id, pollutant, season) {
+function buildChart(manufacturer, device_id, pollutant, season, scrollto) {
 
     // Build the API URL
     var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device_id + "&season=" + season;
@@ -85,6 +85,14 @@ function buildChart(manufacturer, device_id, pollutant, season) {
     d3.json(url, function(error, data) {
         if (error) {
             return console.warn(error);
+            $("#dropdown-helptext").html("<span style='color: red;'>" + error + "</span>");
+        }
+        if (data.x.length == 0) {
+            $("#dropdown-helptext").html("<span style='color: red;'>The selected sensor did not return any data.</span>");
+            resetMapAndChart(false);
+            return console.warn("The selected sensor did not return any data.");
+        } else {
+            $("#dropdown-helptext").html("");
         }
 
         // Get the max and min date to center chart on
@@ -128,10 +136,13 @@ function buildChart(manufacturer, device_id, pollutant, season) {
             } else {
                 Plotly.newPlot("chart", [data], layout);
             }
-            // Scroll to the chart
-            $('html, body').animate({
-                scrollTop: $("#chart").offset().top
-            }, 1000);
+            if (scrollto) {
+                // Scroll to the chart
+                $('html, body').animate({
+                    scrollTop: $("#chart").offset().top
+                }, 1000);
+            }
+            $("#dropdown-helptext").html("");
         });
     });
 }
@@ -159,14 +170,14 @@ $.getJSON("/airquality/api/communities/", function(communities) {
 function selectSeason(season) {
     selected_season = season;
     $("#selected-season").text(season);
-    resetMapAndChart();
+    resetMapAndChart(true);
     resetPollutantandSensor();
 }
 
 function selectCommunity(community) {
     selected_community = community;
     $("#selected-community").text(community);
-    resetMapAndChart();
+    resetMapAndChart(true);
     resetPollutantandSensor();
 }
 
@@ -174,7 +185,7 @@ function selectSensorCategory(category) {
     selected_sensorcategory = category;
     $("#selected-sensorcategory").text(category);
     loadAvailablePollutants(category);
-    resetMapAndChart();
+    resetMapAndChart(true);
     // Show the pollutant picker
     $("#dropdown-pollutant-container").css("display","inherit");
     resetPollutantandSensor();
@@ -193,7 +204,7 @@ function resetPollutantandSensor() {
 function selectPollutant(pollutant) {
     selected_pollutant = $("<div>" + pollutant + "</div>").text();
     $("#selected-pollutant").html(pollutant);
-    resetMapAndChart();
+    resetMapAndChart(true);
     updateMapForPollutant(selected_pollutant);
 }
 
@@ -320,8 +331,13 @@ function fitMaptoMarkers() {
 }
 
 function handleSensorClick(manufacturer, title, position) {
+    var scrollto = true;
     // Build the chart
-    buildChart(manufacturer, title, selected_pollutant, selected_season);
+    if (!position) {
+        scrollto = false;
+    }
+    $("#dropdown-helptext").html("Loading...");
+    buildChart(manufacturer, title, selected_pollutant, selected_season, scrollto);
     createSummaryTable(manufacturer, title, selected_season, selected_pollutant);
 
     // Set the menu to show the selected Sensor
@@ -332,11 +348,12 @@ function handleSensorClick(manufacturer, title, position) {
         airQualityMap.setCenter(position);
         airQualityMap.setZoom(18);
     } else {
-        selectLine(manufacturer, title, selected_pollutant);
+        $("#dropdown-helptext").html("Loading...");
+        selectLine(manufacturer, title, selected_pollutant, selected_season);
     }
 }
 
-function resetMapAndChart() {
+function resetMapAndChart(resetSensorList) {
     // Clear markers from map
     for (var i = 0; i < markers.length; i++) {
         markers[i].setMap(null);
@@ -357,12 +374,14 @@ function resetMapAndChart() {
     // Hide the summary table
     $("#summary-table-container").html("");
 
-    // Reset the sensor list
-    $("#dropdown-sensor-container li").remove();
-    if (selected_sensorcategory == "Stationary") {
-        $("#selected-sensor").text("Sensor");
-    } else {
-        $("#selected-sensor").text("Route");
+    if (resetSensorList) {
+        // Reset the sensor list
+        $("#dropdown-sensor-container li").remove();
+        if (selected_sensorcategory == "Stationary") {
+            $("#selected-sensor").text("Sensor");
+        } else {
+            $("#selected-sensor").text("Route");
+        }
     }
 }
 
@@ -372,7 +391,7 @@ function loadMobile(manufacturer, community, season) {
         var numRoutesDisplayed = 0;
         $.each(eachroute, function(route) {
             if (eachroute[route].community == community && eachroute[route].season == season) {
-                createLine(manufacturer, eachroute[route].session_title);
+                createLine(manufacturer, eachroute[route].session_title, season);
                 numRoutesDisplayed++;
             }
         });
@@ -385,10 +404,10 @@ function loadMobile(manufacturer, community, season) {
 }
 
 // This function creates the markers from the API
-function createLine(manufacturer, route) {
+function createLine(manufacturer, route, season) {
     var polylinedata = [];
     // Send the request to the api for the specified manufacturer
-    $.getJSON("/airquality/api/" + manufacturer + "/routes/?route=" + route, function(devices) {
+    $.getJSON("/airquality/api/" + manufacturer + "/routes/?route=" + route + "&season=" + season, function(devices) {
         // For each device returned
         $.each(devices, function(key, device) {
             // put the data into the array
@@ -423,7 +442,7 @@ function createLine(manufacturer, route) {
 }
 
 var selectedLineData = [];
-function selectLine(manufacturer, route, pollutant) {
+function selectLine(manufacturer, route, pollutant, season) {
     // Reset the selected line
     resetSelectedLine()
     var aqi = {
@@ -431,56 +450,56 @@ function selectLine(manufacturer, route, pollutant) {
             path: google.maps.SymbolPath.CIRCLE,
             fillColor: '#000000',
             fillOpacity: 0.5,
-            scale: 2.0,
+            scale: 2.5,
             strokeWeight: 0
         },
         good: {
             path: google.maps.SymbolPath.CIRCLE,
             fillColor: '#00e400',
             fillOpacity: 0.5,
-            scale: 2.0,
+            scale: 2.5,
             strokeWeight: 0
         },
         moderate: {
             path: google.maps.SymbolPath.CIRCLE,
             fillColor: '#FFFF00',
             fillOpacity: 0.5,
-            scale: 2.0,
+            scale: 2.5,
             strokeWeight: 0
         },
         unhfsg: {
             path: google.maps.SymbolPath.CIRCLE,
             fillColor: '#FF7E00',
             fillOpacity: 0.5,
-            scale: 2.0,
+            scale: 2.5,
             strokeWeight: 0
         },
         unhealthy: {
             path: google.maps.SymbolPath.CIRCLE,
             fillColor: '#FF0000',
             fillOpacity: 0.5,
-            scale: 2.0,
+            scale: 2.5,
             strokeWeight: 0
         },
         veryunhealthy: {
             path: google.maps.SymbolPath.CIRCLE,
             fillColor: '#99004C',
             fillOpacity: 0.5,
-            scale: 2.0,
+            scale: 2.5,
             strokeWeight: 0
         },
         hazardous: {
             path: google.maps.SymbolPath.CIRCLE,
             fillColor: '#7E0023',
             fillOpacity: 0.5,
-            scale: 2.0,
+            scale: 2.5,
             strokeWeight: 0
         }
     };
     // Plot the data with AQI scale, unit, and range if they are available
     $.getJSON("/airquality/api/aqi/", function(aqivals) {
         // Send the request to the api for the specified manufacturer
-        $.getJSON("/airquality/api/" + manufacturer + "/routes/?route=" + route, function(devices) {
+        $.getJSON("/airquality/api/" + manufacturer + "/routes/?route=" + route + "&season=" + season, function(devices) {
             var bounds = new google.maps.LatLngBounds();
             // For each device returned
             $.each(devices, function(key, device) {
@@ -495,6 +514,7 @@ function selectLine(manufacturer, route, pollutant) {
 
                 if (aqivals.hasOwnProperty(pollutant)) {
                     if (aqivals[pollutant].hasOwnProperty("scale")) {
+                        console.log(aqivals[pollutant].scale);
                         if (device.data <= aqivals[pollutant].scale.good.y[0]) {
                             marker.icon = aqi.good;
                         } else if (device.data <= aqivals[pollutant].scale.moderate.y[0]) {
@@ -518,6 +538,9 @@ function selectLine(manufacturer, route, pollutant) {
             });
             // Zoom to the plotted points
             airQualityMap.fitBounds(bounds);
+
+            // Remove the loading text
+            $("#dropdown-helptext").html("");
         });
     });
 }
