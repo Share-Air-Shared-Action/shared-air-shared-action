@@ -12,11 +12,14 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 // Get the device ID from the URL parameter
 $route = $_GET['route'];
 
+// Get the season from the URL parameter
+$season = $_GET['season'];
+
 // Build the SQL query
-$query = "SELECT latitude, longitude FROM airterrier WHERE measurement_type = 'CO2 concentration' AND session_title = $1 ORDER BY time";
+$query = "SELECT latitude, longitude FROM airterrier WHERE measurement_type = 'CO2 concentration' AND session_title = $1 AND season = $2 ORDER BY time";
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($route)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($route, $season)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
