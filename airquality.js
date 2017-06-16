@@ -317,7 +317,6 @@ $("#dropdown-sensorcategory-container ul li").each(function() {
 
 // Zoom the map to the markers or routes available to pick from
 function fitMaptoMarkers() {
-    console.log("fitting map to markers and lines");
     var bounds = new google.maps.LatLngBounds();
     for (var i = 0; i < markers.length; i++) {
         bounds.extend(markers[i].getPosition());
@@ -514,7 +513,6 @@ function selectLine(manufacturer, route, pollutant, season) {
 
                 if (aqivals.hasOwnProperty(pollutant)) {
                     if (aqivals[pollutant].hasOwnProperty("scale")) {
-                        console.log(aqivals[pollutant].scale);
                         if (device.data <= aqivals[pollutant].scale.good.y[0]) {
                             marker.icon = aqi.good;
                         } else if (device.data <= aqivals[pollutant].scale.moderate.y[0]) {
