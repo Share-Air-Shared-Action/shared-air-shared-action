@@ -129,6 +129,11 @@ function buildChart(manufacturer, device_id, pollutant, season, scrollto) {
                     layout.yaxis.title = aqivals[pollutant].unit;
                 }
                 if (aqivals[pollutant].hasOwnProperty("scale")) {
+                    $.each(aqivals[pollutant].scale, function(thisscale) {
+                        aqivals[pollutant].scale[thisscale].x[0] = min_date;
+                        aqivals[pollutant].scale[thisscale].x[1] = max_date;
+                    });
+
                     Plotly.newPlot("chart", [data, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
                 } else {
                     Plotly.newPlot("chart", [data], layout);
