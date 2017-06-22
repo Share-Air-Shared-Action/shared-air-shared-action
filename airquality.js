@@ -303,6 +303,7 @@ function updateMapForPollutant(pollutant) {
         if (selected_sensorcategory == "Stationary") {
             // Load purpleairprimary_pm10
             createMarkers("purpleairprimary_pm10", selected_community, selected_season);
+            createMarkers("metone_pm10", selected_community, selected_season);
             showSensorPicker();
         }
     }

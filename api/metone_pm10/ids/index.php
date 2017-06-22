@@ -13,7 +13,7 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = "SELECT DISTINCT metone.unit_id as device, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM metone INNER JOIN stationarylocations ON (metone.unit_id = stationarylocations.unit_id) WHERE metone.type = 'pm25' AND metone.season = $1";
+$query = "SELECT DISTINCT metone.unit_id as device, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM metone INNER JOIN stationarylocations ON (metone.unit_id = stationarylocations.unit_id) WHERE metone.type = 'pm10' AND metone.season = $1";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season)) or die (return_error("Query failed.", pg_last_error()));
