@@ -1,9 +1,10 @@
 // Initialize the variable for the map
 var airQualityMap;
 
-// Initialize an array for markers and routes
+// Initialize arrays for markers and routes
 var markers = [];
 var routes = [];
+var selectedLineData = [];
 
 // Initialize variables for each selection menu
 var selected_community;
@@ -171,7 +172,7 @@ $.getJSON("/airquality/api/communities/", function(communities) {
     });
 });
 
-
+// This function runs when a season is selected
 function selectSeason(season) {
     selected_season = season;
     $("#selected-season").text(season);
@@ -179,6 +180,7 @@ function selectSeason(season) {
     resetPollutantandSensor();
 }
 
+// This function runs when a community is selected
 function selectCommunity(community) {
     selected_community = community;
     $("#selected-community").text(community);
@@ -186,6 +188,7 @@ function selectCommunity(community) {
     resetPollutantandSensor();
 }
 
+// This function runs when a sensor category is selected
 function selectSensorCategory(category) {
     selected_sensorcategory = category;
     $("#selected-sensorcategory").text(category);
@@ -198,21 +201,35 @@ function selectSensorCategory(category) {
 }
 
 function resetPollutantandSensor() {
+    // Reset text
     $("#selected-pollutant").text("Pollutant");
+
+    // Reset selected pollutant
     selected_pollutant = "";
 
     // Hide the sensor picker
     $("#dropdown-sensor-container").css("display","none");
+
+    // Reset the selected sensor
     selected_sensor = "";
 }
 
+// This function runs when a pollutant is selected
 function selectPollutant(pollutant) {
+    // Set the selected pollutant, stripping any HTML
     selected_pollutant = $("<div>" + pollutant + "</div>").text();
+
+    // Set the text to the pollutant with HTML
     $("#selected-pollutant").html(pollutant);
+
+    // Reset the map and chart, and the sensor list
     resetMapAndChart(true);
+
+    // Update the map to show sensors for the selected pollutant
     updateMapForPollutant(selected_pollutant);
 }
 
+// Load all of the available pollutants depending on the category
 function loadAvailablePollutants(category) {
     // Clear the list
     $("#dropdown-pollutant-container li").remove();
@@ -445,10 +462,14 @@ function createLine(manufacturer, route, season) {
     });
 }
 
-var selectedLineData = [];
+// This function creates markers on the map for each data point in the selected route.
+// If the pollutant has an AQI scale, it uses that to color the marker.
 function selectLine(manufacturer, route, pollutant, season) {
     // Reset the selected line
     resetSelectedLine()
+
+    // Create colored markers for each different AQI
+    // TODO: Move this outside of the function, as it is static.
     var aqi = {
         unknown: {
             path: google.maps.SymbolPath.CIRCLE,
@@ -507,16 +528,22 @@ function selectLine(manufacturer, route, pollutant, season) {
             var bounds = new google.maps.LatLngBounds();
             // For each device returned
             $.each(devices, function(key, device) {
-                // put the data into the array
+                // Create a Google Maps LatLng for the device
                 var thislatlng = new google.maps.LatLng(device.latitude, device.longitude);
+
+                // Build the marker, defaulting to unknown icon.
                 var marker = new google.maps.Marker({
                     position: thislatlng,
                     map: airQualityMap,
                     icon: aqi.unknown
                 });
+
+                // Extend the bounds for zooming
                 bounds.extend(thislatlng);
 
+                // If the AQI API has an entry for this pollutant type
                 if (aqivals.hasOwnProperty(pollutant)) {
+                    // If the AQI API entry has a scale
                     if (aqivals[pollutant].hasOwnProperty("scale")) {
                         if (device.data <= aqivals[pollutant].scale.good.y[0]) {
                             marker.icon = aqi.good;
@@ -534,9 +561,11 @@ function selectLine(manufacturer, route, pollutant, season) {
                             marker.icon = aqi.unknown;
                         }
                     }
+                // Otherwise set to unknown (black circle for marker)
                 } else {
                     marker.icon = aqi.unknown;
                 }
+                // Add the point to the array
                 selectedLineData.push(marker);
             });
             // Zoom to the plotted points
@@ -548,18 +577,22 @@ function selectLine(manufacturer, route, pollutant, season) {
     });
 }
 
+// This function clears the markers for each data point on the map
 function resetSelectedLine() {
+    // Remove each marker from the map
     for (var i = 0; i < selectedLineData.length; i++) {
         selectedLineData[i].setMap(null);
     }
+
+    // Dereference the markers
     selectedLineData = [];
 }
 
-
+// Build the chart and load the data into it
 function createSummaryTable(manufacturer, device, season, pollutant) {
     var summaryUrl = "/airquality/api/" + manufacturer + "/summary/?device=" + device + "&season=" + season;
 
-    // Create the table
+    // Create the table HTML with headers
     $("#summary-table-container").html("<table id='summary-table'><thead><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average</th><th data-dynatable-no-sort='true' style='text-align: right;'>Max</th><th data-dynatable-no-sort='true' style='text-align: right;'>Min</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average Temperature</th><th data-dynatable-no-sort='true' style='text-align: right;'>Relative Humidity</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average Wind Speed</th></thead><tbody></tbody></table>");
 
     // Load the data into the table
