@@ -35,9 +35,9 @@ function initMap() {
 }
 
 // This function creates the markers from the API
-function createMarkers(manufacturer, community) {
+function createMarkers(manufacturer, community, season) {
     // Send the request to the api for the specified manufacturer
-    $.getJSON("/airquality/api/" + manufacturer + "/ids/", function(devices) {
+    $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season, function(devices) {
         // For each device returned
         $.each(devices, function(key, device) {
             // If the device is in the community
@@ -261,23 +261,23 @@ function updateMapForPollutant(pollutant) {
         }
     } else if (selected_pollutant == "NO2") {
         if (selected_sensorcategory == "Stationary") {
-            createMarkers("aeroqual_no2", selected_community);
+            createMarkers("aeroqual_no2", selected_community, selected_season);
             showSensorPicker();
         }
     } else if (selected_pollutant == "O3") {
         if (selected_sensorcategory == "Stationary") {
-            createMarkers("aeroqual_o3", selected_community);
+            createMarkers("aeroqual_o3", selected_community, selected_season);
             showSensorPicker();
         }
     } else if (selected_pollutant == "PM1.0") {
         if (selected_sensorcategory == "Stationary") {
-            createMarkers("purpleairprimary_pm1.0", selected_community);
+            createMarkers("purpleairprimary_pm1.0", selected_community, selected_season);
             showSensorPicker();
         }
     } else if (selected_pollutant == "PM2.5") {
         if (selected_sensorcategory == "Stationary") {
-            createMarkers("purpleairprimary_pm2.5", selected_community);
-            createMarkers("metone_pm2.5", selected_community);
+            createMarkers("purpleairprimary_pm2.5", selected_community, selected_season);
+            createMarkers("metone_pm2.5", selected_community, selected_season);
             showSensorPicker();
         } else if (selected_sensorcategory == "Mobile") {
             shouldShowPicker = loadMobile("airterrier_pm2.5", selected_community, selected_season);
@@ -285,7 +285,7 @@ function updateMapForPollutant(pollutant) {
     } else if (selected_pollutant == "PM10") {
         if (selected_sensorcategory == "Stationary") {
             // Load purpleairprimary_pm10
-            createMarkers("purpleairprimary_pm10", selected_community);
+            createMarkers("purpleairprimary_pm10", selected_community, selected_season);
             showSensorPicker();
         }
     }
@@ -391,7 +391,7 @@ function resetMapAndChart(resetSensorList) {
 
 function loadMobile(manufacturer, community, season) {
     var bounds = new google.maps.LatLngBounds();
-    $.getJSON("/airquality/api/" + manufacturer + "/ids/", function(eachroute) {
+    $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season, function(eachroute) {
         var numRoutesDisplayed = 0;
         $.each(eachroute, function(route) {
             if (eachroute[route].community == community && eachroute[route].season == season) {

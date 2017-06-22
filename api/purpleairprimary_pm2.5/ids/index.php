@@ -9,11 +9,14 @@ header('Content-Type: application/json');
 // Open connection to database using variables set in keys
 $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpass) or die(return_error("Could not connect to database.", pg_last_error()));
 
+// Get the season from the URL parameter
+$season = $_GET['season'];
+
 // Build the SQL query
-$query = 'SELECT DISTINCT purpleairprimary.device_name as device, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM purpleairprimary INNER JOIN stationarylocations ON (purpleairprimary.device_name = stationarylocations.unit_id)';
+$query = 'SELECT DISTINCT purpleairprimary.device_name as device, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM purpleairprimary INNER JOIN stationarylocations ON (purpleairprimary.device_name = stationarylocations.unit_id) WHERE purpleairprimary.season = $1';
 
 // Run the query
-$result = pg_query($query) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($season)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
