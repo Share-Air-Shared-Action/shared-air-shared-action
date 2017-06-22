@@ -63,7 +63,12 @@ function createMarkers(manufacturer, community, season) {
                 markers.push(marker);
 
                 // Populate the menu
-                $("#dropdown-sensor-container ul").append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + marker.title + '", new google.maps.LatLng(' + device.latitude + ', ' + device.longitude + '));' + "'>" + deviceTitle + "</a></li>");
+                var menuList = $("#dropdown-sensor-container ul");
+                menuList.append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + marker.title + '", new google.maps.LatLng(' + device.latitude + ', ' + device.longitude + '));' + "'>" + deviceTitle + "</a></li>");
+                // Sort the menu alphabetically
+                menuList.children().detach().sort(function(a, b) {
+                    return $(a).text().localeCompare($(b).text());
+                }).appendTo(menuList);
             }
             if (markers.length > 0) {
                 fitMaptoMarkers();
@@ -451,7 +456,12 @@ function createLine(manufacturer, route, season) {
             });
 
             // Populate the menu
-            $("#dropdown-sensor-container ul").append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + route + '",null);' + "'>" + route + "</a></li>");
+            var menuList = $("#dropdown-sensor-container ul");
+            menuList.append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + route + '",null);' + "'>" + route + "</a></li>");
+            // Sort the menu alphabetically
+            menuList.children().detach().sort(function(a, b) {
+                return $(a).text().localeCompare($(b).text());
+            }).appendTo(menuList);
         }
         if (routes.length > 0) {
             fitMaptoMarkers();
