@@ -33,6 +33,8 @@ function initMap() {
     // Create the map and store it in the variable
     airQualityMap = new google.maps.Map(mapCanvas, mapOptions);
 
+    // Load previous selection if available
+    loadPreviousSelection();
 }
 
 // This function creates the markers from the API
@@ -180,6 +182,9 @@ $.getJSON("/airquality/api/communities/", function(communities) {
 // This function runs when a season is selected
 function selectSeason(season) {
     selected_season = season;
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("season", season);
+    }
     $("#selected-season").text(season);
     resetMapAndChart(true);
     resetPollutantandSensor();
@@ -188,6 +193,9 @@ function selectSeason(season) {
 // This function runs when a community is selected
 function selectCommunity(community) {
     selected_community = community;
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("community", community);
+    }
     $("#selected-community").text(community);
     resetMapAndChart(true);
     resetPollutantandSensor();
@@ -196,6 +204,9 @@ function selectCommunity(community) {
 // This function runs when a sensor category is selected
 function selectSensorCategory(category) {
     selected_sensorcategory = category;
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("sensorcategory", category);
+    }
     $("#selected-sensorcategory").text(category);
     loadAvailablePollutants(category);
     resetMapAndChart(true);
@@ -211,18 +222,27 @@ function resetPollutantandSensor() {
 
     // Reset selected pollutant
     selected_pollutant = "";
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("pollutant", "");
+    }
 
     // Hide the sensor picker
     $("#dropdown-sensor-container").css("display","none");
 
     // Reset the selected sensor
     selected_sensor = "";
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("sensor", "");
+    }
 }
 
 // This function runs when a pollutant is selected
 function selectPollutant(pollutant) {
     // Set the selected pollutant, stripping any HTML
     selected_pollutant = $("<div>" + pollutant + "</div>").text();
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("pollutant", selected_pollutant);
+    }
 
     // Set the text to the pollutant with HTML
     $("#selected-pollutant").html(pollutant);
@@ -322,6 +342,9 @@ function showSensorPicker() {
         $("#selected-sensor").text("Route");
     }
     selected_sensor = "";
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("sensor", "");
+    }
 }
 
 
@@ -358,6 +381,11 @@ function fitMaptoMarkers() {
 }
 
 function handleSensorClick(manufacturer, title, position) {
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("sensorManufacturer", manufacturer);
+        localStorage.setItem("sensorTitle", title);
+        localStorage.setItem("sensorPosition", position);
+    }
     var scrollto = true;
     // Build the chart
     if (!position) {
@@ -623,4 +651,33 @@ function createSummaryTable(manufacturer, device, season, pollutant) {
        records: '_root'
      }
     });
+}
+
+
+
+function loadPreviousSelection() {
+    if (typeof(Storage) !== "undefined") {
+        var loadCommunity = localStorage.getItem("community");
+        var loadSeason = localStorage.getItem("season");
+        var loadSensorCategory = localStorage.getItem("sensorcategory");
+        var loadPollutant = localStorage.getItem("pollutant");
+        var loadSensorManufacturer = localStorage.getItem("sensorManufacturer");
+        var loadSensorTitle = localStorage.getItem("sensorTitle");
+        var loadSensorPosition = localStorage.getItem("sensorPosition");
+        if (loadCommunity) {
+            selectCommunity(loadCommunity);
+        }
+        if (loadSeason) {
+            selectSeason(loadSeason);
+        }
+        if (loadSensorCategory) {
+            selectSensorCategory(loadSensorCategory);
+        }
+        if (loadPollutant) {
+            selectPollutant(loadPollutant);
+        }
+        if (loadPollutant && loadSensorManufacturer && loadSensorTitle) {
+            handleSensorClick(loadSensorManufacturer,loadSensorTitle,loadSensorPosition);
+        }
+    }
 }
