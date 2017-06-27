@@ -373,8 +373,8 @@ function fitMaptoMarkers() {
         bounds.extend(markers[i].getPosition());
     }
     for (var i = 0; i < routes.length; i++) {
-        for (var j = 0; j < routes[i].latLngs.b[0].b.length; j++) {
-            bounds.extend(routes[i].latLngs.b[0].b[j]);
+        for (var j = 0; j < routes[i].line.latLngs.b[0].b.length; j++) {
+            bounds.extend(routes[i].line.latLngs.b[0].b[j]);
         }
     }
     airQualityMap.fitBounds(bounds);
@@ -416,7 +416,7 @@ function resetMapAndChart(resetSensorList) {
     markers = [];
 
     for (var i = 0; i < routes.length; i++) {
-        routes[i].setMap(null);
+        routes[i].line.setMap(null);
     }
     routes = [];
 
@@ -478,7 +478,7 @@ function createLine(manufacturer, route, season) {
                 strokeWeight: 2,
                 map: airQualityMap
             });
-            routes.push(line);
+            routes.push({"line": line, "name": route});
             line.addListener('click', function() {
                 handleSensorClick(manufacturer, route, null);
             });
@@ -506,6 +506,9 @@ function createLine(manufacturer, route, season) {
 function selectLine(manufacturer, route, pollutant, season) {
     // Reset the selected line
     resetSelectedLine()
+
+    // Hide other lines
+    hideOtherLines(route);
 
     // Create colored markers for each different AQI
     // TODO: Move this outside of the function, as it is static.
@@ -566,7 +569,20 @@ function selectLine(manufacturer, route, pollutant, season) {
         $.getJSON("/airquality/api/" + manufacturer + "/routes/?route=" + route + "&season=" + season, function(devices) {
             var bounds = new google.maps.LatLngBounds();
             // For each device returned
+            var everyother = false;
+            if (devices.length > 400) {
+                console.log("There are " + devices.length + " points in the selected route. Showing every 4th point on map.");
+                everyother = true;
+            }
+            var counter = 0;
             $.each(devices, function(key, device) {
+                counter++;
+                if (everyother) {
+                    if (counter % 4) {
+                        // Skip this data point.
+                        return(true);
+                    }
+                }
                 // Create a Google Maps LatLng for the device
                 var thislatlng = new google.maps.LatLng(device.latitude, device.longitude);
 
@@ -616,6 +632,14 @@ function selectLine(manufacturer, route, pollutant, season) {
     });
 }
 
+function hideOtherLines(nameToShow) {
+    for (var i = 0; i < routes.length; i++) {
+        if (!(routes[i].name == nameToShow)) {
+            routes[i].line.setMap(null);
+        }
+    }
+}
+
 // This function clears the markers for each data point on the map
 function resetSelectedLine() {
     // Remove each marker from the map
@@ -625,6 +649,11 @@ function resetSelectedLine() {
 
     // Dereference the markers
     selectedLineData = [];
+
+    // Unhide other lines
+    for (var i = 0; i < routes.length; i++) {
+        routes[i].line.setMap(airQualityMap);
+    }
 }
 
 // Build the chart and load the data into it
@@ -666,18 +695,19 @@ function loadPreviousSelection() {
         var loadSensorPosition = localStorage.getItem("sensorPosition");
         if (loadCommunity) {
             selectCommunity(loadCommunity);
-        }
-        if (loadSeason) {
-            selectSeason(loadSeason);
-        }
-        if (loadSensorCategory) {
-            selectSensorCategory(loadSensorCategory);
-        }
-        if (loadPollutant) {
-            selectPollutant(loadPollutant);
-        }
-        if (loadPollutant && loadSensorManufacturer && loadSensorTitle) {
-            handleSensorClick(loadSensorManufacturer,loadSensorTitle,loadSensorPosition);
+            if (loadSeason) {
+                selectSeason(loadSeason);
+                if (loadSensorCategory) {
+                    selectSensorCategory(loadSensorCategory);
+                    if (loadPollutant) {
+                        selectPollutant(loadPollutant);
+                        if (loadPollutant && loadSensorManufacturer && loadSensorTitle) {
+                            //TODO: This may trigger before the item appears in the list, causing an inconsistent view.
+                            handleSensorClick(loadSensorManufacturer,loadSensorTitle,loadSensorPosition);
+                        }
+                    }
+                }
+            }
         }
     }
 }
