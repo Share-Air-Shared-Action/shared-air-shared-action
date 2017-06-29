@@ -13,7 +13,44 @@ var selected_sensorcategory;
 var selected_pollutant;
 var selected_sensor;
 
-// This function is called once the Google Maps API loads
+// Load in the communities into the dropdown
+$.getJSON("/airquality/api/communities/", function(communities) {
+
+    // For each community returned
+    $.each(communities, function(community) {
+        // Add it to the community dropdown menu
+        $("#dropdown-community-container ul").append("<li><a>" + communities[community].community + "</a></li>");
+    });
+
+    // For each item in the community dropdown menu
+    $("#dropdown-community-container ul li").each(function() {
+        // Create a click handler
+        $(this).click(function() {
+            // Set the menu text to the text of the clicked item
+            selectCommunity($(this).text())
+        });
+    });
+});
+
+// For each item in the Season dropdown menu
+$("#dropdown-season-container ul li").each(function() {
+    // Create a click handler
+    $(this).click(function() {
+        selectSeason($(this).text());
+    });
+});
+
+// For each item in the Sensor Category dropdown menu
+$("#dropdown-sensorcategory-container ul li").each(function() {
+    // Create a click handler
+    $(this).click(function() {
+        selectSensorCategory($(this).text());
+    });
+});
+
+/**
+ * Loads the Google Map object on callback from Google Maps API
+ */
 function initMap() {
     // Get the map object
     var mapCanvas = document.getElementById('map');
@@ -37,7 +74,12 @@ function initMap() {
     loadPreviousSelection();
 }
 
-// This function creates the markers from the API
+/**
+ * Creates markers and adds each sensor the list
+ * @param  {string} manufacturer The name of the API folder to open.
+ * @param  {string} community    The name of the community.
+ * @param  {string} season       The name of the season from which you want to get data.
+ */
 function createMarkers(manufacturer, community, season) {
     // Send the request to the api for the specified manufacturer
     $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season, function(devices) {
@@ -83,11 +125,18 @@ function createMarkers(manufacturer, community, season) {
     });
 }
 
-// This function builds the Plot.ly chart
-function buildChart(manufacturer, device_id, pollutant, season, scrollto) {
+/**
+ * Builds a Plot.ly chart from using the provided parameters.
+ * @param  {string} manufacturer The name of the API folder to open.
+ * @param  {string} device       The name of the specific sensor/route to display
+ * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
+ * @param  {string} season       The name of the season from which you want to get data.
+ * @param  {bool}   scrollto     If true, once the chart is loaded the DOM will scroll to it.
+ */
+function buildChart(manufacturer, device, pollutant, season, scrollto) {
 
     // Build the API URL
-    var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device_id + "&season=" + season;
+    var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device + "&season=" + season;
 
     // Request the data from API
     d3.json(url, function(error, data) {
@@ -116,7 +165,7 @@ function buildChart(manufacturer, device_id, pollutant, season, scrollto) {
         // Set layout settings
         var layout = {
             barmode: 'group',
-            title: device_id + " data for " + season + " season",
+            title: device + " data for " + season + " season",
             yaxis: {
                 title: pollutant,
                 range: [0, max_data + (0.1 * max_data)]
@@ -160,26 +209,10 @@ function buildChart(manufacturer, device_id, pollutant, season, scrollto) {
     });
 }
 
-// Load in the communities into the dropdown
-$.getJSON("/airquality/api/communities/", function(communities) {
-
-    // For each community returned
-    $.each(communities, function(community) {
-        // Add it to the community dropdown menu
-        $("#dropdown-community-container ul").append("<li><a>" + communities[community].community + "</a></li>");
-    });
-
-    // For each item in the community dropdown menu
-    $("#dropdown-community-container ul li").each(function() {
-        // Create a click handler
-        $(this).click(function() {
-            // Set the menu text to the text of the clicked item
-            selectCommunity($(this).text())
-        });
-    });
-});
-
-// This function runs when a season is selected
+/**
+ * Handles the selection of a season
+ * @param  {string} season The name of the season from which you want to get data.
+ */
 function selectSeason(season) {
     selected_season = season;
     if (typeof(Storage) !== "undefined") {
@@ -190,7 +223,10 @@ function selectSeason(season) {
     resetPollutantandSensor();
 }
 
-// This function runs when a community is selected
+/**
+ * Handles the selection of a community
+ * @param  {string} community  The name of the community.
+ */
 function selectCommunity(community) {
     selected_community = community;
     if (typeof(Storage) !== "undefined") {
@@ -201,21 +237,28 @@ function selectCommunity(community) {
     resetPollutantandSensor();
 }
 
-// This function runs when a sensor category is selected
-function selectSensorCategory(category) {
-    selected_sensorcategory = category;
+/**
+ * Handles the selection of a sensor category
+ * @param  {string} sensorcategory Mobile or Stationary, used to load correct sensors/routes
+ */
+function selectSensorCategory(sensorcategory) {
+    selected_sensorcategory = sensorcategory;
     if (typeof(Storage) !== "undefined") {
-        localStorage.setItem("sensorcategory", category);
+        localStorage.setItem("sensorcategory", sensorcategory);
     }
-    $("#selected-sensorcategory").text(category);
-    loadAvailablePollutants(category);
+    $("#selected-sensorcategory").text(sensorcategory);
+    loadAvailablePollutants(sensorcategory);
     resetMapAndChart(true);
+
     // Show the pollutant picker
     $("#dropdown-pollutant-container").css("display","inherit");
     resetPollutantandSensor();
 
 }
 
+/**
+ * Resets the selected pollutant and sensor
+ */
 function resetPollutantandSensor() {
     // Reset text
     $("#selected-pollutant").text("Pollutant");
@@ -236,7 +279,10 @@ function resetPollutantandSensor() {
     }
 }
 
-// This function runs when a pollutant is selected
+/**
+ * Handles the selection of a pollutant
+ * @param  {string} pollutant The pollutant selected
+ */
 function selectPollutant(pollutant) {
     // Set the selected pollutant, stripping any HTML
     selected_pollutant = $("<div>" + pollutant + "</div>").text();
@@ -251,24 +297,29 @@ function selectPollutant(pollutant) {
     resetMapAndChart(true);
 
     // Update the map to show sensors for the selected pollutant
-    updateMapForPollutant(selected_pollutant);
+    updateMap(selected_pollutant, selected_sensorcategory, selected_community, selected_season);
 }
 
-// Load all of the available pollutants depending on the category
-function loadAvailablePollutants(category) {
+/**
+ * Populates the pollutant menu with the available pollutants based on the sensor category.
+ * @param  {string} sensorcategory Mobile or Stationary, used to load correct sensors/routes
+ */
+function loadAvailablePollutants(sensorcategory) {
     // Clear the list
     $("#dropdown-pollutant-container li").remove();
+
+    // Reset the text to Pollutant
     $("#selected-pollutant").text("Pollutant");
 
     // Build the list
-    if (category == "Stationary") {
+    if (sensorcategory == "Stationary") {
         // NO2, O3, PM1.0, PM2.5, PM10
         $("#dropdown-pollutant-container ul").append("<li><a>NO<sub>2</sub></a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>O<sub>3</sub></a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>PM<sub>1.0</sub></a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>PM<sub>2.5</sub></a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>PM<sub>10</sub></a></li>");
-    } else if (category == "Mobile") {
+    } else if (sensorcategory == "Mobile") {
         // CO, CO2, NO, PM2.5
         $("#dropdown-pollutant-container ul").append("<li><a>CO</a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>CO<sub>2</sub></a></li>");
@@ -288,52 +339,62 @@ function loadAvailablePollutants(category) {
     });
 }
 
-function updateMapForPollutant(pollutant) {
+/**
+ * Loads the correct sensors/routes based on the pollutant.
+ * @param  {string} pollutant      The pollutant to load.
+ * @param  {string} sensorcategory Mobile or Stationary, used to load correct sensors/routes
+ * @param  {string} community      The name of the community.
+ * @param  {string} season         The name of the season from which you want to get data.
+ */
+function updateMap(pollutant, sensorcategory, community, season) {
     if (pollutant == "CO") {
-        if (selected_sensorcategory == "Mobile") {
-            shouldShowPicker = loadMobile("airterrier_co", selected_community, selected_season);
+        if (sensorcategory == "Mobile") {
+            loadMobile("airterrier_co", community, season);
         }
     } else if (selected_pollutant == "CO2") {
-        if (selected_sensorcategory == "Mobile") {
-            shouldShowPicker = loadMobile("airterrier_co2", selected_community, selected_season);
+        if (sensorcategory == "Mobile") {
+            loadMobile("airterrier_co2", community, season);
         }
     } else if (selected_pollutant == "NO") {
-        if (selected_sensorcategory == "Mobile") {
-            shouldShowPicker = loadMobile("airterrier_no", selected_community, selected_season);
+        if (sensorcategory == "Mobile") {
+            loadMobile("airterrier_no", community, season);
         }
     } else if (selected_pollutant == "NO2") {
-        if (selected_sensorcategory == "Stationary") {
-            createMarkers("aeroqual_no2", selected_community, selected_season);
+        if (sensorcategory == "Stationary") {
+            createMarkers("aeroqual_no2", community, season);
             showSensorPicker();
         }
     } else if (selected_pollutant == "O3") {
-        if (selected_sensorcategory == "Stationary") {
-            createMarkers("aeroqual_o3", selected_community, selected_season);
+        if (sensorcategory == "Stationary") {
+            createMarkers("aeroqual_o3", community, season);
             showSensorPicker();
         }
     } else if (selected_pollutant == "PM1.0") {
-        if (selected_sensorcategory == "Stationary") {
-            createMarkers("purpleairprimary_pm1.0", selected_community, selected_season);
+        if (sensorcategory == "Stationary") {
+            createMarkers("purpleairprimary_pm1.0", community, season);
             showSensorPicker();
         }
     } else if (selected_pollutant == "PM2.5") {
-        if (selected_sensorcategory == "Stationary") {
-            createMarkers("purpleairprimary_pm2.5", selected_community, selected_season);
-            createMarkers("metone_pm2.5", selected_community, selected_season);
+        if (sensorcategory == "Stationary") {
+            createMarkers("purpleairprimary_pm2.5", community, season);
+            createMarkers("metone_pm2.5", community, season);
             showSensorPicker();
-        } else if (selected_sensorcategory == "Mobile") {
-            shouldShowPicker = loadMobile("airterrier_pm2.5", selected_community, selected_season);
+        } else if (sensorcategory == "Mobile") {
+            loadMobile("airterrier_pm2.5", community, season);
         }
     } else if (selected_pollutant == "PM10") {
-        if (selected_sensorcategory == "Stationary") {
+        if (sensorcategory == "Stationary") {
             // Load purpleairprimary_pm10
-            createMarkers("purpleairprimary_pm10", selected_community, selected_season);
-            createMarkers("metone_pm10", selected_community, selected_season);
+            createMarkers("purpleairprimary_pm10", community, season);
+            createMarkers("metone_pm10", community, season);
             showSensorPicker();
         }
     }
 }
 
+/**
+ * Shows the sensor/route picker menu, and changes the text to be relevant
+ */
 function showSensorPicker() {
     $("#dropdown-sensor-container").css("display","inherit");
     if (selected_sensorcategory == "Stationary") {
@@ -347,26 +408,9 @@ function showSensorPicker() {
     }
 }
 
-
-// Create the event handlers for the dropdown selectors
-
-// For each item in the Season dropdown menu
-$("#dropdown-season-container ul li").each(function() {
-    // Create a click handler
-    $(this).click(function() {
-        selectSeason($(this).text());
-    });
-});
-
-// For each item in the Sensor Category dropdown menu
-$("#dropdown-sensorcategory-container ul li").each(function() {
-    // Create a click handler
-    $(this).click(function() {
-        selectSensorCategory($(this).text());
-    });
-});
-
-// Zoom the map to the markers or routes available to pick from
+/**
+ * Zooms the map to display only the sensors/routes available to pick from
+ */
 function fitMaptoMarkers() {
     var bounds = new google.maps.LatLngBounds();
     for (var i = 0; i < markers.length; i++) {
@@ -380,10 +424,17 @@ function fitMaptoMarkers() {
     airQualityMap.fitBounds(bounds);
 }
 
-function handleSensorClick(manufacturer, title, position) {
+/**
+ * Handles the click or selection of a sensor/route.
+ * @param  {string} manufacturer The name of the API folder to open.
+ * @param  {string} device       The name of the specific sensor/route to display
+ * @param  {string} position     The position of the device to center on. For routes, set to null.
+ */
+function handleSensorClick(manufacturer, device, position) {
+    selected_sensor = device;
     if (typeof(Storage) !== "undefined") {
         localStorage.setItem("sensorManufacturer", manufacturer);
-        localStorage.setItem("sensorTitle", title);
+        localStorage.setItem("sensorTitle", device);
         localStorage.setItem("sensorPosition", position);
     }
     var scrollto = true;
@@ -392,11 +443,11 @@ function handleSensorClick(manufacturer, title, position) {
         scrollto = false;
     }
     $("#dropdown-helptext").html("Loading...");
-    buildChart(manufacturer, title, selected_pollutant, selected_season, scrollto);
-    createSummaryTable(manufacturer, title, selected_season, selected_pollutant);
+    buildChart(manufacturer, device, selected_pollutant, selected_season, scrollto);
+    createSummaryTable(manufacturer, device, selected_season, selected_pollutant);
 
     // Set the menu to show the selected Sensor
-    $("#selected-sensor").text(title);
+    $("#selected-sensor").text(device);
 
     if (position) {
         // Center the map on the selected sensor
@@ -404,10 +455,14 @@ function handleSensorClick(manufacturer, title, position) {
         airQualityMap.setZoom(18);
     } else {
         $("#dropdown-helptext").html("Loading...");
-        selectLine(manufacturer, title, selected_pollutant, selected_season);
+        selectLine(manufacturer, device, selected_pollutant, selected_season);
     }
 }
 
+/**
+ * Clears any features from the map, hides the chart/summary table
+ * @param {bool} resetSensorList If true, resets the senosr list along with the map/chart/table.
+ */
 function resetMapAndChart(resetSensorList) {
     // Clear markers from map
     for (var i = 0; i < markers.length; i++) {
@@ -440,6 +495,12 @@ function resetMapAndChart(resetSensorList) {
     }
 }
 
+/**
+ * Loads mobile routes into the list/onto the map
+ * @param  {string} manufacturer The name of the API folder to open.
+ * @param  {string} community    The name of the community.
+ * @param  {string} season       The name of the season from which you want to get data.
+ */
 function loadMobile(manufacturer, community, season) {
     var bounds = new google.maps.LatLngBounds();
     $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season, function(eachroute) {
@@ -458,7 +519,12 @@ function loadMobile(manufacturer, community, season) {
     });
 }
 
-// This function creates the markers from the API
+/**
+ * Creates the Polyline from the route's lat/longs.
+ * @param  {string} manufacturer The name of the API folder to open.
+ * @param  {string} route        The name of the specific line/route clicked.
+ * @param  {string} season       The name of the season from which you want to get data.
+ */
 function createLine(manufacturer, route, season) {
     var polylinedata = [];
     // Send the request to the api for the specified manufacturer
@@ -503,6 +569,13 @@ function createLine(manufacturer, route, season) {
 
 // This function creates markers on the map for each data point in the selected route.
 // If the pollutant has an AQI scale, it uses that to color the marker.
+/**
+ * Handles the click/selection of a line/route.
+ * @param  {string} manufacturer The name of the API folder to open.
+ * @param  {string} route        The name of the specific line/route clicked.
+ * @param  {string} season       The name of the season from which you want to get data.
+ * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
+ */
 function selectLine(manufacturer, route, pollutant, season) {
     // Reset the selected line
     resetSelectedLine()
@@ -632,6 +705,10 @@ function selectLine(manufacturer, route, pollutant, season) {
     });
 }
 
+/**
+ * Hides lines/routes other than the selected line/route
+ * @param  {string} nameToShow The name of the route to show
+ */
 function hideOtherLines(nameToShow) {
     for (var i = 0; i < routes.length; i++) {
         if (!(routes[i].name == nameToShow)) {
@@ -640,7 +717,9 @@ function hideOtherLines(nameToShow) {
     }
 }
 
-// This function clears the markers for each data point on the map
+/**
+ * Removes data points from the selected line/route, unhides other lines/routes.
+ */
 function resetSelectedLine() {
     // Remove each marker from the map
     for (var i = 0; i < selectedLineData.length; i++) {
@@ -656,12 +735,18 @@ function resetSelectedLine() {
     }
 }
 
-// Build the chart and load the data into it
+/**
+ * Creates a table object and loads summary data from the API based on parameters
+ * @param  {string} manufacturer The name of the API folder to open.
+ * @param  {string} device       The name of the specific sensor/route to display
+ * @param  {string} season       The name of the season from which you want to get data.
+ * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
+ */
 function createSummaryTable(manufacturer, device, season, pollutant) {
     var summaryUrl = "/airquality/api/" + manufacturer + "/summary/?device=" + device + "&season=" + season;
 
     // Create the table HTML with headers
-    $("#summary-table-container").html("<table id='summary-table'><thead><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average</th><th data-dynatable-no-sort='true' style='text-align: right;'>Max</th><th data-dynatable-no-sort='true' style='text-align: right;'>Min</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average Temperature</th><th data-dynatable-no-sort='true' style='text-align: right;'>Relative Humidity</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average Wind Speed</th></thead><tbody></tbody></table>");
+    $("#summary-table-container").html("<table id='summary-table'><thead><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average</th><th data-dynatable-no-sort='true' style='text-align: right;'>Max</th><th data-dynatable-no-sort='true' style='text-align: right;'>Min</th><th data-dynatable-no-sort='true' style='text-align: right;'>Temperature</th><th data-dynatable-no-sort='true' style='text-align: right;'>Dewpoint</th><th data-dynatable-no-sort='true' style='text-align: right;'>Pressure</th><th data-dynatable-no-sort='true' style='text-align: right;'>Altitude</th><th data-dynatable-no-sort='true' style='text-align: right;'>Windspeed</th></thead><tbody></tbody></table>");
 
     // Load the data into the table
     $('#summary-table').dynatable({
@@ -683,7 +768,9 @@ function createSummaryTable(manufacturer, device, season, pollutant) {
 }
 
 
-
+/**
+ * Loads from localStorage the previously-selected state of the app.
+ */
 function loadPreviousSelection() {
     if (typeof(Storage) !== "undefined") {
         var loadCommunity = localStorage.getItem("community");
