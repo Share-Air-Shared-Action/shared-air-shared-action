@@ -16,7 +16,7 @@ $device = $_GET['device'];
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = 'SELECT DATE(date), round(cast(avg(o3ppm) as numeric),3) as average, round(cast(max(o3ppm) as numeric),3) as max, round(cast(min(o3ppm) as numeric),3) as min FROM aeroqualo3 WHERE unit_id = $1 AND season = $2 GROUP BY DATE(date) ORDER BY DATE(date)';
+$query = "SELECT DATE(date), round(cast(avg(aeroqualo3.o3ppm) as numeric),3) as average, round(cast(max(aeroqualo3.o3ppm) as numeric),3) as max, round(cast(min(aeroqualo3.o3ppm) as numeric),3) as min, round(avg(cast(weather.TEMP as numeric)),3) as Temperature, round(avg(cast(weather.DEWP as numeric)),3) as DewPoint, round(avg(cast(weather.STP as numeric)),3) as Pressure, round(avg(cast(weather.SPD as numeric)),3) as WindSpeed, round(sum(cast(regexp_replace(weather.pcp01, '[^0-9]+', '', 'g') as numeric)),3) as Precipitation FROM aeroqualo3 LEFT JOIN weather ON DATE(aeroqualo3.date) = DATE(weather.yrmodahrmn) WHERE unit_id = $1 AND season = $2 GROUP BY DATE(date) ORDER BY DATE(date)";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
