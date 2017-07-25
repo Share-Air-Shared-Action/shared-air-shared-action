@@ -15,11 +15,14 @@ $device = $_GET['device'];
 // Get the season to be searching for
 $season = $_GET['season'];
 
+// Get the community to be searching for
+$community = $_GET['community'];
+
 // Build the SQL query
-$query = "SELECT time AS x, value AS y FROM metone WHERE unit_id = $1 AND season = $2 AND type = 'pm25' ORDER BY time";
+$query = "SELECT time AS x, value AS y FROM metone WHERE unit_id = $1 AND season = $2 AND community = $3 AND type = 'pm25' ORDER BY time";
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($device, $season, $community)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
