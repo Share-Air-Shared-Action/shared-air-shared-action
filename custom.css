@@ -30,12 +30,18 @@ table {
 th {
     padding: 5px !important;
     color: #fff;
+    text-align: center !important;
 }
 
 td {
     padding:5px !important;
+    text-align: right !important;
 }
 
 #summary-table-container {
     min-height: 200px;
+}
+
+table, th, td {
+   border: 1px solid black;
 }
