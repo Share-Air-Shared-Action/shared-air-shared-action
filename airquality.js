@@ -132,11 +132,12 @@ function createMarkers(manufacturer, community, season) {
  * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
  * @param  {string} season       The name of the season from which you want to get data.
  * @param  {bool}   scrollto     If true, once the chart is loaded the DOM will scroll to it.
+ * @param  {string} community    The name of the community.
  */
-function buildChart(manufacturer, device, pollutant, season, scrollto) {
+function buildChart(manufacturer, device, pollutant, season, scrollto, community) {
 
     // Build the API URL
-    var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device + "&season=" + season;
+    var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device + "&season=" + season + "&community=" + community;
 
     // Request the data from API
     d3.json(url, function(error, data) {
@@ -443,8 +444,8 @@ function handleSensorClick(manufacturer, device, position) {
         scrollto = false;
     }
     $("#dropdown-helptext").html("Loading...");
-    buildChart(manufacturer, device, selected_pollutant, selected_season, scrollto);
-    createSummaryTable(manufacturer, device, selected_season, selected_pollutant);
+    buildChart(manufacturer, device, selected_pollutant, selected_season, scrollto, selected_community);
+    createSummaryTable(manufacturer, device, selected_season, selected_pollutant, selected_community);
 
     // Set the menu to show the selected Sensor
     $("#selected-sensor").text(device);
@@ -741,9 +742,10 @@ function resetSelectedLine() {
  * @param  {string} device       The name of the specific sensor/route to display
  * @param  {string} season       The name of the season from which you want to get data.
  * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
+ * @param  {string} community    The name of the community.
  */
-function createSummaryTable(manufacturer, device, season, pollutant) {
-    var summaryUrl = "/airquality/api/" + manufacturer + "/summary/?device=" + device + "&season=" + season;
+function createSummaryTable(manufacturer, device, season, pollutant, community) {
+    var summaryUrl = "/airquality/api/" + manufacturer + "/summary/?device=" + device + "&season=" + season + "&community=" + community;
 
     // Create the table HTML with headers
     $("#summary-table-container").html("<table id='summary-table'><thead><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average</th><th data-dynatable-no-sort='true' style='text-align: right;'>Max</th><th data-dynatable-no-sort='true' style='text-align: right;'>Min</th><th data-dynatable-no-sort='true' style='text-align: right;'>Temperature</th><th data-dynatable-no-sort='true' style='text-align: right;'>Dewpoint</th><th data-dynatable-no-sort='true' style='text-align: right;'>Pressure</th><th data-dynatable-no-sort='true' style='text-align: right;'>Windspeed</th><th data-dynatable-no-sort='true' style='text-align: right;'>Precipitation</th></thead><tbody></tbody></table>");
