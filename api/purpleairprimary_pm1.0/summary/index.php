@@ -15,11 +15,14 @@ $device = $_GET['device'];
 // Get the season from the URL parameter
 $season = $_GET['season'];
 
+// Get the community to be searching for
+$community = $_GET['community'];
+
 // Build the SQL query
-$query = "SELECT DATE(created_at), round(cast(avg(purpleairprimary.pm1_cf_atm_ugm3) as numeric),3) as average, round(cast(max(purpleairprimary.pm1_cf_atm_ugm3) as numeric),3) as max, round(cast(min(purpleairprimary.pm1_cf_atm_ugm3) as numeric),3) as min, round(avg(cast(weather.TEMP as numeric)),3) as Temperature, round(avg(cast(weather.DEWP as numeric)),3) as DewPoint, round(avg(cast(weather.alt as numeric)),3) as Pressure, round(avg(cast(weather.SPD as numeric)),3) as WindSpeed, round(sum(cast(regexp_replace(weather.pcp01, '[^0-9]+', '', 'g') as numeric)),3) as Precipitation FROM purpleairprimary LEFT JOIN weather ON DATE(purpleairprimary.created_at) = DATE(weather.yrmodahrmn) WHERE device_name = $1 AND season = $2 GROUP BY DATE(created_at) ORDER BY DATE(created_at)";
+$query = "SELECT DATE(created_at), round(cast(avg(purpleairprimary.pm1_cf_atm_ugm3) as numeric),3) as average, round(cast(max(purpleairprimary.pm1_cf_atm_ugm3) as numeric),3) as max, round(cast(min(purpleairprimary.pm1_cf_atm_ugm3) as numeric),3) as min, round(avg(cast(weather.TEMP as numeric)),3) as Temperature, round(avg(cast(weather.DEWP as numeric)),3) as DewPoint, round(avg(cast(weather.alt as numeric)),3) as Pressure, round(avg(cast(weather.SPD as numeric)),3) as WindSpeed, round(sum(cast(regexp_replace(weather.pcp01, '[^0-9]+', '', 'g') as numeric)),3) as Precipitation FROM purpleairprimary LEFT JOIN weather ON DATE(purpleairprimary.created_at) = DATE(weather.yrmodahrmn) WHERE device_name = $1 AND season = $2 AND community = $3 GROUP BY DATE(created_at) ORDER BY DATE(created_at)";
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($device, $season, $community)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);

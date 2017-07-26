@@ -15,11 +15,14 @@ $device = $_GET['device'];
 // Get the season from the URL parameter
 $season = $_GET['season'];
 
+// Get the community to be searching for
+$community = $_GET['community'];
+
 // Build the SQL query
-$query = 'SELECT created_at AS x, pm10_cf_atm_ugm3 AS y FROM purpleairprimary WHERE device_name = $1 AND season = $2 ORDER BY created_at';
+$query = 'SELECT created_at AS x, pm10_cf_atm_ugm3 AS y FROM purpleairprimary WHERE device_name = $1 AND season = $2 AND community = $3 ORDER BY created_at';
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($device, $season, $community)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
