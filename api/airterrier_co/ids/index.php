@@ -13,7 +13,7 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = "SELECT DISTINCT session_title, SUBSTRING(session_title, 1, 2) as community, season FROM airterrier WHERE measurement_type = 'CO concentration' AND season = $1";
+$query = "SELECT DISTINCT session_title, upper(SUBSTRING(session_title, 1, 2)) as community, season FROM airterrier WHERE measurement_type = 'CO concentration' AND season = $1";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season)) or die (return_error("Query failed.", pg_last_error()));
