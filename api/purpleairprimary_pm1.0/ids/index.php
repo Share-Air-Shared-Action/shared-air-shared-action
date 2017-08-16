@@ -13,7 +13,7 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = 'SELECT DISTINCT purpleairprimary.device_name as device, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM purpleairprimary INNER JOIN stationarylocations ON (purpleairprimary.device_name = stationarylocations.unit_id) WHERE purpleairprimary.season = $1';
+$query = 'SELECT DISTINCT purpleairprimary.device_name as device, purpleairprimary.community, stationarylocations.latitude, stationarylocations.longitude FROM purpleairprimary LEFT JOIN stationarylocations ON (purpleairprimary.device_name = stationarylocations.unit_id) WHERE purpleairprimary.season = $1';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season)) or die (return_error("Query failed.", pg_last_error()));
