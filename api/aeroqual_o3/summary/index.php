@@ -15,6 +15,9 @@ $device = $_GET['device'];
 // Get the season from the URL parameter
 $season = $_GET['season'];
 
+// Get the community to be searching for
+$community = $_GET['community'];
+
 // Build the SQL query
 $query = "SELECT DATE(date), round(cast(avg(aeroqualo3.o3ppm) as numeric),3) as average, round(cast(max(aeroqualo3.o3ppm) as numeric),3) as max, round(cast(min(aeroqualo3.o3ppm) as numeric),3) as min, round(avg(cast(weather.TEMP as numeric)),3) as Temperature, round(avg(cast(weather.DEWP as numeric)),3) as DewPoint, round(avg(cast(weather.alt as numeric)),3) as Pressure, round(avg(cast(weather.SPD as numeric)),3) as WindSpeed, round(sum(cast(regexp_replace(weather.pcp01, '[^0-9]+', '', 'g') as numeric)),3) as Precipitation FROM aeroqualo3 LEFT JOIN weather ON DATE(aeroqualo3.date) = DATE(weather.yrmodahrmn) WHERE unit_id = $1 AND season = $2 AND community = $3 GROUP BY DATE(date) ORDER BY DATE(date)";
 

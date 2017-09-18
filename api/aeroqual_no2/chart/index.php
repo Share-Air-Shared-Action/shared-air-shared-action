@@ -15,6 +15,9 @@ $device = $_GET['device'];
 // Get the season from the URL parameter
 $season = $_GET['season'];
 
+// Get the community to be searching for
+$community = $_GET['community'];
+
 // Build the SQL query
 $query = 'SELECT date AS x, no2ppm AS y FROM aeroqualno2 WHERE unit_id = $1 AND season = $2 AND community = $3 ORDER BY date';
 
