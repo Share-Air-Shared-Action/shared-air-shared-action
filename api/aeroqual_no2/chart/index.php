@@ -16,10 +16,10 @@ $device = $_GET['device'];
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = 'SELECT date AS x, no2ppm AS y FROM aeroqualno2 WHERE unit_id = $1 AND season = $2 ORDER BY date';
+$query = 'SELECT date AS x, no2ppm AS y FROM aeroqualno2 WHERE unit_id = $1 AND season = $2 AND community = $3 ORDER BY date';
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($device, $season, $community)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
