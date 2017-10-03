@@ -223,6 +223,7 @@ function selectSeason(season) {
     $("#selected-season").text(season);
     resetMapAndChart(true);
     resetPollutantandSensor();
+    showDownloadButton(selected_community, selected_season);
 }
 
 /**
@@ -279,6 +280,9 @@ function resetPollutantandSensor() {
     if (typeof(Storage) !== "undefined") {
         localStorage.setItem("sensor", "");
     }
+
+    // Hide the download button
+    $("#download-button").hide();
 }
 
 /**
@@ -721,6 +725,19 @@ function hideOtherLines(nameToShow) {
 }
 
 /**
+ * Shows the download button for the selected stuff
+ * @param  {string} nameToShow The name of the route to show
+ */
+function showDownloadButton(community, season) {
+    $("#download-button").off();
+    $("#download-button").click(function() {
+      window.open("/airquality/api/download/?community=" + community + "&season=" + season);
+    });
+    $("#download-button").show();
+    $("#download-button span").text("Download " + community + " data for " + season);
+}
+
+/**
  * Removes data points from the selected line/route, unhides other lines/routes.
  */
 function resetSelectedLine() {
@@ -804,30 +821,31 @@ function updateSummaryHeaders(pollutant, sensorcategory) {
 /**
  * Loads from localStorage the previously-selected state of the app.
  */
-function loadPreviousSelection() {
-    if (typeof(Storage) !== "undefined") {
-        var loadCommunity = localStorage.getItem("community");
-        var loadSeason = localStorage.getItem("season");
-        var loadSensorCategory = localStorage.getItem("sensorcategory");
-        var loadPollutant = localStorage.getItem("pollutant");
-        var loadSensorManufacturer = localStorage.getItem("sensorManufacturer");
-        var loadSensorTitle = localStorage.getItem("sensorTitle");
-        var loadSensorPosition = localStorage.getItem("sensorPosition");
-        if (loadCommunity) {
-            selectCommunity(loadCommunity);
-            if (loadSeason) {
-                selectSeason(loadSeason);
-                if (loadSensorCategory) {
-                    selectSensorCategory(loadSensorCategory);
-                    if (loadPollutant) {
-                        selectPollutant(loadPollutant);
-                        if (loadPollutant && loadSensorManufacturer && loadSensorTitle) {
-                            //TODO: This may trigger before the item appears in the list, causing an inconsistent view.
-                            handleSensorClick(loadSensorManufacturer,loadSensorTitle,loadSensorPosition);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+// function loadPreviousSelection() {
+//     if (typeof(Storage) !== "undefined") {
+//         var loadCommunity = localStorage.getItem("community");
+//         var loadSeason = localStorage.getItem("season");
+//         var loadSensorCategory = localStorage.getItem("sensorcategory");
+//         var loadPollutant = localStorage.getItem("pollutant");
+//         var loadSensorManufacturer = localStorage.getItem("sensorManufacturer");
+//         var loadSensorTitle = localStorage.getItem("sensorTitle");
+//         var loadSensorPosition = localStorage.getItem("sensorPosition");
+//         if (loadCommunity) {
+//             selectCommunity(loadCommunity);
+//             if (loadSeason) {
+//                 selectSeason(loadSeason);
+//                 showDownloadButton(loadCommunity, loadSeason);
+//                 if (loadSensorCategory) {
+//                     selectSensorCategory(loadSensorCategory);
+//                     if (loadPollutant) {
+//                         selectPollutant(loadPollutant);
+//                         if (loadPollutant && loadSensorManufacturer && loadSensorTitle) {
+//                             //TODO: This may trigger before the item appears in the list, causing an inconsistent view.
+//                             handleSensorClick(loadSensorManufacturer,loadSensorTitle,loadSensorPosition);
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
