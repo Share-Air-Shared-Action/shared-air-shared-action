@@ -27,21 +27,21 @@ $outURL = "/airquality/downloads/";
 
 // Build the SQL query for airterrier
 $filename =  $community . "_" . $season . "_airterrier.csv";
-$query = "COPY (SELECT * FROM airterrier WHERE upper(SUBSTRING(session_title, 1, 2)) = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV);";
+$query = "COPY (SELECT * FROM airterrier WHERE upper(SUBSTRING(session_title, 1, 2)) = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV, HEADER);";
 $result = pg_query($dbconn, $query) or die (return_error("Query failed.", pg_last_error()));
 
 print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 // Build the SQL query for aeroqualno2
 $filename = $community . "_" . $season . "_aeroqualno2.csv";
-$query = "COPY (SELECT * FROM aeroqualno2 WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV);";
+$query = "COPY (SELECT * FROM aeroqualno2 WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV, HEADER);";
 $result = pg_query($dbconn, $query) or die (return_error("Query failed.", pg_last_error()));
 
 print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 // Build the SQL query for aeroqualo3
 $filename = $community . "_" . $season . "_aeroqualo3.csv";
-$query = "COPY (SELECT * FROM aeroqualo3 WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV);";
+$query = "COPY (SELECT * FROM aeroqualo3 WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV, HEADER);";
 $result = pg_query($dbconn, $query) or die (return_error("Query failed.", pg_last_error()));
 
 print("<script>window.open('" . $outURL . $filename . "')</script>");
@@ -49,7 +49,7 @@ print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 // Build the SQL query for metone
 $filename = $community . "_" . $season . "_metone.csv";
-$query = "COPY (SELECT * FROM metone WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV);";
+$query = "COPY (SELECT * FROM metone WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV, HEADER);";
 $result = pg_query($dbconn, $query) or die (return_error("Query failed.", pg_last_error()));
 
 print("<script>window.open('" . $outURL . $filename . "')</script>");
@@ -57,7 +57,7 @@ print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 // Build the SQL query for purpleairprimary
 $filename = $community . "_" . $season . "_purpleairprimary.csv";
-$query = "COPY (SELECT * FROM purpleairprimary WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV);";
+$query = "COPY (SELECT * FROM purpleairprimary WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) TO '" . $outDirectory . $filename . "' (format CSV, HEADER);";
 $result = pg_query($dbconn, $query) or die (return_error("Query failed.", pg_last_error()));
 
 print("<script>window.open('" . $outURL . $filename . "')</script>");
@@ -66,7 +66,7 @@ print("<script>window.open('" . $outURL . $filename . "')</script>");
 // Build the SQL query for stationarylocations
 // TODO: Fix for additional seasons. Currently the season column is null for all values
 $filename = $community . "_" . $season . "_stationarylocations.csv";
-$query = "COPY (SELECT * FROM stationarylocations WHERE community = '" . $community . "') TO '" . $outDirectory . $filename . "' (format CSV)";
+$query = "COPY (SELECT * FROM stationarylocations WHERE community = '" . $community . "') TO '" . $outDirectory . $filename . "' (format CSV, HEADER)";
 $result = pg_query($dbconn, $query) or die (return_error("Query failed.", pg_last_error()));
 
 print("<script>window.open('" . $outURL . $filename . "')</script>");
