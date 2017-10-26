@@ -12,11 +12,14 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 // Get the season from the URL parameter
 $season = $_GET['season'];
 
+// Get the season from the URL parameter
+$community = $_GET['community'];
+
 // Build the SQL query
-$query = 'SELECT DISTINCT aeroqualno2.unit_id as device, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM aeroqualno2 INNER JOIN stationarylocations ON (aeroqualno2.unit_id = stationarylocations.unit_id) WHERE aeroqualno2.season = $1';
+$query = 'SELECT DISTINCT aeroqualno2.unit_id as device, averages.average, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM aeroqualno2 INNER JOIN stationarylocations ON (aeroqualno2.unit_id = stationarylocations.unit_id) INNER JOIN (SELECT avg(aeroqualno2.no2ppm) as average, unit_id FROM aeroqualno2 WHERE season = $1 AND community = $2 GROUP BY unit_id) as averages ON (averages.unit_id = aeroqualno2.unit_id) WHERE aeroqualno2.season = $1 AND aeroqualno2.community = $2 AND stationarylocations.community = $2';
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($season)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($season, $community)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);

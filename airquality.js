@@ -81,47 +81,76 @@ function initMap() {
  * @param  {string} community    The name of the community.
  * @param  {string} season       The name of the season from which you want to get data.
  */
-function createMarkers(manufacturer, community, season) {
-    // Send the request to the api for the specified manufacturer
-    $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season, function(devices) {
-        // For each device returned
-        $.each(devices, function(key, device) {
-            // If the device is in the community
-            if (device.community == community) {
-                // Get the device's lat and long and create a Google Maps LatLng
-                var deviceLatLng = new google.maps.LatLng(device.latitude, device.longitude);
+function createMarkers(manufacturer, community, season, pollutant) {
+    $.getJSON("/airquality/api/aqi/", function(aqivals) {
+        // Send the request to the api for the specified manufacturer
+        $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season + "&community=" + community, function(devices) {
+            // For each device returned
+            $.each(devices, function(key, device) {
+                // If the device is in the community
+                if (device.community == community) {
+                    // Get the device's lat and long and create a Google Maps LatLng
+                    var deviceLatLng = new google.maps.LatLng(device.latitude, device.longitude);
 
-                // Get the device's title
-                var deviceTitle = device.device;
+                    // Get the device's title
+                    var deviceTitle = device.device;
 
-                // Create a marker on the map for the device
-                var marker = new google.maps.Marker({
-                    position: deviceLatLng,
-                    title: deviceTitle,
-                    map: airQualityMap
-                });
+                    // Create a marker on the map for the device
+                    var marker = new google.maps.Marker({
+                        position: deviceLatLng,
+                        title: deviceTitle,
+                        map: airQualityMap
+                    });
 
-                // Create an event listener for the marker
-                marker.addListener('click', function() {
-                    handleSensorClick(manufacturer, marker.title, deviceLatLng);
-                });
-                markers.push(marker);
+                    // Create an event listener for the marker
+                    marker.addListener('click', function() {
+                        handleSensorClick(manufacturer, marker.title, deviceLatLng);
+                    });
 
-                // Populate the menu
-                var menuList = $("#dropdown-sensor-container ul");
-                menuList.append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + marker.title + '", new google.maps.LatLng(' + device.latitude + ', ' + device.longitude + '));' + "'>" + deviceTitle + "</a></li>");
-                // Sort the menu alphabetically
-                menuList.children().detach().sort(function(a, b) {
-                    return $(a).text().localeCompare($(b).text());
-                }).appendTo(menuList);
-            }
-            if (markers.length > 0) {
-                fitMaptoMarkers();
-                $("#dropdown-helptext").html("");
-            } else {
-                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
-            }
 
+                    // If the AQI API has an entry for this pollutant type
+                    if (aqivals.hasOwnProperty(pollutant)) {
+                        // If the AQI API entry has a scale
+                        if (aqivals[pollutant].hasOwnProperty("scale")) {
+                            if (device.data <= aqivals[pollutant].scale.good.y[0]) {
+                                marker.icon = aqi.good;
+                            } else if (device.average <= aqivals[pollutant].scale.moderate.y[0]) {
+                                marker.icon = aqi.moderate;
+                            } else if (device.average <= aqivals[pollutant].scale.unhfsg.y[0]) {
+                                marker.icon = aqi.unhfsg;
+                            } else if (device.average <= aqivals[pollutant].scale.unhealthy.y[0]) {
+                                marker.icon = aqi.unhealthy;
+                            } else if (device.average <= aqivals[pollutant].scale.veryunhealthy.y[0]) {
+                                marker.icon = aqi.veryunhealthy;
+                            } else if (device.average > aqivals[pollutant].scale.veryunhealthy.y[0] ) {
+                                marker.icon = aqi.hazardous;
+                            } else {
+                                marker.icon = aqi.unknown;
+                            }
+                        }
+                    // Otherwise set to unknown (black circle for marker)
+                    } else {
+                        marker.icon = aqi.unknown;
+                    }
+
+                    markers.push(marker);
+
+                    // Populate the menu
+                    var menuList = $("#dropdown-sensor-container ul");
+                    menuList.append("<li><a href='javascript:handleSensorClick(" + '"' + manufacturer + '","' + marker.title + '", new google.maps.LatLng(' + device.latitude + ', ' + device.longitude + '));' + "'>" + deviceTitle + "</a></li>");
+                    // Sort the menu alphabetically
+                    menuList.children().detach().sort(function(a, b) {
+                        return $(a).text().localeCompare($(b).text());
+                    }).appendTo(menuList);
+                }
+                if (markers.length > 0) {
+                    fitMaptoMarkers();
+                    $("#dropdown-helptext").html("");
+                } else {
+                    $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+                }
+
+            });
         });
     });
 }
@@ -368,23 +397,23 @@ function updateMap(pollutant, sensorcategory, community, season) {
         }
     } else if (selected_pollutant == "NO2") {
         if (sensorcategory == "Stationary") {
-            createMarkers("aeroqual_no2", community, season);
+            createMarkers("aeroqual_no2", community, season, pollutant);
             showSensorPicker();
         }
     } else if (selected_pollutant == "O3") {
         if (sensorcategory == "Stationary") {
-            createMarkers("aeroqual_o3", community, season);
+            createMarkers("aeroqual_o3", community, season, pollutant);
             showSensorPicker();
         }
     } else if (selected_pollutant == "PM1.0") {
         if (sensorcategory == "Stationary") {
-            createMarkers("purpleairprimary_pm1.0", community, season);
+            createMarkers("purpleairprimary_pm1.0", community, season, pollutant);
             showSensorPicker();
         }
     } else if (selected_pollutant == "PM2.5") {
         if (sensorcategory == "Stationary") {
-            createMarkers("purpleairprimary_pm2.5", community, season);
-            createMarkers("metone_pm2.5", community, season);
+            createMarkers("purpleairprimary_pm2.5", community, season, pollutant);
+            createMarkers("metone_pm2.5", community, season, pollutant);
             showSensorPicker();
         } else if (sensorcategory == "Mobile") {
             loadMobile("airterrier_pm2.5", community, season);
@@ -392,8 +421,8 @@ function updateMap(pollutant, sensorcategory, community, season) {
     } else if (selected_pollutant == "PM10") {
         if (sensorcategory == "Stationary") {
             // Load purpleairprimary_pm10
-            createMarkers("purpleairprimary_pm10", community, season);
-            createMarkers("metone_pm10", community, season);
+            createMarkers("purpleairprimary_pm10", community, season, pollutant);
+            createMarkers("metone_pm10", community, season, pollutant);
             showSensorPicker();
         }
     }
