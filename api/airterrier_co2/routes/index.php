@@ -16,7 +16,7 @@ $route = $_GET['route'];
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = "SELECT latitude, longitude FROM airterrier WHERE measurement_type = 'CO2 concentration' AND session_title = $1 AND season = $2 ORDER BY time";
+$query = "SELECT latitude, longitude FROM airterrier WHERE measurement_type = 'CO2 concentration' AND session_title = $1 AND season = $2 AND error IS DISTINCT FROM 1  ORDER BY time";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($route, $season)) or die (return_error("Query failed.", pg_last_error()));
