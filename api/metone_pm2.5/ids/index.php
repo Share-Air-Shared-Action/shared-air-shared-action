@@ -16,7 +16,7 @@ $season = $_GET['season'];
 $community = $_GET['community'];
 
 // Build the SQL query
-$query = "SELECT DISTINCT metone.unit_id as device, averages.average, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM metone INNER JOIN stationarylocations ON (metone.unit_id = stationarylocations.unit_id) INNER JOIN (SELECT avg(value) as average, unit_id FROM metone WHERE type='pm25' AND season = $1 AND community = $2 GROUP BY unit_id) as averages ON (averages.unit_id = metone.unit_id) WHERE metone.type = 'pm25' AND metone.season = $1 AND metone.community = $2 AND stationarylocations.community = $2";
+$query = "SELECT DISTINCT metone.unit_id as device, averages.average, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM metone INNER JOIN stationarylocations ON (metone.unit_id = stationarylocations.unit_id) INNER JOIN (SELECT avg(value) as average, unit_id FROM metone WHERE type='pm25' AND season = $1 AND community = $2 AND error IS DISTINCT FROM 1 GROUP BY unit_id) as averages ON (averages.unit_id = metone.unit_id) WHERE metone.type = 'pm25' AND metone.season = $1 AND metone.community = $2 AND stationarylocations.community = $2";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season, $community)) or die (return_error("Query failed.", pg_last_error()));

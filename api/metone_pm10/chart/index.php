@@ -19,7 +19,7 @@ $season = $_GET['season'];
 $community = $_GET['community'];
 
 // Build the SQL query
-$query = "SELECT time AS x, value AS y FROM metone WHERE unit_id = $1 AND season = $2 AND community = $3 AND type = 'pm10' ORDER BY time";
+$query = "SELECT time AS x, value AS y FROM metone WHERE unit_id = $1 AND season = $2 AND community = $3 AND error IS DISTINCT FROM 1 AND type = 'pm10' ORDER BY time";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season, $community)) or die (return_error("Query failed.", pg_last_error()));

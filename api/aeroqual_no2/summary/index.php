@@ -19,7 +19,7 @@ $season = $_GET['season'];
 $community = $_GET['community'];
 
 // Build the SQL query
-$query = "SELECT DATE(date), round(cast(avg(aeroqualno2.no2ppm) as numeric),3) as average, round(cast(max(aeroqualno2.no2ppm) as numeric),3) as max, round(cast(min(aeroqualno2.no2ppm) as numeric),3) as min, round(avg(cast(weather.TEMP as numeric)),3) as Temperature, round(avg(cast(weather.DEWP as numeric)),3) as DewPoint, round(avg(cast(weather.alt as numeric)),3) as Pressure, round(avg(cast(weather.SPD as numeric)),3) as WindSpeed, round(sum(cast(regexp_replace(weather.pcp01, '[^0-9]+', '', 'g') as numeric)),3) as Precipitation FROM aeroqualno2 LEFT JOIN weather ON DATE(aeroqualno2.date) = DATE(weather.yrmodahrmn) WHERE unit_id = $1 AND season = $2 AND community = $3 GROUP BY DATE(date) ORDER BY DATE(date)";
+$query = "SELECT DATE(date), round(cast(avg(aeroqualno2.no2ppm) as numeric),3) as average, round(cast(max(aeroqualno2.no2ppm) as numeric),3) as max, round(cast(min(aeroqualno2.no2ppm) as numeric),3) as min, round(avg(cast(weather.TEMP as numeric)),3) as Temperature, round(avg(cast(weather.DEWP as numeric)),3) as DewPoint, round(avg(cast(weather.alt as numeric)),3) as Pressure, round(avg(cast(weather.SPD as numeric)),3) as WindSpeed, round(sum(cast(regexp_replace(weather.pcp01, '[^0-9]+', '', 'g') as numeric)),3) as Precipitation FROM aeroqualno2 LEFT JOIN weather ON DATE(aeroqualno2.date) = DATE(weather.yrmodahrmn) WHERE unit_id = $1 AND season = $2 AND community = $3 AND error IS DISTINCT FROM 1 GROUP BY DATE(date) ORDER BY DATE(date)";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season, $community)) or die (return_error("Query failed.", pg_last_error()));
