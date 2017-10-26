@@ -34,7 +34,7 @@ foreach($resultArray as $item) {
 }
 
 // Build the return array with X, Y, type, and name for plot.ly
-$returnarray = ["x" => $xarray, "y" => $yarray, "type" => "scatter", "name" => "NO (ppb)"];
+$returnarray = ["x" => $xarray, "y" => $yarray, "mode" => "markers", "type" => "scatter", "name" => "NO (ppb)"];
 
 // Encode the array as JSON and return it.
 echo json_encode($returnarray);
