@@ -71,8 +71,8 @@ function initMap() {
     // Create the map and store it in the variable
     airQualityMap = new google.maps.Map(mapCanvas, mapOptions);
 
-    // Load previous selection if available
-    loadPreviousSelection();
+    // // Load previous selection if available
+    // loadPreviousSelection();
 }
 
 /**
@@ -82,9 +82,66 @@ function initMap() {
  * @param  {string} season       The name of the season from which you want to get data.
  */
 function createMarkers(manufacturer, community, season, pollutant) {
+    // Create colored markers for each different AQI
+    var aqi = {
+        unknown: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#000000',
+            fillOpacity: 1,
+            scale: 10,
+            strokeWeight: 1
+        },
+        good: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#00e400',
+            fillOpacity: 1,
+            scale: 10,
+            strokeWeight: 1
+        },
+        moderate: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FFFF00',
+            fillOpacity: 1,
+            scale: 10,
+            strokeWeight: 1
+        },
+        unhfsg: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF7E00',
+            fillOpacity: 1,
+            scale: 10,
+            strokeWeight: 1
+        },
+        unhealthy: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF0000',
+            fillOpacity: 1,
+            scale: 10,
+            strokeWeight: 1
+        },
+        veryunhealthy: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#99004C',
+            fillOpacity: 1,
+            scale: 10,
+            strokeWeight: 1
+        },
+        hazardous: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#7E0023',
+            fillOpacity: 1,
+            scale: 10,
+            strokeWeight: 1
+        }
+    };
     $.getJSON("/airquality/api/aqi/", function(aqivals) {
         // Send the request to the api for the specified manufacturer
         $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season + "&community=" + community, function(devices) {
+            if (!(devices)) {
+                // Hide the sensor picker
+                $("#dropdown-sensor-container").css("display","none");
+                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+            }
             // For each device returned
             $.each(devices, function(key, device) {
                 // If the device is in the community
@@ -99,7 +156,8 @@ function createMarkers(manufacturer, community, season, pollutant) {
                     var marker = new google.maps.Marker({
                         position: deviceLatLng,
                         title: deviceTitle,
-                        map: airQualityMap
+                        map: airQualityMap,
+                        icon: aqi.unknown
                     });
 
                     // Create an event listener for the marker
@@ -112,7 +170,7 @@ function createMarkers(manufacturer, community, season, pollutant) {
                     if (aqivals.hasOwnProperty(pollutant)) {
                         // If the AQI API entry has a scale
                         if (aqivals[pollutant].hasOwnProperty("scale")) {
-                            if (device.data <= aqivals[pollutant].scale.good.y[0]) {
+                            if (device.average <= aqivals[pollutant].scale.good.y[0]) {
                                 marker.icon = aqi.good;
                             } else if (device.average <= aqivals[pollutant].scale.moderate.y[0]) {
                                 marker.icon = aqi.moderate;
@@ -127,10 +185,16 @@ function createMarkers(manufacturer, community, season, pollutant) {
                             } else {
                                 marker.icon = aqi.unknown;
                             }
+                            if (pollutant == "NO2" || pollutant == "O3") {
+                                marker.icon.scale = device.average * 300;
+                            } else {
+                                marker.icon.scale = device.average;
+                            }
                         }
                     // Otherwise set to unknown (black circle for marker)
                     } else {
                         marker.icon = aqi.unknown;
+                        marker.icon.scale = device.average;
                     }
 
                     markers.push(marker);
@@ -613,14 +677,7 @@ function createLine(manufacturer, route, season) {
  * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
  */
 function selectLine(manufacturer, route, pollutant, season) {
-    // Reset the selected line
-    resetSelectedLine()
-
-    // Hide other lines
-    hideOtherLines(route);
-
     // Create colored markers for each different AQI
-    // TODO: Move this outside of the function, as it is static.
     var aqi = {
         unknown: {
             path: google.maps.SymbolPath.CIRCLE,
@@ -672,6 +729,13 @@ function selectLine(manufacturer, route, pollutant, season) {
             strokeWeight: 0
         }
     };
+
+    // Reset the selected line
+    resetSelectedLine()
+
+    // Hide other lines
+    hideOtherLines(route);
+
     // Plot the data with AQI scale, unit, and range if they are available
     $.getJSON("/airquality/api/aqi/", function(aqivals) {
         // Send the request to the api for the specified manufacturer
