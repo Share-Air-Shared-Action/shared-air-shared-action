@@ -158,6 +158,7 @@ function createMarkers(manufacturer, community, season, pollutant) {
                         title: deviceTitle,
                         map: airQualityMap,
                         icon: aqi.unknown
+                        //label: ''
                     });
 
                     // Create an event listener for the marker
@@ -196,7 +197,7 @@ function createMarkers(manufacturer, community, season, pollutant) {
                         marker.icon = aqi.unknown;
                         marker.icon.scale = device.average;
                     }
-
+                    //marker.label = Math.round(device.average * 100) / 100
                     markers.push(marker);
 
                     // Populate the menu
