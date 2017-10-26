@@ -376,6 +376,9 @@ function resetPollutantandSensor() {
 
     // Hide the download button
     $("#download-button").hide();
+
+    // Hide the heatmap button
+    $("#heatmap-button").hide();
 }
 
 /**
@@ -450,14 +453,17 @@ function updateMap(pollutant, sensorcategory, community, season) {
     if (pollutant == "CO") {
         if (sensorcategory == "Mobile") {
             loadMobile("airterrier_co", community, season);
+            showHeatmapButton();
         }
     } else if (selected_pollutant == "CO2") {
         if (sensorcategory == "Mobile") {
             loadMobile("airterrier_co2", community, season);
+            showHeatmapButton();
         }
     } else if (selected_pollutant == "NO") {
         if (sensorcategory == "Mobile") {
             loadMobile("airterrier_no", community, season);
+            showHeatmapButton();
         }
     } else if (selected_pollutant == "NO2") {
         if (sensorcategory == "Stationary") {
@@ -481,6 +487,7 @@ function updateMap(pollutant, sensorcategory, community, season) {
             showSensorPicker();
         } else if (sensorcategory == "Mobile") {
             loadMobile("airterrier_pm2.5", community, season);
+            showHeatmapButton();
         }
     } else if (selected_pollutant == "PM10") {
         if (sensorcategory == "Stationary") {
@@ -531,6 +538,10 @@ function fitMaptoMarkers() {
  * @param  {string} position     The position of the device to center on. For routes, set to null.
  */
 function handleSensorClick(manufacturer, device, position) {
+
+    // Hide the heatmap button
+    $("#heatmap-button").hide();
+    
     selected_sensor = device;
     if (typeof(Storage) !== "undefined") {
         localStorage.setItem("sensorManufacturer", manufacturer);
@@ -619,6 +630,8 @@ function loadMobile(manufacturer, community, season) {
     });
 }
 
+var heatmapdata = [];
+
 /**
  * Creates the Polyline from the route's lat/longs.
  * @param  {string} manufacturer The name of the API folder to open.
@@ -627,6 +640,7 @@ function loadMobile(manufacturer, community, season) {
  */
 function createLine(manufacturer, route, season) {
     var polylinedata = [];
+    heatmapdata = [];
     // Send the request to the api for the specified manufacturer
     $.getJSON("/airquality/api/" + manufacturer + "/routes/?route=" + route + "&season=" + season, function(devices) {
         // For each device returned
@@ -634,6 +648,8 @@ function createLine(manufacturer, route, season) {
             // put the data into the array
             var thislatlng = new google.maps.LatLng(device.latitude, device.longitude);
             polylinedata.push(thislatlng);
+            var thisweightedlocation = {lat: device.latitude, long: device.longitude, weight: device.data};
+            heatmapdata.push(thisweightedlocation);
         });
         if (polylinedata.length > 0) {
             var line = new google.maps.Polyline({
@@ -831,6 +847,25 @@ function showDownloadButton(community, season) {
 }
 
 /**
+ * Shows the download button for the selected stuff
+ * @param  {string} nameToShow The name of the route to show
+ */
+function showHeatmapButton() {
+    // Hide the sensor picker
+    $("#dropdown-sensor-container").css("display","none");
+
+    $("#heatmap-button").off();
+    $("#heatmap-button").click(function() {
+      loadHeatMap();
+      // Hide the heatmap button
+      $("#heatmap-button").hide();
+      // Hide the sensor picker
+      $("#dropdown-sensor-container").css("display","none");
+    });
+    $("#heatmap-button").show();
+}
+
+/**
  * Removes data points from the selected line/route, unhides other lines/routes.
  */
 function resetSelectedLine() {
@@ -951,6 +986,120 @@ function changeColor() {
                 });
             }
         }
+    });
+}
+
+function loadHeatMap() {
+    var heatmapDict = {};
+    var finalHeatmap = [];
+
+    // Calculate the max and min lats/longs
+    for (var i = 0; i < heatmapdata.length; i++) {
+        var thisLat = parseFloat(heatmapdata[i].lat).toFixed(4);
+        var thisLong = parseFloat(heatmapdata[i].long).toFixed(4);
+        var thisWeight = parseFloat(heatmapdata[i].weight);
+
+        if (heatmapDict[thisLat + "," + thisLong]) {
+            heatmapDict[thisLat + "," + thisLong] = ((heatmapDict[thisLat + "," + thisLong] + thisWeight) / 2.0);
+        } else {
+            heatmapDict[thisLat + "," + thisLong] = thisWeight;
+        }
+
+    }
+
+    var aqi = {
+        unknown: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#000000',
+            fillOpacity: .4,
+            scale: 5,
+            strokeWeight: 0
+        },
+        good: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#00e400',
+            fillOpacity: .4,
+            scale: 5,
+            strokeWeight: 0
+        },
+        moderate: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FFFF00',
+            fillOpacity: .4,
+            scale: 5,
+            strokeWeight: 0
+        },
+        unhfsg: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF7E00',
+            fillOpacity: .4,
+            scale: 5,
+            strokeWeight: 0
+        },
+        unhealthy: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF0000',
+            fillOpacity: .4,
+            scale: 5,
+            strokeWeight: 0
+        },
+        veryunhealthy: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#99004C',
+            fillOpacity: .4,
+            scale: 5,
+            strokeWeight: 0
+        },
+        hazardous: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#7E0023',
+            fillOpacity: .4,
+            scale: 5,
+            strokeWeight: 0
+        }
+    };
+    pollutant = selected_pollutant;
+    $.getJSON("/airquality/api/aqi/", function(aqivals) {
+        $.each(heatmapDict, function(index, value) {
+            var thisLat = index.split(',')[0];
+            var thisLong = index.split(',')[1];
+            var thisAverage = value;
+
+            thisLocation = new google.maps.LatLng(thisLat, thisLong);
+
+            var marker = new google.maps.Marker({
+                position: thisLocation,
+                map: airQualityMap,
+                icon: aqi.unknown
+            });
+
+            // If the AQI API has an entry for this pollutant type
+            if (aqivals.hasOwnProperty(pollutant)) {
+                // If the AQI API entry has a scale
+                if (aqivals[pollutant].hasOwnProperty("scale")) {
+                    if (thisAverage <= aqivals[pollutant].scale.good.y[0]) {
+                        marker.icon = aqi.good;
+                    } else if (thisAverage <= aqivals[pollutant].scale.moderate.y[0]) {
+                        marker.icon = aqi.moderate;
+                    } else if (thisAverage <= aqivals[pollutant].scale.unhfsg.y[0]) {
+                        marker.icon = aqi.unhfsg;
+                    } else if (thisAverage <= aqivals[pollutant].scale.unhealthy.y[0]) {
+                        marker.icon = aqi.unhealthy;
+                    } else if (thisAverage <= aqivals[pollutant].scale.veryunhealthy.y[0]) {
+                        marker.icon = aqi.veryunhealthy;
+                    } else if (thisAverage > aqivals[pollutant].scale.veryunhealthy.y[0] ) {
+                        marker.icon = aqi.hazardous;
+                    } else {
+                        marker.icon = aqi.unknown;
+                    }
+                }
+            // Otherwise set to unknown (black circle for marker)
+            } else {
+                marker.icon = aqi.unknown;
+            }
+
+            markers.push(marker);
+        });
     });
 }
 
