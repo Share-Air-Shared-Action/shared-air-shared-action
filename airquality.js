@@ -138,9 +138,10 @@ function createMarkers(manufacturer, community, season, pollutant) {
         // Send the request to the api for the specified manufacturer
         $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season + "&community=" + community, function(devices) {
             if (!(devices)) {
-                // Hide the sensor picker
                 $("#dropdown-sensor-container").css("display","none");
-                $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+                $("#dropdown-helptext").html("Loading or no sensors found with the selected parameters.");
+            } else {
+                $("#dropdown-helptext").html("Loading...");
             }
             // For each device returned
             $.each(devices, function(key, device) {
@@ -211,10 +212,8 @@ function createMarkers(manufacturer, community, season, pollutant) {
                 if (markers.length > 0) {
                     fitMaptoMarkers();
                     $("#dropdown-helptext").html("");
-                } else {
-                    $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+                    $("#dropdown-sensor-container").css("display","inherit");
                 }
-
             });
         });
     });
@@ -863,6 +862,11 @@ function createSummaryTable(manufacturer, device, season, pollutant, community) 
     // Create the table HTML with headers
     $("#summary-table-container").html("<table id='summary-table'><thead><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average</th><th data-dynatable-no-sort='true' style='text-align: right;'>Max</th><th data-dynatable-no-sort='true' style='text-align: right;'>Min</th><th data-dynatable-no-sort='true' style='text-align: right;'>Temperature</th><th data-dynatable-no-sort='true' style='text-align: right;'>Dewpoint</th><th data-dynatable-no-sort='true' style='text-align: right;'>Pressure</th><th data-dynatable-no-sort='true' style='text-align: right;'>Windspeed</th><th data-dynatable-no-sort='true' style='text-align: right;'>Precipitation</th></thead><tbody></tbody></table>");
 
+    // Bind the color change to the table being modified
+    $('#summary-table').bind("DOMSubtreeModified", function() {
+        changeColor();
+    });
+
     // Load the data into the table
     $('#summary-table').dynatable({
      features: {
@@ -884,6 +888,73 @@ function createSummaryTable(manufacturer, device, season, pollutant, community) 
 }
 
 /**
+ * Changes the colors of the table to match the AQI for the values that use AQI
+ */
+function changeColor() {
+    var pollutant = selected_pollutant;
+    $.getJSON("/airquality/api/aqi/", function(aqivals) {
+        if (aqivals.hasOwnProperty(pollutant)) {
+            if (aqivals[pollutant].hasOwnProperty("scale")) {
+                $('#summary-table tr').each(function(index, element) {
+                    var thisRow = $(this).find('td');
+                    var thisAverage = parseFloat($(thisRow[1]).text());
+                    if (thisAverage <= aqivals[pollutant].scale.good.y[0]) {
+                        $(thisRow[1]).css('background-color', '#00e400');
+                    } else if (thisAverage <= aqivals[pollutant].scale.moderate.y[0]) {
+                        $(thisRow[1]).css('background-color', '#FFFF00');
+                    } else if (thisAverage <= aqivals[pollutant].scale.unhfsg.y[0]) {
+                        $(thisRow[1]).css('background-color', '#FF7E00');
+                    } else if (thisAverage <= aqivals[pollutant].scale.unhealthy.y[0]) {
+                        $(thisRow[1]).css('background-color', '#FF0000');
+                        $(thisRow[1]).css('color', '#FFF');
+                    } else if (thisAverage <= aqivals[pollutant].scale.veryunhealthy.y[0]) {
+                        $(thisRow[1]).css('background-color', '#99004C');
+                        $(thisRow[1]).css('color', '#FFF');
+                    } else if (thisAverage > aqivals[pollutant].scale.veryunhealthy.y[0] ) {
+                        $(thisRow[1]).css('background-color', '#7E0023');
+                        $(thisRow[1]).css('color', '#FFF');
+                    }
+                    var thisMax = parseFloat($(thisRow[2]).text());
+                    if (thisMax <= aqivals[pollutant].scale.good.y[0]) {
+                        $(thisRow[2]).css('background-color', '#00e400');
+                    } else if (thisMax <= aqivals[pollutant].scale.moderate.y[0]) {
+                        $(thisRow[2]).css('background-color', '#FFFF00');
+                    } else if (thisMax <= aqivals[pollutant].scale.unhfsg.y[0]) {
+                        $(thisRow[2]).css('background-color', '#FF7E00');
+                    } else if (thisMax <= aqivals[pollutant].scale.unhealthy.y[0]) {
+                        $(thisRow[2]).css('background-color', '#FF0000');
+                        $(thisRow[2]).css('color', '#FFF');
+                    } else if (thisMax <= aqivals[pollutant].scale.veryunhealthy.y[0]) {
+                        $(thisRow[2]).css('background-color', '#99004C');
+                        $(thisRow[2]).css('color', '#FFF');
+                    } else if (thisMax > aqivals[pollutant].scale.veryunhealthy.y[0] ) {
+                        $(thisRow[2]).css('background-color', '#7E0023');
+                        $(thisRow[2]).css('color', '#FFF');
+                    }
+                    var thisMin = parseFloat($(thisRow[3]).text());
+                    if (thisMin <= aqivals[pollutant].scale.good.y[0]) {
+                        $(thisRow[3]).css('background-color', '#00e400');
+                    } else if (thisMin <= aqivals[pollutant].scale.moderate.y[0]) {
+                        $(thisRow[3]).css('background-color', '#FFFF00');
+                    } else if (thisMin <= aqivals[pollutant].scale.unhfsg.y[0]) {
+                        $(thisRow[3]).css('background-color', '#FF7E00');
+                    } else if (thisMin <= aqivals[pollutant].scale.unhealthy.y[0]) {
+                        $(thisRow[3]).css('background-color', '#FF0000');
+                        $(thisRow[3]).css('color', '#FFF');
+                    } else if (thisMin <= aqivals[pollutant].scale.veryunhealthy.y[0]) {
+                        $(thisRow[3]).css('background-color', '#99004C');
+                        $(thisRow[3]).css('color', '#FFF');
+                    } else if (thisMin > aqivals[pollutant].scale.veryunhealthy.y[0] ) {
+                        $(thisRow[3]).css('background-color', '#7E0023');
+                        $(thisRow[3]).css('color', '#FFF');
+                    }
+                });
+            }
+        }
+    });
+}
+
+/**
  * Sets the headers and styling for them on the summary table.
  * @param  {string} pollutant      The text name of the specific pollutant type. Do not provide HTML.
  * @param  {string} sensorcategory Mobile or Stationary, used to load correct sensors/routes.
@@ -901,15 +972,7 @@ function updateSummaryHeaders(pollutant, sensorcategory) {
         avgdesc = "";
     }
 
-    // Get the AQI units
-    $.getJSON("/airquality/api/aqi/", function(aqivals) {
-        if (aqivals.hasOwnProperty(pollutant)) {
-            if (aqivals[pollutant].hasOwnProperty("unit")) {
-                pollutantUnit = aqivals[pollutant].unit;
-            }
-        }
-        $("#summary-table-container").find("thead").replaceWith("<thead><tr><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: red;' colspan='3'>" + pollutantUnit + "</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: brown;' colspan='2'>Temperature (&deg;F)</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;'>Pressure</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;'>Windspeed</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;'>Precipitation</th>  </tr>  <tr><th data-dynatable-no-sort='true'></th><th data-dynatable-no-sort='true' style='text-align: right; background-color: red;' data-dynatable-column='pollutant-average'>" + avgdesc + " Average</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: red;' data-dynatable-column='pollutant-max'>" + avgdesc + " Max</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: red;' data-dynatable-column='pollutant-min'>" + avgdesc + " Min</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: brown;' data-dynatable-column='temp-avg'>Average</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: brown;' data-dynatable-column='temp-dewpoint'>Dewpoint</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;' data-dynatable-column='pressure'>In. Hg</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;' data-dynatable-column='windspeed'>MPH</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;' data-dynatable-column='precipitation'>In.</th></tr></thead>");
-    });
+    $("#summary-table-container").find("thead").replaceWith("<thead><tr><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: red;' colspan='3'>" + pollutantUnit + "</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: brown;' colspan='2'>Temperature (&deg;F)</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;'>Pressure</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;'>Windspeed</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;'>Precipitation</th>  </tr>  <tr><th data-dynatable-no-sort='true'></th><th data-dynatable-no-sort='true' style='text-align: right; background-color: red;' data-dynatable-column='pollutant-average'>" + avgdesc + " Average</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: red;' data-dynatable-column='pollutant-max'>" + avgdesc + " Max</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: red;' data-dynatable-column='pollutant-min'>" + avgdesc + " Min</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: brown;' data-dynatable-column='temp-avg'>Average</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: brown;' data-dynatable-column='temp-dewpoint'>Dewpoint</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;' data-dynatable-column='pressure'>In. Hg</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;' data-dynatable-column='windspeed'>MPH</th><th data-dynatable-no-sort='true' style='text-align: right; background-color: blue;' data-dynatable-column='precipitation'>In.</th></tr></thead>");
 }
 
 /**
