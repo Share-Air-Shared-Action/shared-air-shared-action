@@ -4,6 +4,7 @@ var airQualityMap;
 // Initialize arrays for markers and routes
 var markers = [];
 var routes = [];
+var rectangles = [];
 var selectedLineData = [];
 
 // Initialize variables for each selection menu
@@ -541,7 +542,7 @@ function handleSensorClick(manufacturer, device, position) {
 
     // Hide the heatmap button
     $("#heatmap-button").hide();
-    
+
     selected_sensor = device;
     if (typeof(Storage) !== "undefined") {
         localStorage.setItem("sensorManufacturer", manufacturer);
@@ -585,6 +586,11 @@ function resetMapAndChart(resetSensorList) {
         routes[i].line.setMap(null);
     }
     routes = [];
+
+    for (var i = 0; i < rectangles.length; i++) {
+        rectangles[i].line.setMap(null);
+    }
+    rectangles = [];
 
     // Reset any selected line
     resetSelectedLine();
@@ -1065,40 +1071,95 @@ function loadHeatMap() {
             var thisLong = index.split(',')[1];
             var thisAverage = value;
 
-            thisLocation = new google.maps.LatLng(thisLat, thisLong);
+            // console.log("New lat/lng: " + (parseFloat(thisLat) - 0.00005) + ", " + (parseFloat(thisLong) - 0.00005) + " and " + (parseFloat(thisLat) + 0.00005) + ", " + (parseFloat(thisLong) + 0.00005));
 
-            var marker = new google.maps.Marker({
-                position: thisLocation,
-                map: airQualityMap,
-                icon: aqi.unknown
-            });
+            // var marker = new google.maps.Marker({
+            //     position: thisLocation,
+            //     map: airQualityMap,
+            //     icon: aqi.unknown
+            // });
 
             // If the AQI API has an entry for this pollutant type
             if (aqivals.hasOwnProperty(pollutant)) {
                 // If the AQI API entry has a scale
                 if (aqivals[pollutant].hasOwnProperty("scale")) {
                     if (thisAverage <= aqivals[pollutant].scale.good.y[0]) {
-                        marker.icon = aqi.good;
+                        rectangles.push(new google.maps.Rectangle({
+                           strokeOpacity: 0,
+                           fillColor: '#00e400',
+                           fillOpacity: 0.35,
+                           map: airQualityMap,
+                           bounds: new google.maps.LatLngBounds(
+                               new google.maps.LatLng(parseFloat(thisLat) - 0.00005, parseFloat(thisLong) - 0.00005),
+                               new google.maps.LatLng(parseFloat(thisLat) + 0.00005, parseFloat(thisLong) + 0.00005))
+                        }));
+                        //marker.icon = aqi.good;
                     } else if (thisAverage <= aqivals[pollutant].scale.moderate.y[0]) {
-                        marker.icon = aqi.moderate;
+                        rectangles.push(new google.maps.Rectangle({
+                           strokeOpacity: 0,
+                           fillColor: '#FFFF00',
+                           fillOpacity: 0.35,
+                           map: airQualityMap,
+                           bounds: new google.maps.LatLngBounds(
+                               new google.maps.LatLng(parseFloat(thisLat) - 0.00005, parseFloat(thisLong) - 0.00005),
+                               new google.maps.LatLng(parseFloat(thisLat) + 0.00005, parseFloat(thisLong) + 0.00005))
+                        }));
+                        //marker.icon = aqi.moderate;
                     } else if (thisAverage <= aqivals[pollutant].scale.unhfsg.y[0]) {
-                        marker.icon = aqi.unhfsg;
+                        rectangles.push(new google.maps.Rectangle({
+                           strokeOpacity: 0,
+                           fillColor: '#FF7E00',
+                           fillOpacity: 0.35,
+                           map: airQualityMap,
+                           bounds: new google.maps.LatLngBounds(
+                               new google.maps.LatLng(parseFloat(thisLat) - 0.00005, parseFloat(thisLong) - 0.00005),
+                               new google.maps.LatLng(parseFloat(thisLat) + 0.00005, parseFloat(thisLong) + 0.00005))
+                        }));
+                        //marker.icon = aqi.unhfsg;
                     } else if (thisAverage <= aqivals[pollutant].scale.unhealthy.y[0]) {
-                        marker.icon = aqi.unhealthy;
+                        rectangles.push(new google.maps.Rectangle({
+                           strokeOpacity: 0,
+                           fillColor: '#FF0000',
+                           fillOpacity: 0.35,
+                           map: airQualityMap,
+                           bounds: new google.maps.LatLngBounds(
+                               new google.maps.LatLng(parseFloat(thisLat) - 0.00005, parseFloat(thisLong) - 0.00005),
+                               new google.maps.LatLng(parseFloat(thisLat) + 0.00005, parseFloat(thisLong) + 0.00005))
+                        }));
+                        //marker.icon = aqi.unhealthy;
                     } else if (thisAverage <= aqivals[pollutant].scale.veryunhealthy.y[0]) {
-                        marker.icon = aqi.veryunhealthy;
+                        rectangles.push(new google.maps.Rectangle({
+                           strokeOpacity: 0,
+                           fillColor: '#99004C',
+                           fillOpacity: 0.35,
+                           map: airQualityMap,
+                           bounds: new google.maps.LatLngBounds(
+                               new google.maps.LatLng(parseFloat(thisLat) - 0.00005, parseFloat(thisLong) - 0.00005),
+                               new google.maps.LatLng(parseFloat(thisLat) + 0.00005, parseFloat(thisLong) + 0.00005))
+                        }));
+                        //marker.icon = aqi.veryunhealthy;
                     } else if (thisAverage > aqivals[pollutant].scale.veryunhealthy.y[0] ) {
-                        marker.icon = aqi.hazardous;
+                        rectangles.push(new google.maps.Rectangle({
+                           strokeOpacity: 0,
+                           fillColor: '#7E0023',
+                           fillOpacity: 0.35,
+                           map: airQualityMap,
+                           bounds: new google.maps.LatLngBounds(
+                               new google.maps.LatLng(parseFloat(thisLat) - 0.00005, parseFloat(thisLong) - 0.00005),
+                               new google.maps.LatLng(parseFloat(thisLat) + 0.00005, parseFloat(thisLong) + 0.00005))
+                        }));
+                        //marker.icon = aqi.hazardous;
                     } else {
-                        marker.icon = aqi.unknown;
+                        // do nothing
+                        //marker.icon = aqi.unknown;
                     }
                 }
             // Otherwise set to unknown (black circle for marker)
             } else {
-                marker.icon = aqi.unknown;
+                //marker.icon = aqi.unknown;
             }
 
-            markers.push(marker);
+            //markers.push(marker);
         });
     });
 }
