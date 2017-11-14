@@ -588,7 +588,7 @@ function resetMapAndChart(resetSensorList) {
     routes = [];
 
     for (var i = 0; i < rectangles.length; i++) {
-        rectangles[i].line.setMap(null);
+        rectangles[i].setMap(null);
     }
     rectangles = [];
 
@@ -1013,71 +1013,12 @@ function loadHeatMap() {
 
     }
 
-    var aqi = {
-        unknown: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#000000',
-            fillOpacity: .4,
-            scale: 5,
-            strokeWeight: 0
-        },
-        good: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#00e400',
-            fillOpacity: .4,
-            scale: 5,
-            strokeWeight: 0
-        },
-        moderate: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#FFFF00',
-            fillOpacity: .4,
-            scale: 5,
-            strokeWeight: 0
-        },
-        unhfsg: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#FF7E00',
-            fillOpacity: .4,
-            scale: 5,
-            strokeWeight: 0
-        },
-        unhealthy: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#FF0000',
-            fillOpacity: .4,
-            scale: 5,
-            strokeWeight: 0
-        },
-        veryunhealthy: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#99004C',
-            fillOpacity: .4,
-            scale: 5,
-            strokeWeight: 0
-        },
-        hazardous: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#7E0023',
-            fillOpacity: .4,
-            scale: 5,
-            strokeWeight: 0
-        }
-    };
     pollutant = selected_pollutant;
     $.getJSON("/airquality/api/aqi/", function(aqivals) {
         $.each(heatmapDict, function(index, value) {
             var thisLat = index.split(',')[0];
             var thisLong = index.split(',')[1];
             var thisAverage = value;
-
-            // console.log("New lat/lng: " + (parseFloat(thisLat) - 0.00005) + ", " + (parseFloat(thisLong) - 0.00005) + " and " + (parseFloat(thisLat) + 0.00005) + ", " + (parseFloat(thisLong) + 0.00005));
-
-            // var marker = new google.maps.Marker({
-            //     position: thisLocation,
-            //     map: airQualityMap,
-            //     icon: aqi.unknown
-            // });
 
             // If the AQI API has an entry for this pollutant type
             if (aqivals.hasOwnProperty(pollutant)) {
