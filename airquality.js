@@ -454,17 +454,17 @@ function updateMap(pollutant, sensorcategory, community, season) {
     if (pollutant == "CO") {
         if (sensorcategory == "Mobile") {
             loadMobile("airterrier_co", community, season);
-            showHeatmapButton();
+            $("#dropdown-helptext").html("Loading...");
         }
     } else if (selected_pollutant == "CO2") {
         if (sensorcategory == "Mobile") {
             loadMobile("airterrier_co2", community, season);
-            showHeatmapButton();
+            $("#dropdown-helptext").html("Loading...");
         }
     } else if (selected_pollutant == "NO") {
         if (sensorcategory == "Mobile") {
             loadMobile("airterrier_no", community, season);
-            showHeatmapButton();
+            $("#dropdown-helptext").html("Loading...");
         }
     } else if (selected_pollutant == "NO2") {
         if (sensorcategory == "Stationary") {
@@ -488,7 +488,7 @@ function updateMap(pollutant, sensorcategory, community, season) {
             showSensorPicker();
         } else if (sensorcategory == "Mobile") {
             loadMobile("airterrier_pm2.5", community, season);
-            showHeatmapButton();
+            $("#dropdown-helptext").html("Loading...");
         }
     } else if (selected_pollutant == "PM10") {
         if (sensorcategory == "Stationary") {
@@ -631,7 +631,9 @@ function loadMobile(manufacturer, community, season) {
         if (numRoutesDisplayed == 0) {
             $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
         } else {
+            $("#dropdown-helptext").html("");
             showSensorPicker();
+            showHeatmapButton();
         }
     });
 }
@@ -857,9 +859,6 @@ function showDownloadButton(community, season) {
  * @param  {string} nameToShow The name of the route to show
  */
 function showHeatmapButton() {
-    // Hide the sensor picker
-    $("#dropdown-sensor-container").css("display","none");
-
     $("#heatmap-button").off();
     $("#heatmap-button").click(function() {
       loadHeatMap();
