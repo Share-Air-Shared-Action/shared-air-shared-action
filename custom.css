@@ -19,6 +19,10 @@ body {
     width: 100%;
 }
 
+#dropdown-sensor-container .dropdown-menu li a {
+    text-transform: uppercase;
+}
+
 .container {
     width: 98% !important;
 }
