@@ -2,7 +2,7 @@ body {
     font-family: 'Montserrat', sans-serif;
 }
 
-#map {
+#map, #map-container {
     min-height: 500px;
 }
 
@@ -52,4 +52,8 @@ table, th, td {
 
 .dynatable-processing {
     top: -28px !important;
+}
+
+.introjs-helperNumberLayer {
+    display: none;
 }

@@ -1126,6 +1126,40 @@ function updateSummaryHeaders(pollutant, sensorcategory) {
 }
 
 /**
+ * Event handler for starting the tutorial
+ */
+function initIntro() {
+    introJs().onchange(function(targetElement) {
+    console.log(targetElement.id);
+    switch (targetElement.id)
+        {
+        case "dropdown-community-container":
+            selectCommunity("LV");
+        break;
+        case "dropdown-season-container":
+            selectSeason("Summer");
+        break;
+        case "dropdown-sensorcategory-container":
+            selectSensorCategory("Stationary");
+        break;
+        case "dropdown-pollutant-container":
+            selectPollutant("PM2.5");
+        break;
+        case "map":
+            handleSensorClick("metone_pm2.5","SASA_MO1", new google.maps.LatLng(41.846744, -87.707265));
+        break;
+        case "chart":
+            setTimeout(function() {
+                $('html, body').animate({
+                    scrollTop: ($(".introjs-tooltiptext").offset().top - 50)
+                }, 500);
+            }, 500);
+        break;
+        }
+    }).start();
+}
+
+/**
  * Loads from localStorage the previously-selected state of the app.
  */
 // function loadPreviousSelection() {
