@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css">
     <link rel="apple-touch-icon" sizes="180x180" href="/airquality/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/airquality/images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/airquality/images/favicon-16x16.png">
@@ -24,12 +25,15 @@
         <div class="row">
             <div class="col-md-10">
                 <img src="images/logo.jpg" style="max-width: 100px; display: inline-block;">
-                <h1>Shared Air, Shared Action</h1>
+                <h1 data-intro="Welcome to the Shared Air, Shared Action site. This tutorial will guide you through the usage of this site. Click next to continue, or exit to quit.">Shared Air, Shared Action</h1>
             </div>
         </div>
         <div class="row">
             <div id="map" class="col-md-8"></div>
             <div class="col-md-4">
+                <div id="help-button-container" class="dropdown">
+                    <button class="btn btn-primary" type="button" id="help-button" onclick="introJs().start()">How do I use this site?</button>
+                </div>
                 <div id="dropdown-community-container" class="dropdown">
                     <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-community" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span id="selected-community">Community</span> <span class="caret"></span></button>
                     <ul class="dropdown-menu" aria-labelledby="dropdown-community"></ul>
@@ -75,6 +79,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js"></script>
     <script src="airquality.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAaXa0hQduSjUxxBFeW19u06x8KKCS1IVQ&callback=initMap"></script>
 </body>
