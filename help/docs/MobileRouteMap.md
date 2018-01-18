@@ -1,3 +1,3 @@
-# Mobile Route Map View
+# Route Air Quality Index Map
 
-How to get to the mobile route map view on the SASA website
+Mobile sensors allow you to see on a map the Air Quality Index of a selected route. You can view the map by following the steps below.
