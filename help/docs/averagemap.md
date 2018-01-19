@@ -6,7 +6,7 @@ Stationary sensors allow you to view their average Air Quality Index on a map. Y
 
 ## Tutorial
 
-Begin by selecting the community and season for which you would like to download data.
+Begin by selecting the community and season for which you would like to view the AQI map.
 
 ![Community and Season Dropdowns](images/community-season.png)
 
