@@ -15,11 +15,15 @@ $device = $_GET['device'];
 // Get the season from the URL parameter
 $season = $_GET['season'];
 
+// Get the community to be searching for
+$community = $_GET['community'];
+
 // Build the SQL query
-$query = "SELECT DATE(time), round(cast(avg(airterrier.measured_value) as numeric),3) as average, round(cast(max(airterrier.measured_value) as numeric),3) as max, round(cast(min(airterrier.measured_value) as numeric),3) as min, round(avg(cast(weather.TEMP as numeric)),3) as Temperature, round(avg(cast(weather.DEWP as numeric)),3) as DewPoint, round(avg(cast(weather.alt as numeric)),3) as Pressure, round(avg(cast(weather.SPD as numeric)),3) as WindSpeed, round(sum(cast(regexp_replace(weather.pcp01, '[^0-9]+', '', 'g') as numeric)),3) as Precipitation FROM airterrier LEFT JOIN weather ON DATE(airterrier.time) = DATE(weather.yrmodahrmn) WHERE measurement_type = 'Particulate Matter' AND session_title = $1 AND season = $2 AND error IS DISTINCT FROM 1  GROUP BY DATE(time) ORDER BY DATE(time)";
+// Agregates from airterrier and wundergound indvidual for each date and then joined
+$query = "SELECT DATE(airterrier.date_val),ROUND(cast(airterrier.average as NUMERIC),3) average,ROUND(cast(airterrier.maximum as NUMERIC),3) AS max,ROUND(cast(airterrier.minimum as NUMERIC),3) as MIN,weather.temperature,weather.dewpoint,weather.pressure,weather.windspeed,weather.precipitation FROM (SELECT DATE(time) date_val,AVG(measured_value) AS average,max(measured_value) AS maximum,min(measured_value) AS minimum FROM airterrier WHERE upper(session_title) = upper($1) AND measurement_type = 'Particulate Matter' AND season = $2 AND error IS DISTINCT FROM 1 GROUP BY DATE(time)) AS airterrier LEFT JOIN (SELECT DATE(observation_time) date_val,ROUND(AVG(CAST(TEMP_F as NUMERIC)),3) AS Temperature, ROUND(AVG(cast(dewpoint_f as NUMERIC)),3) AS DewPoint, ROUND(AVG(CAST(pressure_in AS NUMERIC)),3) AS Pressure, ROUND(AVG(CAST(wind_mph AS NUMERIC)),3) AS WindSpeed, ROUND(SUM(CAST(precip_1hr_in AS NUMERIC)),3) AS Precipitation FROM wundergound WHERE community = $3 GROUP BY DATE(observation_time)) AS weather ON DATE(airterrier.date_val)=DATE(weather.date_val) ORDER BY airterrier.date_val";
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($device, $season,$community)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
