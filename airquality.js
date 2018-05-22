@@ -24,6 +24,12 @@ $.getJSON("/airquality/api/communities/", function(communities) {
         $("#dropdown-community-container ul").append("<li><a>" + communities[community].community + "</a></li>");
     });
 
+    // If communities are one or more
+    if(communities.length>0){
+        // Add to the community dropdown menu option to view all information
+        $("#dropdown-community-container ul").append("<li><a>ALL</a></li>");
+    }
+
     // For each item in the community dropdown menu
     $("#dropdown-community-container ul li").each(function() {
         // Create a click handler
@@ -135,6 +141,8 @@ function createMarkers(manufacturer, community, season, pollutant) {
             strokeWeight: 1
         }
     };
+
+
     $.getJSON("/airquality/api/aqi/", function(aqivals) {
         // Send the request to the api for the specified manufacturer
         $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season + "&community=" + community, function(devices) {
@@ -400,8 +408,144 @@ function selectPollutant(pollutant) {
     // Reset the map and chart, and the sensor list
     resetMapAndChart(true);
 
-    // Update the map to show sensors for the selected pollutant
-    updateMap(selected_pollutant, selected_sensorcategory, selected_community, selected_season);
+    // Check whether the chart is comparision across ALL community or summary of individual community
+    if(selected_community == "ALL"){
+
+      compareCommunities(selected_season,selected_sensorcategory,selected_pollutant);
+
+    } else {
+
+      // Update the map to show sensors for the selected pollutant
+      updateMap(selected_pollutant, selected_sensorcategory, selected_community, selected_season);
+
+    }
+}
+
+/**
+  * compares the average pollutant across a particular season and sensorcategory
+  * @param  {string} pollutant      The pollutant to load.
+  * @param  {string} sensorcategory Mobile or Stationary, used to load correct sensors/routes
+  * @param  {string} season         The name of the season from which you want to get data.
+  */
+function compareCommunities(season,sensorcategory,pollutant){
+
+  var manufacturer = "";
+  // Identify the API path for sensorcategory and pollutant
+  if(sensorcategory == "Mobile"){
+    if(pollutant == "CO"){
+        manufacturer = "airterrier_co";
+    } else if (pollutant == "CO2") {
+        manufacturer = "airterrier_co2";
+    } else if (pollutant == "NO") {
+        manufacturer = "airterrier_no";
+    }  else if  (pollutant == "PM2.5") {
+        manufacturer = "airterrier_pm2.5";
+    }
+  } else if(sensorcategory == "Stationary"){
+    if (pollutant == "NO2") {
+        manufacturer = "aeroqual_no2";
+    } else if (pollutant == "O3") {
+        manufacturer = "aeroqual_o3";
+    } else if (pollutant == "PM1.0") {
+        manufacturer = "purpleairprimary_pm1.0";
+    } else if (pollutant == "PM2.5") {
+        //// TODO: How to handle multiple pollutants
+        //createMarkers("purpleairprimary_pm2.5", season, pollutant);
+        manufacturer = "purpleairprimary_pm2.5";
+        //createMarkers("metone_pm2.5", season, pollutant);
+    } else if (pollutant == "PM10") {
+        // Load purpleairprimary_pm10
+        //createMarkers("purpleairprimary_pm10", season, pollutant);
+        //createMarkers("metone_pm10", season, pollutant);
+        manufacturer = "purpleairprimary_pm10";
+    }
+  }
+
+  //// TODO: Write the function
+  buildComparissionChart(season,manufacturer,pollutant,true)
+
+}
+
+/**
+ * Builds a Plot.ly bar chart comparision across all communities using the provided parameters.
+ * @param  {string} season         The name of the season from which you want to get data.
+ * @param  {string} manufacturer The name of the API folder to open.
+ * @param  {string} pollutant      The pollutant to load.
+ */
+function buildComparissionChart(season,manufacturer,pollutant,scrollto){
+
+  // Build the API URL
+  var url = "/airquality/api/" + manufacturer + "/comparison/?season=" + season;
+
+  // Request the data from API
+  d3.json(url, function(error, data) {
+      if (error) {
+          return console.warn(error);
+          $("#dropdown-helptext").html("<span style='color: red;'>" + error + "</span>");
+      }
+      if (data.x.length == 0) {
+          $("#dropdown-helptext").html("<span style='color: red;'>The selected pollutant did not return any data.</span>");
+          resetMapAndChart(false);
+          return console.warn("The selected pollutant did not return any data.");
+      } else {
+          $("#dropdown-helptext").html("");
+      }
+
+      // Get the max and min date to center chart on
+      //var max_range = data.x[data.x.length - 1];
+      // var min_range = data.x['0'];
+
+      // Max data point
+      var max_data = Math.max.apply(null,data.y);
+
+      // Set the chart width to the width of the chart's HTML element
+      var chart_width = $("#chart").width();
+
+      // Set layout settings
+      var layout = {
+          title: "Comparision of " + data.name +" for " + season + " season",
+          yaxis: {
+              title: data.name,
+              range: [0, max_data + (0.1 * max_data)]
+          },
+          textposition: 'auto',
+          hoverinfo: 'none',
+          xaxis: {
+              range: [data.x],
+              title: 'Communities'
+          },
+          width: chart_width - 25,
+          height: 700,
+          autosize: true
+      };
+
+      // Plot the data with AQI scale, unit, and range if they are available
+      // $.getJSON("/airquality/api/aqi/", function(aqivals) {
+      //     if (aqivals.hasOwnProperty(pollutant)) {
+      //         if (aqivals[pollutant].hasOwnProperty("unit")) {
+      //             layout.yaxis.title = aqivals[pollutant].unit;
+      //         }
+      //         if (aqivals[pollutant].hasOwnProperty("scale")) {
+      //             $.each(aqivals[pollutant].scale, function(thisscale) {
+      //                 aqivals[pollutant].scale[thisscale].x[0] = min_date;
+      //                 aqivals[pollutant].scale[thisscale].x[1] = max_date;
+      //             });
+      //
+      //             Plotly.newPlot("chart", [data, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+      //         } else {
+      //             Plotly.newPlot("chart", [data], layout);
+      //         }
+      //     } else {
+              Plotly.newPlot("chart", [data], layout);
+          // }
+          if (scrollto) {
+              // Scroll to the chart
+              $('html, body').animate({
+                  scrollTop: $("#chart").offset().top
+              }, 1000);
+          }
+          $("#dropdown-helptext").html("");
+  });
 }
 
 /**
@@ -900,7 +1044,7 @@ function createSummaryTable(manufacturer, device, season, pollutant, community) 
     var summaryUrl = "/airquality/api/" + manufacturer + "/summary/?device=" + device + "&season=" + season + "&community=" + community;
 
     // Create the table HTML with headers
-    $("#summary-table-container").html("<table id='summary-table'><thead><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average</th><th data-dynatable-no-sort='true' style='text-align: right;'>Max</th><th data-dynatable-no-sort='true' style='text-align: right;'>Min</th><th data-dynatable-no-sort='true' style='text-align: right;'>Temperature</th><th data-dynatable-no-sort='true' style='text-align: right;'>Dewpoint</th><th data-dynatable-no-sort='true' style='text-align: right;'>Pressure</th><th data-dynatable-no-sort='true' style='text-align: right;'>Windspeed</th><th data-dynatable-no-sort='true' style='text-align: right;'>Precipitation</th></thead><tbody></tbody></table>");
+    $("#summary-table-container").html("<table id='summary-table'><caption>Weather data source: wunderground.com</caption><thead><th data-dynatable-no-sort='true'>Date</th><th data-dynatable-no-sort='true' style='text-align: right;'>Average</th><th data-dynatable-no-sort='true' style='text-align: right;'>Max</th><th data-dynatable-no-sort='true' style='text-align: right;'>Min</th><th data-dynatable-no-sort='true' style='text-align: right;'>Temperature</th><th data-dynatable-no-sort='true' style='text-align: right;'>Dewpoint</th><th data-dynatable-no-sort='true' style='text-align: right;'>Pressure</th><th data-dynatable-no-sort='true' style='text-align: right;'>Windspeed</th><th data-dynatable-no-sort='true' style='text-align: right;'>Precipitation</th></thead><tbody></tbody></table>");
 
     // Bind the color change to the table being modified
     $('#summary-table').bind("DOMSubtreeModified", function() {

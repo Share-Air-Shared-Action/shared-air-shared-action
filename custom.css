@@ -57,3 +57,7 @@ table, th, td {
 .introjs-helperNumberLayer {
     display: none;
 }
+#summary-table caption {
+text-align: right;
+
+}
