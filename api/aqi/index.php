@@ -63,13 +63,16 @@ header('Content-Type: application/json');
             }
         },
         "range": [0, 20],
-        "unit": "CO (ppm)"
+        "unit": "CO (ppm)",
+        "name": "CO"
     },
     "CO2": {
-        "unit": "CO<sub>2</sub> (ppm)"
+        "unit": "CO<sub>2</sub> (ppm)",
+        "name": "CO<sub>2</sub>"
     },
     "NO": {
-        "unit": "NO (ppb)"
+        "unit": "NO (ppb)",
+        "name": "NO"
     },
     "NO2": {
         "scale": {
@@ -129,7 +132,8 @@ header('Content-Type: application/json');
             }
         },
         "range": [0, 0.7],
-        "unit": "NO<sub>2</sub> (ppb)"
+        "unit": "NO<sub>2</sub> (ppb)",
+        "name": "NO<sub>2</sub>"
     },
     "O3": {
         "scale": {
@@ -189,10 +193,12 @@ header('Content-Type: application/json');
             }
         },
         "range": [0, 0.15],
-        "unit": "O<sub>3</sub> (ppm)"
+        "unit": "O<sub>3</sub> (ppm)",
+        "name": "O<sub>3</sub>"
     },
     "PM1.0": {
-        "unit": "PM<sub>1.0</sub> (&mu;g/m<sup>3</sup>)"
+        "unit": "PM<sub>1.0</sub> (&mu;g/m<sup>3</sup>)",
+        "name": "PM<sub>1.0</sub>"
     },
     "PM2.5": {
         "scale": {
@@ -252,7 +258,8 @@ header('Content-Type: application/json');
             }
         },
         "range": [0, 60],
-        "unit": "PM<sub>2.5</sub> (&mu;g/m<sup>3</sup>)"
+        "unit": "PM<sub>2.5</sub> (&mu;g/m<sup>3</sup>)",
+        "name": "PM<sub>2.5</sub>"
     },
     "PM10": {
         "scale": {
@@ -312,6 +319,7 @@ header('Content-Type: application/json');
             }
         },
         "range": [0, 400],
-        "unit": "PM<sub>10</sub> (&mu;g/m<sup>3</sup>)"
+        "unit": "PM<sub>10</sub> (&mu;g/m<sup>3</sup>)",
+        "name": "PM<sub>10</sub>"
     }
 }
