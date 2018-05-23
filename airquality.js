@@ -24,12 +24,6 @@ $.getJSON("/airquality/api/communities/", function(communities) {
         $("#dropdown-community-container ul").append("<li><a>" + communities[community].community + "</a></li>");
     });
 
-    // If communities are one or more
-    if(communities.length>0){
-        // Add to the community dropdown menu option to view all information
-        $("#dropdown-community-container ul").append("<li><a>ALL</a></li>");
-    }
-
     // For each item in the community dropdown menu
     $("#dropdown-community-container ul li").each(function() {
         // Create a click handler
@@ -408,17 +402,9 @@ function selectPollutant(pollutant) {
     // Reset the map and chart, and the sensor list
     resetMapAndChart(true);
 
-    // Check whether the chart is comparision across ALL community or summary of individual community
-    if(selected_community == "ALL"){
-
-      compareCommunities(selected_season,selected_sensorcategory,selected_pollutant);
-
-    } else {
-
       // Update the map to show sensors for the selected pollutant
       updateMap(selected_pollutant, selected_sensorcategory, selected_community, selected_season);
 
-    }
 } // function selectPollutant
 
 /**
@@ -449,7 +435,6 @@ function compareCommunities(season,sensorcategory,pollutant){
     } else if (pollutant == "PM1.0") {
         manufacturer.push("purpleairprimary_pm1.0");
     } else if (pollutant == "PM2.5") {
-        //// TODO: How to handle multiple pollutants
         manufacturer.push("purpleairprimary_pm2.5");
         manufacturer.push("metone_pm2.5");
     } else if (pollutant == "PM10") {
@@ -486,7 +471,7 @@ function compareCommunities(season,sensorcategory,pollutant){
       throw new Error("The selected pollutant did not return any data.")
     }
     // plot chart when all the data for pollutant is fetched
-    plotComparisonChart(season,data,pollutant,true); //scrollto = true
+    plotComparisonChart(season,data,pollutant);
   })
   .catch(function(error){
     console.warn(error);
@@ -500,7 +485,7 @@ function compareCommunities(season,sensorcategory,pollutant){
  * Extracts average pollutant across all communities for the give Season
  * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
  * @param  {string} season       The name of the season from which you want to get data.
- * @param  {string} manufacturer The name of the manufacturer from which you want to get data. 
+ * @param  {string} manufacturer The name of the manufacturer from which you want to get data.
  */
 function fetchComparisonData(season,manufacturer,pollutant) {
  return new Promise((resolve,reject) =>{
@@ -514,7 +499,7 @@ function fetchComparisonData(season,manufacturer,pollutant) {
            reject(error);
        }
        if (data.x.length == 0) {
-           console.warn("No data returned for "+manufacturer);
+           console.warn("No data returned for " + manufacturer );
            reject("The selected pollutant did not return any data.");
        } else {
            $("#dropdown-helptext").html("");
@@ -531,61 +516,104 @@ function fetchComparisonData(season,manufacturer,pollutant) {
  * @param  {string} data         The average pollutant value across all the communities
  * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
  * @param  {string} season       The name of the season from which you want to get data.
- * @param  {bool}   scrollto     If true, once the chart is loaded the DOM will scroll to it.
  */
-function plotComparisonChart(season,data,pollutant,scrollto){
+function plotComparisonChart(season,data,pollutant){
 
   // to identify the max value in y axis
   var ydata = [];
+
+  // color values for each bar
+  var color = [];
+
+  // variable that will aggreate from all the manufacturer data
+  var plotdata = data[0];
+
+  var border = [];
+
+  // if more than one manufacturer then calculate average across them
   if(data.length>1){
-    // add arrays acroos each index location ex: a[0] = b[0] + c[0]
-  for(var i=0;i<data[0].length;i++){
-    ydata.push(data[0].y[i]);
+  for(var i=0;i<data[0].y.length;i++){
+    let arraysum = data[0].y[i];
     for(let j=0;j<data.length;j++){
-      ydata[i] += data[j].y[i];
+      arraysum += data[j].y[i];
     }
+    ydata.push(arraysum/data.length);
+    border.push(0.2);
   } // for
-  } else {
-    ydata = data[0];
-  } // if-else
+  plotdata.y = ydata;
+  }
+
+
 
   // Max data point
-  var max_data = Math.max.apply(null,ydata.y);
+  var max_data = Math.max.apply(null,plotdata.y);
 
   // Set the chart width to the width of the chart's HTML element
-  var chart_width = $("#chart").width();
+  var chart_width = $("#comparison-chart").width();
 
   // Plot the data with AQI scale, unit, and range if they are available
   $.getJSON("/airquality/api/aqi/", function(aqivals) {
 
+
+
     // Set layout settings
     var layout = {
-        title: "Comparision of " + aqivals[pollutant].name +" for " + season + " season",
+        title: "Comparision of average " + aqivals[pollutant].name +" for " + season.toLowerCase() + " season across other neighbourhood",
         yaxis: {
-            title: data[0].name,
+            title: plotdata.name,
             range: [0, max_data + (0.1 * max_data)]
         },
         textposition: 'auto',
         hoverinfo: 'none',
         xaxis: {
-            range: [data[0].x],
+            range: [plotdata.x],
             title: 'Communities'
         },
         width: chart_width - 25,
         height: 700,
-        autosize: true,
-        barmode: 'stack'
+        autosize: true
     }; // layout
 
-          Plotly.newPlot("chart", data , layout);
+    if (aqivals.hasOwnProperty(pollutant)) {
+        if (aqivals[pollutant].hasOwnProperty("unit")) {
+            layout.yaxis.title = aqivals[pollutant].unit;
+        }
 
 
-      if (scrollto) {
-          // Scroll to the chart
-          $('html, body').animate({
-              scrollTop: $("#chart").offset().top
-          }, 1000);
-      } // if scrollto
+        if (aqivals[pollutant].hasOwnProperty("scale")) {
+            $.each(aqivals[pollutant].scale, function(thisscale) {
+                aqivals[pollutant].scale[thisscale].x[0] = "0";
+                aqivals[pollutant].scale[thisscale].x[1] = "0";
+            });
+
+            // color the bar
+            $.each(plotdata.y,function(yindex){
+              var yvalue = plotdata.y[yindex];
+              if (yvalue>0 && yvalue < aqivals[pollutant].scale.good.y[0]) {
+                color.push(aqivals[pollutant].scale.good.fillcolor);
+              } else if (yvalue>aqivals[pollutant].scale.good.y[0] && yvalue<aqivals[pollutant].scale.moderate.y[0]) {
+                color.push(aqivals[pollutant].scale.moderate.fillcolor);
+              } else if (yvalue>aqivals[pollutant].scale.moderate.y[0] && yvalue<aqivals[pollutant].scale.unhfsg.y[0]) {
+                color.push(aqivals[pollutant].scale.unhfsg.fillcolor);
+              } else if (yvalue>aqivals[pollutant].scale.unhfsg.y[0] && yvalue<aqivals[pollutant].scale.unhealthy.y[0]) {
+                color.push(aqivals[pollutant].scale.unhealthy.fillcolor);
+              } else if (yvalue>aqivals[pollutant].scale.unhealthy.y[0] && yvalue<aqivals[pollutant].scale.veryunhealthy.y[0]) {
+                color.push(aqivals[pollutant].scale.veryunhealthy.fillcolor);
+              } else if (yvalue>aqivals[pollutant].scale.veryunhealthy.y[0]) {
+                color.push(aqivals[pollutant].scale.hazardous.fillcolor);
+              }
+            });
+
+        plotdata["marker"] = {"color" : color };
+        
+            Plotly.newPlot("comparison-chart", [plotdata,aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+        } else {
+            Plotly.newPlot("comparison-chart", [plotdata], layout);
+        }
+    } else {
+        Plotly.newPlot("comparison-chart", [plotdata], layout);
+    }
+          //Plotly.newPlot("chart", data , layout);
 
       $("#dropdown-helptext").html("");
 
@@ -747,6 +775,7 @@ function handleSensorClick(manufacturer, device, position) {
     $("#dropdown-helptext").html("Loading...");
     buildChart(manufacturer, device, selected_pollutant, selected_season, scrollto, selected_community);
     createSummaryTable(manufacturer, device, selected_season, selected_pollutant, selected_community);
+    compareCommunities(selected_season,selected_sensorcategory,selected_pollutant);
 
     // Set the menu to show the selected Sensor
     $("#selected-sensor").text(device);
