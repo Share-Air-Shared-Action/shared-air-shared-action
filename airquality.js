@@ -558,7 +558,7 @@ function plotComparisonChart(season,data,pollutant){
 
     // Set layout settings
     var layout = {
-        title: "Comparision of average " + aqivals[pollutant].name +" for " + season.toLowerCase() + " season across other neighbourhood",
+        title: "Comparison of average " + aqivals[pollutant].name +" for " + season.toLowerCase() + " season across other neighborhood",
         yaxis: {
             title: plotdata.name,
             range: [0, max_data + (0.1 * max_data)]
@@ -605,7 +605,7 @@ function plotComparisonChart(season,data,pollutant){
             });
 
         plotdata["marker"] = {"color" : color };
-        
+
             Plotly.newPlot("comparison-chart", [plotdata,aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
         } else {
             Plotly.newPlot("comparison-chart", [plotdata], layout);

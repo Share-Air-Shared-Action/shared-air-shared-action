@@ -14,7 +14,7 @@ $season = $_GET['season'];
 $measurement_type = 'Particulate Matter';
 
 // Build the SQL query
-$query = 'SELECT upper(substr(session_title,0,3)) AS x, ROUND(CAST(AVG(measured_value) as NUMERIC),3) AS y FROM airterrier WHERE measurement_type = $2 AND season=$1 AND error IS distinct FROM 1 GROUP BY upper(substr(session_title,0,3))';
+$query = 'SELECT upper(substr(session_title,0,3)) AS x, ROUND(CAST(AVG(measured_value) as NUMERIC),3) AS y FROM airterrier,(select community from stationarylocations group by community) locations  WHERE measurement_type = $2 AND season=$1  AND locations.community=upper(substr(session_title,0,3)) AND error IS distinct FROM 1 GROUP BY upper(substr(session_title,0,3))';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season,$measurement_type)) or die (return_error("Query failed.", pg_last_error()));
