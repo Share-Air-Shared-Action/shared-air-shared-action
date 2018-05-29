@@ -558,7 +558,7 @@ function plotComparisonChart(season,data,pollutant){
 
     // Set layout settings
     var layout = {
-        title: "Comparison of average " + aqivals[pollutant].name +" for " + season.toLowerCase() + " season across other neighborhood",
+        title: "Comparison of average " + aqivals[pollutant].name +" for " + season.toLowerCase() + " season across all neighborhood",
         yaxis: {
             title: plotdata.name,
             range: [0, max_data + (0.1 * max_data)]
@@ -819,6 +819,9 @@ function resetMapAndChart(resetSensorList) {
 
     // Hide the summary table
     $("#summary-table-container").html("");
+
+    // Hide the comparison chart
+    $("#comparison-chart").html("")
 
     if (resetSensorList) {
         // Reset the sensor list
