@@ -12,12 +12,17 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 // Get the season from the URL parameter
 $season = $_GET['season'];
 $measurement_type = 'Particulate Matter';
+// When three distinct pm value is available
+$sensor_name='AirBeam2-PM2.5';
+
+// When only one pm value available for session
+$sensor_name_comm='AirBeam-PM';
 
 // Build the SQL query
-$query = 'SELECT upper(substr(session_title,0,3)) AS x, ROUND(CAST(AVG(measured_value) as NUMERIC),3) AS y FROM airterrier,(select community from stationarylocations group by community) locations  WHERE measurement_type = $2 AND season=$1  AND locations.community=upper(substr(session_title,0,3)) AND error IS distinct FROM 1 GROUP BY upper(substr(session_title,0,3))';
+$query = 'SELECT upper(substr(session_title,0,3)) AS x, ROUND(CAST(AVG(measured_value) as NUMERIC),3) AS y FROM airterrier,(select community from stationarylocations group by community) locations  WHERE measurement_type = $2 AND season=$1  AND locations.community=upper(substr(session_title,0,3)) AND (sensor_name=$3 OR sensor_name=$4) AND error IS distinct FROM 1 GROUP BY upper(substr(session_title,0,3))';
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($season,$measurement_type)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($season,$measurement_type,$sensor_name,$sensor_name_comm)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);

@@ -424,8 +424,12 @@ function compareCommunities(season,sensorcategory,pollutant){
         manufacturer.push("airterrier_co2");
     } else if (pollutant == "NO") {
         manufacturer.push("airterrier_no");
+    }  else if  (pollutant == "PM1.0") {
+        manufacturer.push("airterrier_pm1.0");
     }  else if  (pollutant == "PM2.5") {
         manufacturer.push("airterrier_pm2.5");
+  }  else if  (pollutant == "PM10") {
+        manufacturer.push("airterrier_pm10");
     }
   } else if(sensorcategory == "Stationary"){
     if (pollutant == "NO2") {
@@ -471,7 +475,7 @@ function compareCommunities(season,sensorcategory,pollutant){
       throw new Error("The selected pollutant did not return any data.")
     }
     // plot chart when all the data for pollutant is fetched
-    plotComparisonChart(season,data,pollutant);
+    plotComparisonChart(season,data,pollutant,sensorcategory);
   })
   .catch(function(error){
     console.warn(error);
@@ -517,7 +521,7 @@ function fetchComparisonData(season,manufacturer,pollutant) {
  * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
  * @param  {string} season       The name of the season from which you want to get data.
  */
-function plotComparisonChart(season,data,pollutant){
+function plotComparisonChart(season,data,pollutant,sensorcategory){
 
   // to identify the max value in y axis
   var ydata = [];
@@ -558,7 +562,7 @@ function plotComparisonChart(season,data,pollutant){
 
     // Set layout settings
     var layout = {
-        title: "Comparison of average " + aqivals[pollutant].name +" for " + season.toLowerCase() + " season across all neighborhood",
+        title: "Comparison of average " + aqivals[pollutant].name +" of "+ sensorcategory.toLowerCase() +" sensor for " + season.toLowerCase() + " season across all neighborhood",
         yaxis: {
             title: plotdata.name,
             range: [0, max_data + (0.1 * max_data)]
@@ -642,11 +646,13 @@ function loadAvailablePollutants(sensorcategory) {
         $("#dropdown-pollutant-container ul").append("<li><a>PM<sub>2.5</sub></a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>PM<sub>10</sub></a></li>");
     } else if (sensorcategory == "Mobile") {
-        // CO, CO2, NO, PM2.5
+        // CO, CO2, NO, PM1.0, PM2.5, PM10
         $("#dropdown-pollutant-container ul").append("<li><a>CO</a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>CO<sub>2</sub></a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>NO</a></li>");
+        $("#dropdown-pollutant-container ul").append("<li><a>PM<sub>1.0</sub></a></li>");
         $("#dropdown-pollutant-container ul").append("<li><a>PM<sub>2.5</sub></a></li>");
+        $("#dropdown-pollutant-container ul").append("<li><a>PM<sub>10</sub></a></li>");
     } else {
         console.warn("Invalid senosr category selected");
     }
@@ -698,7 +704,10 @@ function updateMap(pollutant, sensorcategory, community, season) {
         if (sensorcategory == "Stationary") {
             createMarkers("purpleairprimary_pm1.0", community, season, pollutant);
             showSensorPicker();
-        }
+      } else if (sensorcategory == "Mobile") {
+        loadMobile("airterrier_pm1.0", community, season);
+        $("#dropdown-helptext").html("Loading...");
+      }
     } else if (selected_pollutant == "PM2.5") {
         if (sensorcategory == "Stationary") {
             createMarkers("purpleairprimary_pm2.5", community, season, pollutant);
@@ -714,7 +723,10 @@ function updateMap(pollutant, sensorcategory, community, season) {
             createMarkers("purpleairprimary_pm10", community, season, pollutant);
             createMarkers("metone_pm10", community, season, pollutant);
             showSensorPicker();
-        }
+      } else if (sensorcategory == "Mobile") {
+        loadMobile("airterrier_pm10", community, season);
+        $("#dropdown-helptext").html("Loading...");
+      }
     }
 }
 

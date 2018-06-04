@@ -9,23 +9,16 @@ header('Content-Type: application/json');
 // Open connection to database using variables set in keys
 $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpass) or die(return_error("Could not connect to database.", pg_last_error()));
 
-// Get the device ID from the URL parameter
-$device = $_GET['device'];
-
 // Get the season from the URL parameter
 $season = $_GET['season'];
-
-// When three distinct pm value is available
-$sensor_name='AirBeam2-PM2.5';
-
-// When only one pm value available for session
-$sensor_name_comm='AirBeam-PM';
+$measurement_type = 'Particulate Matter';
+$sensor_name='AirBeam2-PM10';
 
 // Build the SQL query
-$query = "SELECT time AS x, measured_value AS y FROM airterrier WHERE measurement_type = 'Particulate Matter' AND session_title = $1 AND season = $2  AND (sensor_name=$3 OR sensor_name=$4) AND error IS DISTINCT FROM 1  ORDER BY time";
+$query = 'SELECT upper(substr(session_title,0,3)) AS x, ROUND(CAST(AVG(measured_value) as NUMERIC),3) AS y FROM airterrier,(select community from stationarylocations group by community) locations  WHERE measurement_type = $2 AND season=$1  AND locations.community=upper(substr(session_title,0,3)) AND sensor_name=$3 AND error IS distinct FROM 1 GROUP BY upper(substr(session_title,0,3))';
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($device, $season,$sensor_name,$sensor_name_comm)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($season,$measurement_type,$sensor_name)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
@@ -35,12 +28,12 @@ $xarray = [];
 $yarray = [];
 
 foreach($resultArray as $item) {
-	$xarray[] = substr($item['x'], 0, -3);
+	$xarray[] = $item['x'];
 	$yarray[] = floatval($item['y']);
 }
 
 // Build the return array with X, Y, type, and name for plot.ly
-$returnarray = ["x" => $xarray, "y" => $yarray, "mode" => "markers", "type" => "scatter", "name" => "PM<sub>2.5</sub> (&mu;g/m<sup>3</sup>)"];
+$returnarray = ["x" => $xarray, "y" => $yarray, "text" => $xarray , "mode" => "markers", "type" => "bar", "name" => "PM<sub>2.5</sub> (&mu;g/m<sup>3</sup>)" ];
 
 // Encode the array as JSON and return it.
 echo json_encode($returnarray);
