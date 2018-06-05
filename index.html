@@ -20,7 +20,7 @@
     <meta name="theme-color" content="#ffffff">
 </head>
 
-<body>
+<body onload="hideSummaryStatistics()">
     <div class="container" align="center">
         <div class="row">
             <div class="col-md-10">
@@ -40,8 +40,12 @@
                 </div>
                 <div id="dropdown-community-container" class="dropdown" data-intro="Begin by selecting the community that you would like to see the air quality data for. Select ALL to see pollutant comparison across all communities. For this tutorial, I've selected LV for you." data-step="2">
                     <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-community" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span id="selected-community">Community</span> <span class="caret"></span></button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdown-community"></ul>
+                   <ul class="dropdown-menu" aria-labelledby="dropdown-community" onclick="showStatistics()"></ul>
+ 
                 </div>
+
+                 <div id="summary-statistics-container" class="dropdown"><button class="btn btn-default dropdown-toggle"> View Summary Statistics </button> </div>                              
+
                 <div id="dropdown-season-container" class="dropdown" data-intro="Next, select which season you want to see data for. For this tutorial, I've selected Summer for you." data-step="3">
                     <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-season" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><span id="selected-season">Season</span> <span class="caret"></span></button>
                     <ul class="dropdown-menu" aria-labelledby="dropdown-season">

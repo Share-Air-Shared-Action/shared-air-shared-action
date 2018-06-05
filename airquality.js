@@ -29,10 +29,33 @@ $.getJSON("/airquality/api/communities/", function(communities) {
         // Create a click handler
         $(this).click(function() {
             // Set the menu text to the text of the clicked item
-            selectCommunity($(this).text())
+           selectCommunity($(this).text())
+     //   showStatistics();
+
         });
     });
+// $("#summary-statistics-container").css("display","inherit");
 });
+
+//showStatistics();
+
+// show view summary statistics
+function showStatistics() {
+
+	$("#summary-statistics-container").css("display","inherit");
+
+	
+}
+
+
+// hide view summary statistics
+function hideSummaryStatistics() {
+	
+//	$("#summary-statistics-container").html("");
+$("#summary-statistics-container").css("display", "none");	
+}
+
+
 
 // For each item in the Season dropdown menu
 $("#dropdown-season-container ul li").each(function() {
@@ -332,6 +355,8 @@ function selectCommunity(community) {
         localStorage.setItem("community", community);
     }
     $("#selected-community").text(community);
+  //  showStatistics();
+
     resetMapAndChart(true);
     resetPollutantandSensor();
 }
