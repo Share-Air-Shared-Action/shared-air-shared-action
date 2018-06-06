@@ -14,6 +14,8 @@ var selected_sensorcategory;
 var selected_pollutant;
 var selected_sensor;
 var selected_pollutantHTML;
+const COMPARE = "compare";
+const AVERAGE = "average";
 
 // Load in the communities into the dropdown
 $.getJSON("/airquality/api/communities/", function(communities) {
@@ -44,15 +46,15 @@ function showStatistics() {
 
 	$("#summary-statistics-container").css("display","inherit");
 
-	
+
 }
 
 
 // hide view summary statistics
 function hideSummaryStatistics() {
-	
+
 //	$("#summary-statistics-container").html("");
-$("#summary-statistics-container").css("display", "none");	
+$("#summary-statistics-container").css("display", "none");
 }
 
 
@@ -433,16 +435,18 @@ function selectPollutant(pollutant) {
 } // function selectPollutant
 
 /**
-  * compares the average pollutant across a particular season and sensorcategory
-  * @param  {string} pollutant      The pollutant to load.
-  * @param  {string} sensorcategory Mobile or Stationary, used to load correct sensors/routes
-  * @param  {string} season         The name of the season from which you want to get data.
-  */
-function compareCommunities(season,sensorcategory,pollutant){
-
+ * load appropriate manufacturers for the api
+* @param  {string} sensorcategory Mobile or Stationary, used to load correct sensors/routes
+ * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
+ * @param  {string} api          Signifies whether to fetch data for comparision or average reading
+ */
+ function loadManufacturers(sensorcategory,pollutant,api){
+   return new Promise((resolve,reject)=>{
   var manufacturer = [];
+
   // Identify the API path for sensorcategory and pollutant
-  if(sensorcategory == "Mobile"){
+     if(api==COMPARE){
+       if(sensorcategory == "Mobile"){
     if(pollutant == "CO"){
         manufacturer.push("airterrier_co");
     } else if (pollutant == "CO2") {
@@ -471,55 +475,108 @@ function compareCommunities(season,sensorcategory,pollutant){
         manufacturer.push("metone_pm10");
     }
   }
+  resolve(manufacturer);
+  // For average graph plotting load manufacturers based on pollutant irrespective of sensorcategory
+}else if(api==AVERAGE){
 
-  // store the pollutant data to display using chart
-  var data = [];
-
-  // boolean variable to identify any data retrieved for pollutant
-  var haserrors=true;
-
-  //buildComparisonChart(season,manufacturer[0],pollutant,true);
-  var promises = [];
-
-  manufacturer.forEach(function(item){
-    // creating a promise call, handling success case in then block and error in catch block
-    promises.push(fetchComparisonData(season,item,pollutant)
-      .then(function(result){
-        data.push(result);
-        haserrors = haserrors && false;
-      }).catch(function(error){
-        console.warn(error);
-      }) // catch
-    ) // push
-  }); // foreach
-
-  // executes promises to fetch pollutant data from all manufacturer
-  Promise.all(promises).then(function(result){
-
-    if(data.length==0||data.length==1&&data[0].x.length==0){
-      throw new Error("The selected pollutant did not return any data.")
+  if(pollutant == "CO"){
+        manufacturer.push("airterrier_co");
+    } else  if (pollutant == "NO1") {
+          manufacturer.push("aeroqual_no1");
+    } else if (pollutant == "O2") {
+          manufacturer.push("aeroqual_o2");
+    } else if (pollutant == "CO1") {
+        manufacturer.push("airterrier_co1");
+    } else if (pollutant == "NO") {
+        manufacturer.push("airterrier_no");
+    }  else if  (pollutant == "PM0.-1") {
+        manufacturer.push("airterrier_pm0.-1");
+        manufacturer.push("purpleairprimary_pm0.-1");
+    }  else if  (pollutant == "PM1.4") {
+        manufacturer.push("airterrier_pm1.4");
+        manufacturer.push("purpleairprimary_pm1.4");
+        manufacturer.push("metone_pm1.4");
+    }  else if  (pollutant == "PM9") {
+        manufacturer.push("airterrier_pm9");
+        manufacturer.push("purpleairprimary_pm9");
+        manufacturer.push("metone_pm9");
     }
-    // plot chart when all the data for pollutant is fetched
-    plotComparisonChart(season,data,pollutant,sensorcategory);
-  })
-  .catch(function(error){
-    console.warn(error);
-    $("#dropdown-helptext").html("<span style='color: red;'>The selected pollutant did not return any data.</span>");
-    resetMapAndChart(false);
-  });
+    resolve(manufacturer);
+  }
+   })
+ }
 
-} // function compareCommunities
+/**
+  * fetches the manufacturers for given parameter extracts the data from database using api and call plot graph function for comparision and average type of graph plotting
+  * @param  {string} pollutant      The pollutant to load.
+  * @param  {string} sensorcategory Mobile or Stationary, used to load correct sensors/routes
+  * @param  {string} season         The name of the season from which you want to get data.
+  * @param  {string} api          Signifies whether to fetch data for comparision or average reading
+  */
+function plotCommunities(season,sensorcategory,pollutant,api){
+
+  // a promise that extract the list of manufacturers for comparing communities
+  loadManufacturers(sensorcategory,pollutant,api).then((manufacturer)=>{
+
+    // store the pollutant data to display using chart
+    var data = [];
+
+    // boolean variable to identify any data retrieved for pollutant
+    var haserrors=true;
+
+    //buildComparisonChart(season,manufacturer[0],pollutant,true);
+    var promises = [];
+
+    manufacturer.forEach(function(item){
+      // creating a promise call, handling success case in then block and error in catch block
+      promises.push(fetchGraphData(season,manufacturer,pollutant,api)
+        .then(function(result){
+          data.push(result);
+          haserrors = haserrors && false;
+        }).catch(function(error){
+          console.warn(error);
+        }) // catch
+      ) // push
+    }); // foreach
+
+    // executes promises to fetch pollutant data from all manufacturer
+    Promise.all(promises).then(function(result){
+
+      if(data.length==0||data.length==1&&data[0].x.length==0){
+        throw new Error("The selected pollutant did not return any data.")
+      }
+      // plot chart when all the data for pollutant is fetched
+
+      //// TODO: Add chart function for average data plot
+      plotComparisonChart(season,data,pollutant,sensorcategory);
+    })
+    .catch(function(error){
+      console.warn(error);
+      $("#dropdown-helptext").html("<span style='color: red;'>The selected pollutant did not return any data.</span>");
+      resetMapAndChart(false);
+    });
+
+  })
+
+} // function plotCommunities
+
 
 /**
  * Extracts average pollutant across all communities for the give Season
  * @param  {string} pollutant    The text name of the specific pollutant type. Do not provide HTML.
  * @param  {string} season       The name of the season from which you want to get data.
  * @param  {string} manufacturer The name of the manufacturer from which you want to get data.
+ * @param  {string} api          Signifies whether to fetch data for comparision or average reading
  */
-function fetchComparisonData(season,manufacturer,pollutant) {
+function fetchGraphData(season,manufacturer,pollutant,api) {
  return new Promise((resolve,reject) =>{
    // Build the API URL
-   var url = "/airquality/api/" + manufacturer + "/comparison/?season=" + season;
+   var url = "";
+   if(api==COMPARE){
+     url = "/airquality/api/" + manufacturer + "/comparison/?season=" + season;
+   } else if(api==AVERAGE) {
+     url = "/airquality/api/" + manufacturer + "/avg_reading/";
+   }
 
    // Request the data from API
    d3.json(url, function(error, data) {
@@ -538,7 +595,7 @@ function fetchComparisonData(season,manufacturer,pollutant) {
  })
   // Build the API url
 
-} // function fetchComparisonData
+} // function fetchGraphData
 
 /**
  * Builds a Plot.ly chart from using the provided parameters.
@@ -812,7 +869,7 @@ function handleSensorClick(manufacturer, device, position) {
     $("#dropdown-helptext").html("Loading...");
     buildChart(manufacturer, device, selected_pollutant, selected_season, scrollto, selected_community);
     createSummaryTable(manufacturer, device, selected_season, selected_pollutant, selected_community);
-    compareCommunities(selected_season,selected_sensorcategory,selected_pollutant);
+    plotCommunities(selected_season,selected_sensorcategory,selected_pollutant,COMPARE); // api = "compare"
 
     // Set the menu to show the selected Sensor
     $("#selected-sensor").text(device);
