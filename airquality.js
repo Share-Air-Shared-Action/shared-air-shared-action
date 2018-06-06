@@ -345,6 +345,7 @@ function selectSeason(season) {
     resetMapAndChart(true);
     resetPollutantandSensor();
     showDownloadButton(selected_community, selected_season);
+    hideSummaryStatistics();
 }
 
 /**
