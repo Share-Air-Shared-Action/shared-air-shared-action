@@ -112,12 +112,37 @@ function initMap() {
  */
 
 function summaryMap() {
+	
+	var centerloc;
+	
     // Get the map object
     var mapCanvas = document.getElementById('map');
 
-    // Center the map on the Chicago area
-    var centerloc = new google.maps.LatLng(41.7923412, -87.6030669);
+//    var centerloc  = new google.maps.LatLng(41.700564, -87.530184);
 
+
+    // Center the map on the community selected
+	if (selected_community == "SE" ) { 
+           centerloc  = new google.maps.LatLng(41.700564, -87.530184);
+	} 
+
+
+          else if (selected_community == "SL"){
+ 	centerloc = new google.maps.LatLng( 41.867463, -87.627174);
+	} else if (selected_community == "NB"){
+		
+	 centerloc = new google.maps.LatLng(42.13999619, -87.79922692);	
+	
+	} else if (selected_community == "PC") {
+	  centerloc = new google.maps.LatLng(41.65842, -87.6084);
+	} else if (selected_community == "LV"){
+	  centerloc = new google.maps.LatLng( 41.846744, -87.707265);
+	} else {
+	 centerloc = new google.maps.LatLng(41.7923412, -87.6030669);	
+	}
+	
+		
+		
     // Set the map options
     var mapOptions = {
         center: centerloc,
@@ -135,7 +160,7 @@ function summaryMap() {
 }
 
 
-
+	
 
 /**
  * Creates markers and adds each sensor the list
