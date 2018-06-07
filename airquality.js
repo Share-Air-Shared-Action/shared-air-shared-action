@@ -441,7 +441,7 @@ function selectSensorCategory(sensorcategory) {
     // Show the pollutant picker
     $("#dropdown-pollutant-container").css("display","inherit");
     resetPollutantandSensor();
-
+     hideSummaryStatistics();
 }
 
 /**
@@ -493,6 +493,7 @@ function selectPollutant(pollutant) {
 
       // Update the map to show sensors for the selected pollutant
       updateMap(selected_pollutant, selected_sensorcategory, selected_community, selected_season);
+       hideSummaryStatistics();
 
 } // function selectPollutant
 
