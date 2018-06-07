@@ -14,7 +14,7 @@ $community = $_GET['community'];
 
 // Build the SQL query
 // Agregates from aeroqualno2 and wundergound indvidual for each date and then joined
-$query = "select season, day_section, ROUND(cast(avg(no2ppm) as NUMERIC),3) from (select season, case when tod >= 6 and tod < 10 then 'morning' when tod >= 10 and tod < 14 then 'midday' when tod >= 14 and tod < 16 then 'afternoon' when tod >= 16 and tod < 20 then 'evening' when tod >= 20 and tod < 24 or tod >= 0 and tod < 6  then 'overnight' end day_section, no2ppm from
+$query = "select season, day_section, ROUND(cast(avg(no2ppm) as NUMERIC),3) val from (select season, case when tod >= 6 and tod < 10 then 'morning' when tod >= 10 and tod < 14 then 'midday' when tod >= 14 and tod < 16 then 'afternoon' when tod >= 16 and tod < 20 then 'evening' when tod >= 20 and tod < 24 or tod >= 0 and tod < 6  then 'overnight' end day_section, no2ppm from
 (select season,to_char(date,'HH24')::integer tod, no2ppm from aeroqualno2 where community=$1 and season='Summer' or season='Winter' and error is distinct from 1) part_1) part_2 group by season,day_section";
 
 // Run the query
@@ -23,8 +23,22 @@ $result = pg_query_params($dbconn, $query, array($community)) or die (return_err
 // Create JSON result
 $resultArray = pg_fetch_all($result);
 
+// Seperate out the individual columns into independent array
+$season = [];
+$section = [];
+$val = [];
+
+foreach($resultArray as $item) {
+	$season[] = $item['season'];
+	$section[] = $item['day_section'];
+	$val[] = floatval($item['val']);
+}
+
+// Build the return array with season, section and val
+$returnarray = ["season" => $season, "section" => $section, "val" => $val];
+
 // Encode the array as JSON and return it.
-echo json_encode($resultArray);
+echo json_encode($returnarray);
 
 // Free resultset
 pg_free_result($result);

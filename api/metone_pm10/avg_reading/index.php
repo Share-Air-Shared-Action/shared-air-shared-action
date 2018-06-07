@@ -14,7 +14,7 @@ $community = $_GET['community'];
 $type = 'pm10';
 
 // Build the SQL query
-$query = 'select season, day_section, ROUND(cast(avg(value) as NUMERIC),3) from (select season, case when tod >= 6 and tod < 10 then 'morning' when tod >= 10 and tod < 14 then 'midday' when tod >= 14 and tod < 16 then 'afternoon' when tod >= 16 and tod < 20 then 'evening' when tod >= 20 and tod < 24 or tod >= 0 and tod < 6  then 'overnight' end day_section, value from
+$query = 'select season, day_section, ROUND(cast(avg(value) as NUMERIC),3) val from (select season, case when tod >= 6 and tod < 10 then 'morning' when tod >= 10 and tod < 14 then 'midday' when tod >= 14 and tod < 16 then 'afternoon' when tod >= 16 and tod < 20 then 'evening' when tod >= 20 and tod < 24 or tod >= 0 and tod < 6  then 'overnight' end day_section, value from
 (select season,to_char(time,'HH24')::integer tod, value from metone where community=$1 and season='Summer' or season='Winter' and error is distinct from 1 AND type = $2) part_1) part_2 group by season,day_section';
 
 // Run the query
@@ -23,18 +23,19 @@ $result = pg_query_params($dbconn, $query, array($community,$type)) or die (retu
 // Create JSON result
 $resultArray = pg_fetch_all($result);
 
-// Seperate out the X and Y (Time and values) data so that it can be charted by plot.ly
-$xarray = [];
-$yarray = [];
+// Seperate out the individual columns into independent array
+$season = [];
+$section = [];
+$val = [];
 
-// If any rows retrieved then store to individual arrays
-	foreach($resultArray as $item) {
-		$xarray[] = $item['x'];
-		$yarray[] = floatval($item['y']);
-	}
+foreach($resultArray as $item) {
+	$season[] = $item['season'];
+	$section[] = $item['day_section'];
+	$val[] = floatval($item['val']);
+}
 
-// Build the return array with X, Y, type, and name for plot.ly
-$returnarray = ["x" => $xarray, "y" => $yarray, "text" => $xarray , "mode" => "markers", "type" => "bar", "name" => "PM<sub>2.5</sub> (&mu;g/m<sup>3</sup>)" ];
+// Build the return array with season, section and val
+$returnarray = ["season" => $season, "section" => $section, "val" => $val];
 
 // Encode the array as JSON and return it.
 echo json_encode($returnarray);
