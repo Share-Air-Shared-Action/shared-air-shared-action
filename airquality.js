@@ -104,6 +104,39 @@ function initMap() {
     // loadPreviousSelection();
 }
 
+
+
+
+/**
+ * Loads the Google Map object for view summary statistics page on callback from Google Maps API
+ */
+
+function summaryMap() {
+    // Get the map object
+    var mapCanvas = document.getElementById('map');
+
+    // Center the map on the Chicago area
+    var centerloc = new google.maps.LatLng(41.7923412, -87.6030669);
+
+    // Set the map options
+    var mapOptions = {
+        center: centerloc,
+        zoom: 10,
+        panControl: true,
+        scrollwheel: false,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    // Create the map and store it in the variable
+    airQualityMap = new google.maps.Map(mapCanvas, mapOptions);
+
+    // // Load previous selection if available
+    // loadPreviousSelection();
+}
+
+
+
+
 /**
  * Creates markers and adds each sensor the list
  * @param  {string} manufacturer The name of the API folder to open.
