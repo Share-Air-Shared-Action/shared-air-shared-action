@@ -38,7 +38,7 @@ foreach($resultArray as $item) {
 }
 
 // Build the return array with season, section and val
-$returnarray = ["season" => $season, "section" => $section, "val" => $val];
+$returnarray = ["season" => $season, "section" => $section, "val" => $val, "mode" => "markers", "type" => "bar", "name" => "CO (ppm)"];
 
 // Encode the array as JSON and return it.
 echo json_encode($returnarray);
