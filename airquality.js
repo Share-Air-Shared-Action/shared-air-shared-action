@@ -114,6 +114,9 @@ function initMap() {
 
 function renderSummaryPage() {
 
+
+ load_shapefile();
+
   var centerloc;
 
   // read GET parameter from URL string
@@ -156,13 +159,24 @@ function renderSummaryPage() {
   };
 
   // Create the map and store it in the variable
-  airQualityMap = new google.maps.Map(mapCanvas, mapOptions);
+//  airQualityMap = new google.maps.Map(mapCanvas, mapOptions);
 
   // // Load previous selection if available
   // loadPreviousSelection();
 
   fetchPollutant(community);
 }
+
+
+// function to load the content of the shapefile
+
+function load_shapefile(){
+	
+	document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+}
+
+
+
 
 function fetchPollutant(community) {
 
@@ -278,9 +292,6 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
   // to identify the max value in y axis
   var ydata = [];
 
-  // color values for each bar
-  var color = [];
-
   // variable that will aggreate from all the manufacturer data
   var summer = [];
   var winter = [];
@@ -318,11 +329,11 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
     }
     // append to the array to create a linear array across all manufacturer to calculate the max height of y axis
     ydata.concat(data[i].val);
+    console.log(ydata);
   }
 
   // Max data point
   var max_data = Math.max.apply(null, ydata);
-
 
   // add 24 hours average reading
   summertime.set("All day", summeravg);
@@ -342,7 +353,7 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
   var summerplotdata = {
     "x": xaxis,
     "y": summervalues,
-    "text": summervalues,
+    "text": summervalues.map(x=>x+"\n"+" summer"),
     "textposition": "outside",
     "hoverinfo": 'none',
     "name": "Summer",
@@ -353,7 +364,8 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
   var winterplotdata = {
     "x": xaxis,
     "y": wintervalues,
-    "text": wintervalues,
+    "text": wintervalues.map(x=>x+"\n"+" winter"),
+    "text":"winter",
     "textposition": "outside",
     "hoverinfo": 'none',
     "name": "Winter",
@@ -396,13 +408,61 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
         aqivals[pollutant].scale[thisscale].x[0] = "0";
         aqivals[pollutant].scale[thisscale].x[1] = "0";
       });
-
+      colorBars(winterplotdata,aqivals,pollutant)
+      .then((plotdata)=>{
+        winterplotdata=plotdata;
+        return colorBars(summerplotdata,aqivals,pollutant);
+      })
+      .then((plotdata)=>{
+        summerplotdata=plotdata;
+        return;
+      })
+      .then(()=>{
+        console.log(layout);
+        //Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata,aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+        Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata], layout);
+      })
+    } else {
+      Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata], layout);
     }
+  } else {
+    Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata], layout);
   }
-  Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata], layout);
 
 } // function plotComparisonChart
 
+function colorBars(plotdata,aqivals, pollutant) {
+  return new Promise(function(resolve, reject) {
+
+    // color values for each bar
+    var color = [];
+
+    // color the bar
+    $.each(plotdata.y, function(yindex) {
+      var yvalue = plotdata.y[yindex];
+      if (yvalue > 0 && yvalue < aqivals[pollutant].scale.good.y[0]) {
+        color.push(aqivals[pollutant].scale.good.fillcolor);
+      } else if (yvalue > aqivals[pollutant].scale.good.y[0] && yvalue < aqivals[pollutant].scale.moderate.y[0]) {
+        color.push(aqivals[pollutant].scale.moderate.fillcolor);
+      } else if (yvalue > aqivals[pollutant].scale.moderate.y[0] && yvalue < aqivals[pollutant].scale.unhfsg.y[0]) {
+        color.push(aqivals[pollutant].scale.unhfsg.fillcolor);
+      } else if (yvalue > aqivals[pollutant].scale.unhfsg.y[0] && yvalue < aqivals[pollutant].scale.unhealthy.y[0]) {
+        color.push(aqivals[pollutant].scale.unhealthy.fillcolor);
+      } else if (yvalue > aqivals[pollutant].scale.unhealthy.y[0] && yvalue < aqivals[pollutant].scale.veryunhealthy.y[0]) {
+        color.push(aqivals[pollutant].scale.veryunhealthy.fillcolor);
+      } else if (yvalue > aqivals[pollutant].scale.veryunhealthy.y[0]) {
+        color.push(aqivals[pollutant].scale.hazardous.fillcolor);
+      }
+    });
+
+    plotdata["marker"] = {
+      "color": color
+    };
+
+    resolve(plotdata);
+
+  });
+}
 /**
  * Creates markers and adds each sensor the list
  * @param  {string} manufacturer The name of the API folder to open.
@@ -616,12 +676,12 @@ function buildChart(manufacturer, device, pollutant, season, scrollto, community
             aqivals[pollutant].scale[thisscale].x[1] = max_date;
           });
 
-          Plotly.newPlot("chart", [data, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+          Plotly.newPlot("chart", [data, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardousaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
         } else {
-          Plotly.newPlot("chart", [data], layout);
+          Plotly.newPlot("chart", [dataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
         }
       } else {
-        Plotly.newPlot("chart", [data], layout);
+        Plotly.newPlot("chart", [dataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
       }
       if (scrollto) {
         // Scroll to the chart
@@ -995,14 +1055,14 @@ function plotComparisonChart(season, data, pollutant, sensorcategory) {
           "color": color
         };
 
-        Plotly.newPlot("comparison-chart", [plotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+        Plotly.newPlot("comparison-chart", [plotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardousaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
       } else {
-        Plotly.newPlot("comparison-chart", [plotdata], layout);
+        Plotly.newPlot("comparison-chart", [plotdataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
       }
     } else {
-      Plotly.newPlot("comparison-chart", [plotdata], layout);
+      Plotly.newPlot("comparison-chart", [plotdataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
     }
-    //Plotly.newPlot("chart", data , layout);
+    //Plotly.newPlot("chart", dataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous , layout);
 
     $("#dropdown-helptext").html("");
 
@@ -1173,14 +1233,14 @@ function plotSummaryChart(community, season, data, pollutant, sensorcategory) {
           "color": color
         };
 
-        Plotly.newPlot("comparison-chart", [plotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+        Plotly.newPlot("comparison-chart", [plotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardousaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
       } else {
-        Plotly.newPlot("comparison-chart", [plotdata], layout);
+        Plotly.newPlot("comparison-chart", [plotdataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
       }
     } else {
-      Plotly.newPlot("comparison-chart", [plotdata], layout);
+      Plotly.newPlot("comparison-chart", [plotdataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
     }
-    //Plotly.newPlot("chart", data , layout);
+    //Plotly.newPlot("chart", dataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous , layout);
 
     $("#dropdown-helptext").html("");
 

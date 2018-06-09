@@ -1,0 +1,504 @@
+/*
+GIS Software Elshayal Smart GIS and Map Editor and GPS Software Open Source Code Library 18.002
+http://freesmartgis.blogspot.com/
+https://www.facebook.com/media/set/?set=a.1015115436573.2279.1785711747&type=1&l=6a9d2074a5
+Email:FreeSmartGIS@gmail.com  or SmartGIS@Hotmail.com or SmartGIS@SmartGIS.us
+WhatsApp: +201281421662  or +201222113080
+Tel: +201222113080 or +201550585159
+GIS Software - First African Arabian Egyptian GIS GPS Software by Smart GIS (Mohamed Elshayal)
+Updated 14 February, 2018 Smart GIS Map Editor 18.002 is the First African Arabian Egyptian GIS GPS Software that is developed by
+Africa Arab Egypt GIS programmers and independent of any package, It is not funded by any organization, and it consists of:
+1) Map Editor and analysis for desktop, 2) Map Server for web, 3) Mobile GPS Tracking and Data Collector for mobile,
+4) Download Rectified Google Earth, 5) Open Source to Convert GIS Shape Files to HTML Google Map Web GIS and Mobile App
+Made in Egypt
+*/
+
+.MainBody {
+    padding: 0;
+    margin: 0;
+    border: 0 none;
+    border-color: #FFFFFF;
+    width: 100%;
+    height: 100%;
+    background-color: #FFFFFF;
+    color: #000000;
+    font-family: Times New Roman;
+    font-size: 12px;
+    font-weight: normal;
+    font-style: normal;
+    overflow: hidden;
+}
+
+.MainLayoutTbl {
+    margin: 0;
+    padding: 0;
+    border: 0 none;
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    z-index: 0;
+}
+
+    .MainLayoutTbl tr td {
+        margin: 0;
+        padding: 0;
+        border: 0 none;
+    }
+
+.HeaderPrt {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    border: 0 none;
+}
+
+.BannerPrt {
+    width: 100%;
+    text-align: center;
+    background-color: #FF8000;
+    color: #FFFFFF;
+    font-family: Times New Roman;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: normal;
+}
+
+.BannerPrtErr {
+    width: 100%;
+    text-align: center;
+    background-color: #FF8000;
+    color: Red;
+    font-family: Times New Roman;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: normal;
+}
+
+.LeftPrt {
+    margin: 0px;
+    padding: 0 0px 0px 5px;
+    width: 25%;
+    vertical-align: top;
+    border: 0 none;
+    transition: 0.5s;
+}
+
+.NavPrt {
+    margin: 0;
+    padding-left: 0pt;
+    border: 0 none;
+    background-color: crimson;
+    color: white;
+    width: 100px;
+    line-height: 130%;
+    z-index: 3;
+}
+
+    .NavPrt ul.hmenu {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        width: auto;
+    }
+
+        .NavPrt ul.hmenu li {
+            margin: 0;
+            padding: 0;
+            display: inline-table;
+            cursor: pointer;
+            width: 100px;
+            line-height: 130%;
+            font-size: small;
+            text-align: left;
+            border-radius: 0;
+        }
+
+            .NavPrt ul.hmenu li:hover {
+                margin: 0;
+                padding: 0;
+                display: inline-table;
+                color: white;
+                background-color: crimson;
+                cursor: pointer;
+                width: 100px;
+                font-size: small;
+                text-align: left;
+                border-radius: 0;
+            }
+
+            .NavPrt ul.hmenu li ul {
+                margin: 0;
+                padding: 0;
+                background-color: #EFEFEF;
+                width: 150px;
+                display: none;
+                cursor: pointer;
+                position: absolute;
+                border: 0 none;
+                border-radius: 0;
+            }
+
+                .NavPrt ul.hmenu li ul li {
+                    margin: 0;
+                    padding: 0;
+                    background-color: #EFEFEF;
+                    color: #008000;
+                    font-family: Times New Roman;
+                    font-size: 14px;
+                    font-weight: bold;
+                    font-style: normal;
+                    border: thin solid #EFEFEF;
+                    width: 150px;
+                    line-height: 180%;
+                    cursor: pointer;
+                    text-align: left;
+                    border-radius: 0;
+                }
+
+                    .NavPrt ul.hmenu li ul li:hover {
+                        margin: 0;
+                        padding: 0;
+                        background-color: #008000;
+                        color: #EFEFEF;
+                        font-family: Times New Roman;
+                        font-size: 14px;
+                        font-weight: bold;
+                        font-style: normal;
+                        border: thin solid #008000;
+                        width: 150px;
+                        line-height: 180%;
+                        cursor: pointer;
+                        text-align: left;
+                        border-radius: 0;
+                    }
+
+.VisDiv {
+    display: block;
+    overflow: auto;
+    height: auto;
+}
+
+.HiddenDiv {
+    display: none;
+    overflow: auto;
+}
+
+.HiddenCol {
+    width: 0;
+    visibility: hidden;
+    display: none;
+}
+
+.HiddenRow {
+    height: 0;
+    visibility: hidden;
+    display: none;
+}
+
+.MnuBar {
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    position: sticky;
+    top: 0pt;
+    z-index: 0;
+    width: 100%;
+    height: 17pt;
+    background-color: #EBEBEB;
+    border: thin none #CCCCCC;
+    color: #000000;
+    font-weight: bolder;
+    font-size: small;
+    text-align: center;
+}
+
+.Btn {
+    padding: 5px 5px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px #999;
+    background-color: #FF8000;
+    color: #FFFFFF;
+    font-family: Times New Roman;
+    font-size: 12px;
+    font-weight: normal;
+    font-style: normal;
+}
+
+    .Btn:hover {
+        background-color: #FF8000;
+        color: #FFFFFF;
+        box-shadow: 0 5px #666;
+    }
+
+    .Btn:active {
+        background-color: #FFFFFF;
+        color: #FF8000;
+        box-shadow: 0 5px #666;
+    }
+
+.BtnClose {
+    padding: 5px 5px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px #999;
+    float: right;
+    background-color: #FF8000;
+    color: #FFFFFF;
+    font-family: Times New Roman;
+    font-size: 12px;
+    font-weight: normal;
+    font-style: normal;
+}
+
+    .BtnClose:hover {
+        background-color: #FF8000;
+        color: #FFFFFF;
+        box-shadow: 0 5px #666;
+    }
+
+    .BtnClose:active {
+        background-color: #FFFFFF;
+        color: #FF8000;
+        box-shadow: 0 5px #666;
+    }
+
+.FormTbl {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.FormTblLeft {
+    margin: 0;
+    padding: 0;
+    width: 30%;
+}
+
+.FormTblRight {
+    margin: 0;
+    padding: 0;
+    width: 70%;
+}
+
+.DropDown {
+    width: 98%;
+}
+
+.InputStyle {
+    width: 98%;
+}
+
+.FindDataDiv {
+    width: 100%;
+    color: #000000;
+    display: none;
+    overflow: auto;
+    height: auto;
+    z-index: -1;
+}
+
+.FindHeaderTbl {
+    font-size: small;
+    border-collapse: collapse;
+    height: auto;
+    width: 100%;
+    display: table;
+}
+
+    .FindHeaderTbl thead {
+        background-color: #EBEBEB;
+        border: thin solid #000000;
+        color: #000000;
+    }
+
+        .FindHeaderTbl thead tr {
+            background-color: #EBEBEB;
+            border: thin solid #000000;
+            color: #000000;
+        }
+
+            .FindHeaderTbl thead tr th {
+                position: -webkit-sticky;
+                position: -moz-sticky;
+                position: -ms-sticky;
+                position: -o-sticky;
+                position: sticky;
+                top: 17pt;
+                background-color: #EBEBEB;
+                border: thin solid #000000;
+                color: #000000;
+                font-weight: bolder;
+                font-size: small;
+                text-align: center;
+            }
+
+            .FindHeaderTbl thead tr td {
+                background-color: #EBEBEB;
+                border: thin solid #000000;
+                color: #000000;
+                font-weight: bolder;
+                font-size: small;
+                text-align: center;
+            }
+
+    .FindHeaderTbl tbody tr:nth-child(odd) {
+        background-color: #FFFFFF;
+        border: thin solid #000000;
+        color: #000000;
+        cursor: pointer;
+    }
+
+        .FindHeaderTbl tbody tr:nth-child(odd):hover {
+            background-color: #CCFFF4;
+            border: thin solid #000000;
+            color: #000000;
+            cursor: pointer;
+        }
+
+    .FindHeaderTbl tbody tr:nth-child(even) {
+        background-color: #FBFBFB;
+        border: thin solid #000000;
+        color: #000000;
+        cursor: pointer;
+    }
+
+        .FindHeaderTbl tbody tr:nth-child(even):hover {
+            background-color: #CCFFF4;
+            border: thin solid #000000;
+            color: #000000;
+            cursor: pointer;
+        }
+
+    .FindHeaderTbl tbody tr td {
+        border: thin solid #000000;
+        text-align: center;
+    }
+
+.GooglePrt {
+    margin: 0;
+    padding: 0;
+    width: 75%;
+    vertical-align: top;
+    z-index: 0;
+    border: 0 none;
+}
+
+.GoogleLabel {
+    position: relative;
+    left: -50%;
+    top: -8px;
+    white-space: nowrap;
+    border: 0px solid blue;
+    padding: 2px;
+    background-color: transparent;
+    font-size: small;
+    font-weight: bold;
+    color: red;
+}
+
+.GInfoWinCls {
+    min-width: 100px !important;
+    margin: 0px;
+    padding: 0px;
+    background-color: #cccccc;
+}
+
+    .GInfoWinCls tr td {
+        margin: 0px;
+        padding: 0px;
+        color: black;
+        border: 1px solid #cccccc;
+        background-color: white;
+    }
+
+.FooterPrt {
+    margin: 0;
+    padding: 0;
+    width: 75%;
+    border: 0 none;
+    font-size: xx-small;
+    color: #000000;
+    background-color: #F0F0F0;
+    text-align: center;
+    vertical-align: top;
+}
+
+.EditFrm {
+    border: medium groove #D4D4D4;
+    width: auto;
+    height: auto;
+    overflow: scroll;
+    color: #000000;
+    position: absolute;
+    left: 20%;
+    display: none;
+    background-color: #FFFFFF;
+    z-index: 3;
+}
+
+.ExternalFrm {
+    position: absolute;
+    left: 25%;
+    width: 70%;
+    height: auto;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: scroll;
+    display: none;
+    color: #000000;
+    background-color: #FFFFFF;
+    border: medium groove #D4D4D4;
+    z-index: 0;
+}
+
+    .ExternalFrm div {
+        position: relative;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+    }
+
+        .ExternalFrm div iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+.PrivacyFrm {
+    position: absolute;
+    left: 25%;
+    width: 70%;
+    height: auto;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: scroll;
+    display: none;
+    color: #000000;
+    background-color: #FFFFFF;
+    border: medium groove #D4D4D4;
+    z-index: 0;
+}
+
+    .PrivacyFrm div {
+        position: relative;
+        left: 0;
+        top: 17pt;
+        width: 100%;
+        height: auto;
+    }
+
+iframe:focus {
+    outline: none;
+}
+
+iframe[seamless] {
+    display: block;
+}
+

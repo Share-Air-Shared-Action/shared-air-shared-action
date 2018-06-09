@@ -1,0 +1,1346 @@
+<!--
+GIS Software Elshayal Smart GIS and Map Editor and GPS Software Open Source Code Library 18.002
+http://freesmartgis.blogspot.com/
+https://www.facebook.com/media/set/?set=a.1015115436573.2279.1785711747&type=1&l=6a9d2074a5
+FreeSmartGIS@gmail.com   WhatsApp +201281421662  Tel +201550585159
+GIS Software - First African Arabian Egyptian GIS GPS Software by Smart GIS (Mohamed Elshayal)
+Updated 14 February, 2018 Smart GIS Map Editor 18.002 is the First African Arabian Egyptian GIS GPS Software that is developed by
+Africa Arab Egypt GIS programmers and independent of any package, It is not funded by any organization, and it consists of:
+1) Map Editor and analysis for desktop, 2) Map Server for web, 3) Mobile GPS Tracking and Data Collector for mobile,
+4) Download Rectified Google Earth, 5) Open Source to Convert GIS Shape Files to HTML Google Map Web GIS and Mobile App
+Made in Egypt
+-->
+
+<!DOCTYPE html>
+<!--HTML5 doctype-->
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta name="Author" content="Mohamed Elshayal">
+    <meta name="keywords" content="GIS Software Elshayal Smart GIS Convert Shape files to HTML GIS Web and Mobile Application">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
+
+    <title>GIS Software Elshayal Smart GIS First African Arabian Egyptian GIS Convert Shape files to HTML Web GIS and Mobile Application</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <style>
+        @-ms-viewport {
+            width: 100vw;
+            min-zoom: 100%;
+            zoom: 100%;
+        }
+
+        @viewport {
+            width: 100vw;
+            min-zoom: 100% zoom: 100%;
+        }
+
+        @-ms-viewport {
+            user-zoom: fixed;
+            min-zoom: 100%;
+        }
+
+        @viewport {
+            user-zoom: fixed;
+            min-zoom: 100%;
+        }
+    </style>
+    <!--
+    <script src="cordova.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/init-app.js"></script>
+    <script src="xdk/init-dev.js"></script>
+    -->
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="icon" href="https://storage.googleapis.com/mapapi/icons/favicon.ico">
+
+    <script type="text/javascript" charset="UTF-8">
+
+        var HSymbol = {
+            path: 'M-200 0 c-3 -8 -4 -108 -3 -223 l3 -210 80 0 80 0 3 73 3 72 49 0 49 0 3 -72 3 -73 80 0 80 0 0 220 0 220 -80 0 -80 0 -3 -72 -3 -73 -49 0 -49 0 -3 73 -3 72 -78 3 c-57 2 -79 -1 -82 -10z',
+            strokeColor: 'Black',
+            fillColor: 'Green',
+            fillOpacity: 1,
+            scale: 0.03
+        };
+
+        var SquareSymbol = {
+            path: 'M -2,-2 2,-2 2,2 -2,2 z',
+            strokeColor: 'Black',
+            fillColor: 'yellow',
+            fillOpacity: 1,
+            scale: 10
+        };
+
+        var CircleSymbol = {
+            path: 'M -1,0 A 1,1 0 0 0 1,0 1,1 0 0 0 -1,0 z',
+            strokeColor: 'Black',
+            fillColor: 'red',
+            fillOpacity: 1,
+            strokeWeight: 1,
+            scale: 10
+        };
+
+        var NetworkConnected = true;
+        var NetworkState = true;
+        var ConnectionNONE = null;
+        var PrivacyID = 1;
+        var AppReady = 0;
+
+        var SrchMFld1Val = '00000';
+        var SrchMFld2Val = '00000';
+        var SrchMFld3Val = '00000';
+        var SrchMFld4Val = '';
+
+        var TblMFld1Val = '00000';
+        var TblMFld2Val = '00000';
+        var TblMFld3Val = 'View';
+        var TblMFld4Val = '00000';
+        var TblMFld5Val = '';
+        var TblMFld6Val = '';
+        var TblMFldTblNm = '';
+
+        function ClickTableMoveFunc(TblNm, KeyID, SerID, Lat, Lng, ViewEditMode, tbl) {
+            var ResData = '';
+            if (ViewEditMode == 1) {
+                SendFuncPostDB('TablesRecView.asp', 'TblNm=' + encodeURIComponent(TblNm) + '&KeyID=' + encodeURIComponent(KeyID) + '&SerID=' + encodeURIComponent(SerID) + '&UsrNm=' + encodeURIComponent(AccUsrNm) + '&UploadPath=' + encodeURIComponent(FUploadUrl), 'ResultDiv', FTablesMDB);
+                ResData = document.getElementById('ResultDiv').innerHTML;
+                document.getElementById('ResultDiv').innerHTML = '';
+                tbl.innerHTML = ResData;
+            } else {
+                SendFuncPostDB('TablesRecEdit.asp', 'TblNm=' + encodeURIComponent(TblNm) + '&KeyID=' + encodeURIComponent(KeyID) + '&SerID=' + encodeURIComponent(SerID) + '&Lat=' + encodeURIComponent(Lat) + '&Lng=' + encodeURIComponent(Lng) + '&UsrNm=' + encodeURIComponent(AccUsrNm) + '&UploadPath=' + encodeURIComponent(FUploadUrl), 'ResultDiv', FTablesMDB);
+                ResData = document.getElementById('ResultDiv').innerHTML;
+                document.getElementById('ResultDiv').innerHTML = '';
+                tbl.innerHTML = ResData;
+            }
+        }
+
+        function ClickTableFunc(LyrNo, id) {
+            var retRes = true;
+            var SerID = 1;
+            if (GetGClickTable(LyrNo) != 0) {
+                var KeyID = GetGClickKeyID(LyrNo);
+                var ResData = '';
+                document.getElementById('ResultDiv').innerHTML = '';
+                if ((TblMFld3Val == 'View') || (AccLevel <= 0)) {
+                    HideAllDataFrm();
+                    SendFuncPostDB('TablesRecView.asp', 'TblNm=' + encodeURIComponent(GetGClickTable(LyrNo)) + '&KeyID=' + encodeURIComponent(KeyID) + '&SerID=' + encodeURIComponent(SerID) + '&UsrNm=' + encodeURIComponent(AccUsrNm) + '&UploadPath=' + encodeURIComponent(FUploadUrl), 'ResultDiv', FTablesMDB);
+                    ResData = document.getElementById('ResultDiv').innerHTML;
+                    document.getElementById('ResultDiv').innerHTML = '';
+                    SetGInfoWinContent(LyrNo, id, KeyID + '<br />' + ResData);
+                } else {
+                    if (TablesRow) {
+                        if (confirm('Are you Sure you would like to Connect - ' + KeyID + ' - to this Table Record?')) {
+                            document.getElementById("TablesRecFrm").elements.namedItem("KEYID").value = KeyID;
+                            document.getElementById("EditFrmHeaderTitle").innerHTML = KeyID;
+                        }
+                        retRes = false;
+                    } else {
+                        SendFuncPostDB('TablesRecEdit.asp', 'TblNm=' + encodeURIComponent(GetGClickTable(LyrNo)) + '&KeyID=' + encodeURIComponent(KeyID) + '&Lat=' + encodeURIComponent(GetGInfoWinLat(LyrNo)) + '&Lng=' + encodeURIComponent(GetGInfoWinLng(LyrNo)) + '&UsrNm=' + encodeURIComponent(AccUsrNm) + '&UploadPath=' + encodeURIComponent(FUploadUrl), 'ResultDiv', FTablesMDB);
+                        ResData = document.getElementById('ResultDiv').innerHTML;
+                        document.getElementById('ResultDiv').innerHTML = '';
+                        SetGInfoWinContent(LyrNo, id, KeyID + '<br />' + ResData);
+                    }
+                }
+            }
+            return retRes;
+        }
+
+        function OpenGClickLayer(LyrNo, TableName, ClickFunc) {
+            TblMFldTblNm = TableName;
+            try {
+                document.getElementById(String('LyrLstChk' + LyrNo)).checked = true;
+                document.getElementById(String('LyrLstChk' + LyrNo)).onchange();
+            } catch (err) { }
+        }
+
+        function SaveAccCookies() {
+            try {
+                localStorage.AccUsrNm = AccUsrNm;
+                localStorage.AccPswrd = AccPswrd;
+                localStorage.GPSAutoSave = GPSAutoSave;
+            } catch (e) { }
+        }
+
+        function LoadAccCookies() {
+            try {
+                if (localStorage.AccUsrNm) {
+                    document.getElementById('UsrNm').value = localStorage.AccUsrNm;
+                }
+                if (localStorage.AccPswrd) {
+                    document.getElementById('Pswrd').value = localStorage.AccPswrd;
+                }
+
+                if (localStorage.GPSAutoSave) {
+                    GPSAutoSave = localStorage.GPSAutoSave;
+                }
+                if (GPSAutoSave == 0) {
+                    document.getElementById('GPSAutoSave').checked = false;
+                } else {
+                    document.getElementById('GPSAutoSave').checked = true;
+                }
+
+            } catch (e) { }
+        }
+
+        function LoadLayersList() {
+            try {
+                SendFuncPostDB('LayersList.asp', '', 'LayersListGrp', FLayersMDB);
+            } catch (err) { }
+        }
+
+        function LoadLayersSearch() {
+            try {
+                SendFuncPostDB('LayersSearch.asp', '', 'ResultDiv', FLayersMDB);
+                document.getElementById('LayersSearchGrp').innerHTML = document.getElementById('ResultDiv').innerHTML + document.getElementById('LayersSearchBak').innerHTML;
+            } catch (err) { }
+        }
+
+        function LogInFunc() {
+            SendFuncPostDB('UserLogin.asp', GetFormParams('LogInForm'), 'LogDataDiv', FDataMDB);
+            LoadLayersList();
+            LoadLayersSearch();
+        }
+
+        function GetLogResult(Sgnd, RecID, lvl1, lvl2, Usr, Pswrd) {
+            AccSigned = Sgnd;
+            AccRecID = RecID;
+            AccLevel = 0;
+            try { AccLevel = eval(lvl1); } catch (e) { }
+            LyrLevel = 0;
+            try { LyrLevel = eval(lvl2); } catch (e) { }
+            AccUsrNm = Usr;
+            AccPswrd = Pswrd;
+            if (AccSigned == 1) {
+                document.getElementById("LogInForm").elements.namedItem("UsrNm").value = AccUsrNm;
+                document.getElementById('WelcomeUser').innerHTML = AccUsrNm;
+                document.getElementById('UserName').innerHTML = AccUsrNm + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                HideDiv('LogInDiv');
+                ShowDiv('LogOutDiv');
+                if (AccLevel > 0) {
+                    ShowDiv('ViewModeTr');
+                    TblMFld3Val = 'View';
+                    document.getElementById("TablesViewMode").checked = true;
+                    ShowDiv('ViewSearchTr');
+                } else {
+                    if (AccLevel < 0) {
+                        ShowDiv('ViewSearchTr');
+                    }
+                }
+            } else {
+                LogOutFunc();
+            }
+            SaveAccCookies();
+        }
+
+        function LogOutFunc() {
+            AccSigned = 0;
+            AccLevel = 0;
+            LyrLevel = 0;
+            AccUsrNm = '';
+            AccPswrd = '';
+            document.getElementById('WelcomeUser').innerHTML = '';
+            document.getElementById('UserName').innerHTML = '';
+            document.getElementById('Pswrd').value = '';
+            document.getElementById('LogDataDiv').innerHTML = '';
+            document.getElementById('CollectorDataDiv').innerHTML = '';
+            document.getElementById('LayersTablesDataDiv').innerHTML = '';
+            SrchMFld1Val = '00000';
+            SrchMFld2Val = '00000';
+            SrchMFld3Val = '00000';
+            SrchMFld4Val = '';
+            ClearDropDown('SrchMFld1ID');
+            ClearDropDown('SrchMFld2ID');
+            ClearDropDown('SrchMFld3ID');
+            ClearDropDown('TblMFld1ID');
+            ClearDropDown('TblMFld2ID');
+            TblMFld3Val = 'View';
+            ClearDropDown('TblMFld4ID');
+            TblMFld5Val = '';
+            document.getElementById('Lbl1').value = '';
+            TblMFld6Val = '';
+            document.getElementById('Lbl2').value = '';
+            SavedQry = '';
+            SavedQryNo = 0;
+            document.getElementById('SavedQryNo').innerHTML = ' ' + SavedQryNo + ' Saved Qry';
+            HideDiv('LogOutDiv');
+            ShowDiv('LogInDiv');
+            SwitchDiv('LogDiv');
+            HideGLayer(111, 0);
+            HideGLayer(112, 0);
+            HideDiv('EditFrm');
+            HideDiv('ViewModeTr');
+            HideDiv('ViewSearchTr');
+            document.getElementById("TablesViewMode").checked = true;
+            SaveAccCookies();
+            LoadLayersList();
+            LoadLayersSearch();
+        }
+
+        var RecEditChanged = false;
+
+        function PointDrag(LyrNo, id) {
+            RecEditChanged = true;
+            if (document.getElementById("RecFrm")) {
+                document.getElementById("RecFrm").elements.namedItem("lng").value = GLayers[LyrNo].GMarkers[id].getPosition().lng();
+                document.getElementById("RecFrm").elements.namedItem("lat").value = GLayers[LyrNo].GMarkers[id].getPosition().lat();
+            }
+        }
+
+        function PointCancel(LyrNo) {
+            if (GLayers[LyrNo]) {
+                if (GLayers[LyrNo].GPoints[GLayers[LyrNo].GInfoWinOpenID]) {
+                    SetGFeatInfo(LyrNo, GLayers[LyrNo].GInfoWinOpenID, null, null, '#000000', 1, 1, 'red', 1, 0.5);
+                    if (document.getElementById(String('row_' + GLayers[LyrNo].GInfoWinOpenID))) {
+                        document.getElementById(String('row_' + GLayers[LyrNo].GInfoWinOpenID)).style.backgroundColor = '';
+                    }
+                    if (RecRow) { RecRow.style.backgroundColor = ''; }
+                    SetGDraggable(LyrNo, GLayers[LyrNo].GInfoWinOpenID, false);
+                    CancelDrag(LyrNo, GLayers[LyrNo].GInfoWinOpenID);
+                    PointDrag(LyrNo, GLayers[LyrNo].GInfoWinOpenID);
+                    HideDiv('EditFrm');
+                    RecEditChanged = false;
+                    RecRow = null;
+                    SetGLayer(112, 1);
+                }
+            }
+        }
+
+        function PointConfirm(LyrNo) {
+            SetGFeatInfo(LyrNo, GLayers[LyrNo].GInfoWinOpenID, null, null, '#000000', 1, 1, 'red', 1, 0.5);
+            if (document.getElementById(String('row_' + GLayers[LyrNo].GInfoWinOpenID))) {
+                document.getElementById(String('row_' + GLayers[LyrNo].GInfoWinOpenID)).style.backgroundColor = '';
+            }
+            if (RecRow) { RecRow.style.backgroundColor = ''; }
+            SetGDraggable(LyrNo, GLayers[LyrNo].GInfoWinOpenID, false);
+            ConfirmDrag(LyrNo, GLayers[LyrNo].GInfoWinOpenID);
+            PointDrag(LyrNo, GLayers[LyrNo].GInfoWinOpenID);
+            HideDiv('EditFrm');
+            RecEditChanged = false;
+            SendFuncPostDB('RecQryView.asp', 'TblNm=Points&UsrNm=' + encodeURIComponent(AccUsrNm) + '&Field1=' + encodeURIComponent(SrchMFld1Val) + '&Field2=' + encodeURIComponent(SrchMFld2Val) + '&Field3=' + encodeURIComponent(SrchMFld3Val), 'CollectorDataDiv', FDataMDB);
+            CopyFromDiv1ToDiv2('CollectorDataDiv', 'InternalFrmContent');
+            SetGLayer(112, 1);
+        }
+
+        function ModyPointClose() {
+            PointCancel(111);
+            document.getElementById('EditFrmContent').innerHTML = '';
+        }
+
+        function ModyPointClick(LyrNo, id, tr) {
+            if (RecRow) { RecRow.style.backgroundColor = ''; }
+            HideAllDataFrm();
+            RecRow = tr;
+            if (!RecEditChanged) {
+                ConfirmClick(LyrNo, id);
+                SetGFeatInfo(LyrNo, id, null, null, '#000000', 1, 1, '#FFFF00', 1, 1);
+                document.getElementById(String('row_' + id)).style.backgroundColor = 'yellow';
+                if (RecRow) { RecRow.style.backgroundColor = 'yellow'; }
+                SetGMarkerCenter(LyrNo, id);
+                SendFuncPostDB('RecFrmView.asp', 'TblNm=Points&RecID=' + Number(document.getElementById(String('Rec_' + id)).innerHTML) + '&UsrNm=' + encodeURIComponent(AccUsrNm) + '&UploadPath=' + encodeURIComponent(FUploadUrl), 'EditFrmContent', FDataMDB);
+                document.getElementById("EditFrmHeaderTitle").innerHTML = 'Modify Points';
+                document.getElementById("EditFrmHeaderBtnClose").onclick = ModyPointClose;
+                ShowDiv('EditFrm');
+                GLayers[LyrNo].GInfoWinOpenID = id;
+                SetGDragFunc(LyrNo, 'PointDrag');
+                SetGDraggable(LyrNo, id, true);
+                PointDrag(LyrNo, id);
+            }
+        }
+
+        function AddPointClose() {
+            PointCancel(112);
+            document.getElementById('EditFrmContent').innerHTML = '';
+        }
+
+        function AddPointClick() {
+            HideAllDataFrm();
+            SetGLayer(112, 1);
+            SetGDragFunc(112, 'PointDrag');
+            SetGFeatInfo(112, 1, null, null, '#000000', 1, 1, 'yellow', 1, 1);
+            SetGPoint(112, 1, GMaps[GMapNo].getCenter().lat(), GMaps[GMapNo].getCenter().lng());
+            SendFuncPostDB('RecFrmView.asp', 'TblNm=Points&RecID=-1&UsrNm=' + encodeURIComponent(AccUsrNm) + '&UploadPath=' + encodeURIComponent(FUploadUrl), 'EditFrmContent', FDataMDB);
+            document.getElementById("EditFrmHeaderTitle").innerHTML = 'Add Point';
+            document.getElementById("EditFrmHeaderBtnClose").onclick = AddPointClose;
+            ShowDiv('EditFrm');
+            GLayers[112].GInfoWinOpenID = 1;
+            SetGDraggable(112, 1, true);
+            PointDrag(112, 1);
+            if (SrchMFld1Val != '00000') {
+                document.getElementById("RecFrm").elements.namedItem("Field1").value = SrchMFld1Val;
+            }
+            if (SrchMFld2Val != '00000') {
+                document.getElementById("RecFrm").elements.namedItem("Field2").value = SrchMFld2Val;
+            }
+            if (SrchMFld3Val != '00000') {
+                document.getElementById("RecFrm").elements.namedItem("Field3").value = SrchMFld3Val;
+            }
+            document.getElementById("RecFrm").elements.namedItem("lng").value = GLayers[112].GMarkers[1].getPosition().lng();
+            document.getElementById("RecFrm").elements.namedItem("lat").value = GLayers[112].GMarkers[1].getPosition().lat();
+        }
+
+        function TablesRecClickDrag(LyrNo, id) {
+            RecEditChanged = true;
+            document.getElementById("TablesRecFrm").elements.namedItem("LNG").value = GLayers[113].GMarkers[1].getPosition().lng();
+            document.getElementById("TablesRecFrm").elements.namedItem("LAT").value = GLayers[113].GMarkers[1].getPosition().lat();
+        }
+
+        function TablesRecClickClose() {
+            RecEditChanged = false;
+            HideDiv('EditFrm');
+            SetGLayer(113, 1);
+            if (TablesRow) { TablesRow.style.backgroundColor = ''; }
+            TablesRow = null;
+            document.getElementById('EditFrmContent').innerHTML = '';
+        }
+
+        function TablesRecClickDelete() {
+            DeleteTblRow(TablesRow);
+            TablesRecClickClose();
+        }
+
+        function TablesRecClickSave() {
+            SaveFormToRow("TablesRecFrm", TablesRow)
+            TablesRecClickClose();
+        }
+
+        function TablesRecClick(TblNm, KeyID, lat, lng, RecID, tr) {
+            if (TablesRow) { TablesRow.style.backgroundColor = ''; }
+            HideAllDataFrm();
+            TablesRow = tr;
+            SetGLayer(113, 1);
+            SetGFeatInfo(113, 1, null, null, '#000000', 1, 1, 'yellow', 1, 1);
+            TablesRow.style.backgroundColor = 'yellow';
+            if ((lat != 0) && (lng != 0)) {
+                SetGMapOptions(1, null, lat, lng, null, null, null, null, null, null);
+                SetGPoint(113, 1, lat, lng);
+            } else {
+                SetGPoint(113, 1, GMaps[GMapNo].getCenter().lat(), GMaps[GMapNo].getCenter().lng());
+            }
+            if ((TblMFld3Val == 'View') || (AccLevel <= 0)) {
+                SendFuncPostDB('TablesQryRecView.asp', 'TblNm=' + encodeURIComponent(TblNm) + '&RecID=' + encodeURIComponent(RecID) + '&UsrNm=' + encodeURIComponent(AccUsrNm) + '&UploadPath=' + encodeURIComponent(FUploadUrl), 'EditFrmContent', FTablesMDB);
+                document.getElementById("EditFrmHeaderTitle").innerHTML = KeyID;
+                document.getElementById("EditFrmHeaderBtnClose").onclick = TablesRecClickClose;
+            } else {
+                SendFuncPostDB('TablesQryRecEdit.asp', 'TblNm=' + encodeURIComponent(TblNm) + '&RecID=' + encodeURIComponent(RecID) + '&Lat=' + encodeURIComponent(lat) + '&Lng=' + encodeURIComponent(lng) + '&UsrNm=' + encodeURIComponent(AccUsrNm) + '&UploadPath=' + encodeURIComponent(FUploadUrl), 'EditFrmContent', FTablesMDB);
+                document.getElementById("EditFrmHeaderTitle").innerHTML = KeyID;
+                document.getElementById("EditFrmHeaderBtnClose").onclick = TablesRecClickClose;
+                SetGDragFunc(113, 'TablesRecClickDrag');
+                SetGDraggable(113, 1, true);
+            }
+            ShowDiv('EditFrm');
+        }
+
+        function HideAllDataFrm() {
+            HideAllInfoWin();
+            PointCancel(111);
+            PointCancel(112);
+            TablesRecClickClose();
+        }
+
+        function HideAllDiv() {
+            document.getElementById(String('LogDiv')).style.display = 'none';
+            document.getElementById(String('LayersDiv')).style.display = 'none';
+            document.getElementById(String('LayersTablesDiv')).style.display = 'none';
+            document.getElementById(String('LayersSearchDiv')).style.display = 'none';
+            document.getElementById(String('CollectorDiv')).style.display = 'none';
+            document.getElementById(String('GpsDiv')).style.display = 'none';
+            document.getElementById(String('GoogleSearchDiv')).style.display = 'none';
+            document.getElementById(String('ShortestPathDiv')).style.display = 'none';
+        }
+
+        function RightArrowFunc() {
+            LeftWid = 0.0;
+            GoogleWid = 1.0;
+            OnResizeFunc();
+            google.maps.event.trigger(GMaps[GMapNo], 'resize');
+            HideAllDiv();
+        }
+
+        function LeftArrowFunc() {
+            LeftWid = 0.25;
+            GoogleWid = 0.75;
+            OnResizeFunc();
+        }
+
+        function MyGPSSave() {
+            if ((AccSigned == 1) && (AccRecID > 0)) {
+                var d = new Date(GpsVar.GpsDate);
+                SendFuncPostAsyncDB('PosSave.asp', 'RecID=' + encodeURIComponent(AccRecID) + '&UsrNm=' + encodeURIComponent(AccUsrNm) + '&lat=' + encodeURIComponent(GpsVar.GpsLat.toFixed(13)) + '&lng=' + encodeURIComponent(GpsVar.GpsLng.toFixed(13)) + '&Speed=' + encodeURIComponent((GpsVar.GpsSpeed * 3.6).toFixed(2)) + '&EditDate=' + encodeURIComponent(GetDateTime(d)), 'ResultDiv', FDataMDB);
+            }
+        }
+
+        function MyGPSSaveClick() {
+            if (!GpsVar.GpsSendReady) {
+                MyGPSSave();
+            }
+        }
+
+        function MyGPSMove() {
+            if (document.getElementById(String('GpsLat')).innerHTML == 'null') {
+                SetGpsCenter();
+                RefreshGMap();
+            } else {
+                if (GpsVar.GpsSendReady) {
+                    if (GPSAutoSave == 1) {
+                        MyGPSSave();
+                    }
+                }
+            }
+            document.getElementById(String('GpsLat')).innerHTML = DMS(GpsVar.GpsLat);
+            document.getElementById(String('GpsLng')).innerHTML = DMS(GpsVar.GpsLng);
+            document.getElementById(String('GpsSpeed')).innerHTML = (GpsVar.GpsSpeed * 3.6).toFixed(0) + ' Km/h';
+            document.getElementById(String('GpsAccuracy')).innerHTML = GpsVar.GpsAccuracy.toFixed(0) + ' m';
+            document.getElementById(String('GpsAltitude')).innerHTML = GpsVar.GpsAltitude.toFixed(0) + ' m';
+        }
+
+        function MyGPSClick() {
+            if (!GpsVar.GpsSendReady) {
+                SetGpsCenter();
+                RefreshGMap();
+                SaveGCookies(1);
+            }
+        }
+
+        function LoadScriptFunc(ScriptURL, OnloadVal, asyncVal) {
+            try {
+                var SmartGIShead = document.getElementsByTagName('head').item(0);
+                var SmartGISScript = document.createElement('script');
+                SmartGISScript.setAttribute('type', 'text/javascript');
+                SmartGISScript.setAttribute('src', ScriptURL);
+                if (OnloadVal != '') { SmartGISScript.setAttribute('onload', OnloadVal); }
+                SmartGISScript.async = asyncVal;
+                SmartGIShead.appendChild(SmartGISScript);
+            } catch (e) { }
+        }
+
+        function MyMapsEventFunc(MapNo) {
+            document.getElementById('ZoomGRange').value = GetGmapZoom(MapNo)
+            if (GetGmapZoom(MapNo) > 22) {
+                SetGMapOptions(MapNo, 22, null, null, null, null, null, null, null, null);
+            }
+        }
+
+        function MyMapsMouseMoveFunc(MapNo, lat, lng) {
+            document.getElementById('MouseOverCoords').innerHTML = 'Lat: ' + DMS(lat) + '<br>Lng: ' + DMS(lng) + ' ';
+        }
+
+        function MyLayersClick(LyrNo, id) {
+            return true;
+        }
+
+        function MyLayersDrag(LyrNo, id) {
+
+        }
+
+        var LineOffset = 0;
+
+        function MyTimeOutFunc() {
+            LineOffset = (LineOffset + 1) % 100;
+            for (var i = 1; i < GetGLayersCount(); i++) {
+                if (GetGLayerType(i) == 2) {
+                    for (var j = 1; j < GetGFeatsCount(i); j++) {
+                        SetGPolylineIcon(i, j, HSymbol, (LineOffset / 1));
+                    }
+                }
+            }
+        }
+
+        function HideQLayers(Lyr) {
+            for (var L = 1; L < 3; L++) {
+                if (Lyr != L) {
+                    HideGLayer(L);
+                    document.getElementById('Lyr0' + String(L)).checked = false;
+                }
+            }
+        }
+
+        LeftWid = 0.25;
+        GoogleWid = 0.75;
+
+        function OnResizeFunc() {
+            WinWidth = (window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || screen.width);
+            WinHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || screen.height);
+
+            document.getElementById(String('LeftPrtDiv')).style.width = String((WinWidth * LeftWid) + 'px');
+            document.getElementById(String('GoogleDiv')).style.width = String((WinWidth * GoogleWid) + 'px');
+
+            document.getElementById(String('GoogleDiv')).style.height = String((WinHeight * 0.85) + 'px');
+            document.getElementById('MouseOverCoords').style.left = String((WinWidth * GoogleWid * 0.20) + 'px');
+            document.getElementById('ZoomGRangeDiv').style.left = String((WinWidth * GoogleWid * 0.70) + 'px');
+            document.getElementById('ZoomGRange').style.width = String((WinWidth * GoogleWid * 0.20) + 'px');
+
+            document.getElementById(String('LogDiv')).style.height = String(((WinHeight * 0.85) - 20) + 'px');
+            document.getElementById(String('LayersDiv')).style.height = String(((WinHeight * 0.85) - 20) + 'px');
+            document.getElementById(String('LayersTablesDiv')).style.height = String(((WinHeight * 0.85) - 20) + 'px');
+            document.getElementById(String('LayersSearchDiv')).style.height = String(((WinHeight * 0.85) - 20) + 'px');
+            document.getElementById(String('CollectorDiv')).style.height = String(((WinHeight * 0.85) - 20) + 'px');
+            document.getElementById(String('GpsDiv')).style.height = String(((WinHeight * 0.85) - 20) + 'px');
+            document.getElementById(String('GoogleSearchDiv')).style.height = String(((WinHeight * 0.85) - 20) + 'px');
+            document.getElementById(String('ShortestPathDiv')).style.height = String(((WinHeight * 0.85) - 20) + 'px');
+
+            document.getElementById(String('EditFrm')).style.top = String((WinHeight * 0.15) + 'px');
+            document.getElementById(String('EditFrm')).style.maxHeight = String((WinHeight * 0.70) + 'px');
+            document.getElementById(String('PrivacyFrm')).style.top = String((WinHeight * 0.20) + 'px');
+            document.getElementById(String('PrivacyFrm')).style.maxHeight = String((WinHeight * 0.60) + 'px');
+            document.getElementById(String('InternalFrm')).style.top = String((WinHeight * 0.20) + 'px');
+            document.getElementById(String('InternalFrm')).style.maxHeight = String((WinHeight * 0.60) + 'px');
+            document.getElementById(String('ExternalFrm')).style.top = String((WinHeight * 0.20) + 'px');
+            document.getElementById(String('ExternalFrm')).style.height = String((WinHeight * 0.60) + 'px');
+            document.getElementById(String('ExternalFrmContent')).style.height = String((WinHeight * 0.50) + 'px');
+            google.maps.event.trigger(GMaps[GMapNo], 'resize');
+        }
+
+        function BringtoFront(DivID) {
+            if (document.getElementById(String('EditFrm')).style.zIndex >= 1) { document.getElementById(String('EditFrm')).style.zIndex = document.getElementById(String('EditFrm')).style.zIndex - 1; }
+            if (document.getElementById(String('PrivacyFrm')).style.zIndex >= 1) { document.getElementById(String('PrivacyFrm')).style.zIndex = document.getElementById(String('PrivacyFrm')).style.zIndex - 1; }
+            if (document.getElementById(String('InternalFrm')).style.zIndex >= 1) { document.getElementById(String('InternalFrm')).style.zIndex = document.getElementById(String('InternalFrm')).style.zIndex - 1; }
+            if (document.getElementById(String('ExternalFrm')).style.zIndex >= 1) { document.getElementById(String('ExternalFrm')).style.zIndex = document.getElementById(String('ExternalFrm')).style.zIndex - 1; }
+            document.getElementById(String(DivID)).style.zIndex = 3;
+        }
+
+        function onPauseFunc() {
+        }
+
+        function onResumeFunc() {
+        }
+
+        function onMenuKeyDownFunc() {
+        }
+
+        function onOfflineFunc() {
+            NetworkState = navigator.connection.type;
+            NetworkConnected = false;
+            document.getElementById(String('BannerDiv')).className = 'BannerPrtErr';
+        }
+
+        function onOnlineFunc() {
+            NetworkState = navigator.connection.type;
+            if (NetworkState !== Connection.NONE) {
+                NetworkConnected = true;
+                document.getElementById(String('BannerDiv')).className = 'BannerPrt';
+                if (AppReady == 2) { OnAppReadyFunc(); }
+            } else {
+                NetworkConnected = false;
+                document.getElementById(String('BannerDiv')).className = 'BannerPrtErr';
+            }
+        }
+
+        function OnDeviceReadyFunc() {
+            document.addEventListener("offline", onOfflineFunc, false);
+            document.addEventListener("online", onOnlineFunc, false);
+            document.addEventListener("pause", onPauseFunc, false);
+            document.addEventListener("resume", onResumeFunc, false);
+            document.addEventListener("menubutton", onMenuKeyDownFunc, false);
+            try {
+                navigator.splashscreen.show();
+            } catch (e) { }
+            AppReady = AppReady + 1;
+            OnAppReadyFunc();
+        }
+
+        function OnLoadFunc() {
+            document.addEventListener("deviceready", OnDeviceReadyFunc, false);
+            AppReady = AppReady + 1;
+            OnAppReadyFunc();
+        }
+
+        function OnAppReadyFunc() {
+            try {
+                NetworkState = navigator.connection.type;
+                ConnectionNONE = Connection.NONE;
+            } catch (e) { }
+            if (NetworkState !== ConnectionNONE) {
+                NetworkConnected = true;
+                document.getElementById(String('BannerDiv')).className = 'BannerPrt';
+                if (AppReady == 1) {
+                    AppReady = AppReady + 1;
+                    document.getElementById('LangID').value = 'en';
+                    try {
+                        if (!localStorage.LangID) { localStorage.LangID = 'en'; }
+                        document.getElementById('LangID').value = localStorage.LangID;
+                    } catch (e) { }
+                    LoadScriptFunc('https://maps.googleapis.com/maps/api/js?key=AIzaSyBwvUThAyuM3yUnAVBRpNMUp9syAbMaWzg&libraries=places,geometry&v=3.exp&language=' + document.getElementById('LangID').value, 'OnGoogleReady();', false);
+                }
+            } else {
+                NetworkConnected = false;
+                document.getElementById(String('BannerDiv')).className = 'BannerPrtErr';
+            }
+        }
+
+        function OnGoogleReady() {
+            LoadScriptFunc('https://storage.googleapis.com/mapapi/api/18002/SGapi.js', '', true);
+        }
+
+        function OnLoadMapFunc() {
+            try {
+                navigator.splashscreen.hide();
+            } catch (e) { }
+            OnResizeFunc();
+
+            SetDataFuncPath('/SmartGISweb/');
+            SetUploadFuncPath('/SmartGISweb/Uploads/');
+            SetUsersMDB('UsersList.mdb');
+            SetLayersListMDB('LayersList or none.mdb');
+            SetLayersTablesMDB('LayersTables.mdb');
+            SetGMap(1, 'GoogleDiv', 12, 41.7051734924316, -87.5742835998535, google.maps.MapTypeId.ROADMAP, true, true, false, true, true);
+            SetGLabelClsNm('GoogleLabel');
+            SetGMapEventFunc('MyMapsEventFunc');
+            SetGMapMouseMoveFunc('MyMapsMouseMoveFunc');
+            try { LoadGCookies(1); } catch (err) { }
+            getGpsPos(100, '#00FFFF', 'My Location');
+            StartSmartGpsWatch(100, '#00FFFF', 'My Location', 11111);
+            SetGpsMoveFunc('MyGPSMove');
+            SetGpsClickFunc('MyGPSClick');
+            SetGInputSearchBox(1, 'GAdr', 101, 'GeoDataDiv', 'Places', 'Green', 'yellow', null);
+            ShowGTrafficLayer(1);
+            try { document.getElementById('LayersSearchBak').innerHTML = document.getElementById('LayersSearchGrp').innerHTML; } catch (err) { }
+            try { LoadAccCookies(); } catch (err) { }
+            try { LogInFunc(); } catch (err) { }
+            LeftArrowFunc();
+            dragDiv('EditFrm'); dragDiv('PrivacyFrm'); dragDiv('InternalFrm'); dragDiv('ExternalFrm');
+        }
+
+    </script>
+</head>
+<body class="MainBody" onload="JavaScript: OnLoadFunc();" onresize="JavaScript: OnResizeFunc();">
+    <table class="MainLayoutTbl">
+        <tr id="HeaderTR">
+            <td colspan="2">
+                <div id="HeaderDiv" class="HeaderPrt">
+                    <div id="BannerDiv" class="BannerPrt">
+                        <span id="UserName" style="float: right;"></span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr id="BodyTR">
+            <td id="LeftTD" class="LeftPrt">
+                <div id="LeftPrtDiv" class="LeftPrt">
+                    <div id="MenuDiv" style="position: relative; top: 0pt; left: 0pt; z-index: 1;">
+                        <nav class="NavPrt">
+                            <ul class="hmenu">
+                                <li onmouseover="JavaScript: ShowDiv('vmenu01') ;" onmouseout="JavaScript:HideDiv('vmenu01') ;">
+                                    &#9776; Menu
+                                    <ul id="vmenu01">
+                                        <!--<li onclick="JavaScript: HideDiv('vmenu01'); SwitchDiv('LogDiv'); LeftArrowFunc();">Login</li>-->
+                                        <li onclick="JavaScript: HideDiv('vmenu01'); SwitchDiv('LayersDiv'); LeftArrowFunc();">Layers View</li>
+                                        <li onclick="JavaScript: HideDiv('vmenu01'); SwitchDiv('LayersSearchDiv'); LeftArrowFunc();">Layers Search</li>
+                                        <!--<li onclick="JavaScript: HideDiv('vmenu01'); SwitchDiv('LayersTablesDiv'); LeftArrowFunc();">Tables Search</li>-->
+                                        <!--<li onclick="JavaScript: HideDiv('vmenu01'); SwitchDiv('CollectorDiv'); LeftArrowFunc();">Data Collector</li>-->
+                                        <li onclick="JavaScript: HideDiv('vmenu01'); SwitchDiv('GpsDiv'); LeftArrowFunc();">GPS Tracking</li>
+                                        <li onclick="JavaScript: HideDiv('vmenu01'); SwitchDiv('GoogleSearchDiv'); LeftArrowFunc();">Google Search</li>
+                                        <li onclick="JavaScript: HideDiv('vmenu01'); SwitchDiv('ShortestPathDiv'); LeftArrowFunc();">Shortest Path</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div id="LogDiv" class="HiddenDiv">
+                        <table class="MnuBar"><tr><td>Login<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
+                        <div id="LogInDiv" style="display: block;">
+                            <form id="LogInForm">
+                                <table class=" FormTbl">
+                                    <tr>
+                                        <td class="FormTblLeft"><b>User</b></td>
+                                        <td class="FormTblRight"><input class="InputStyle" type="text" id="UsrNm" name="UsrNm" value="" size="22"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="FormTblLeft"><b>Pass</b></td>
+                                        <td class="FormTblRight"><input class="InputStyle" type="password" id="Pswrd" name="Pswrd" value="" size="22"></td>
+                                    </tr>
+                                </table>
+                            </form>
+                            <table class="FormTbl">
+                                <tr>
+                                    <td>
+                                        <button class="Btn" onclick="JavaScript: LogInFunc(); " value="Log in" title="Log in">Log in</button>
+                                        <!--<button class="Btn" onclick="JavaScript:SendFuncPostDB('UserSignUp.asp', 'UsrNm=&Pswrd=', 'LogDataDiv' , FDataMDB); " value="Sign Up" title="Sign Up">Sign Up</button>-->
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="LogOutDiv" style="display: none;">
+                            <table class="FormTbl">
+                                <tr>
+                                    <td>Welcome Back User <span id="WelcomeUser"></span></td>
+                                </tr>
+                                <tr>
+                                    <td><hr /></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button class="Btn" onclick="JavaScript: LogOutFunc() ;" value="Log Out" title="Log Out">Log Out</button>
+                                        <button class="Btn" onclick="JavaScript: SendFuncPostDB('UserProfile.asp', 'UsrNm=' + encodeURIComponent(AccUsrNm) + '&Pswrd=' + encodeURIComponent(AccPswrd) , 'LogDataDiv' , FDataMDB); " value="User Manager" title="User Manager">User Manager</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="LogDataDiv" class="FindDataDiv" style="display: block;"></div>
+                    </div>
+                    <div id="LayersDiv" class="VisDiv">
+                        <table class="MnuBar"><tr><td>Layers View<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
+                        <div id="LayersListGrp" class="VisDiv"></div>
+                        <table style="width: 100%;">
+                            <tr><td width="10%"><input id="LyrLstChk1" onchange="JavaScript: if (this.checked) { if (!GLayers[1]) { LoadJsLayer('SL.js' ,'SetSLGLayer(1) ; RefreshGMap(); GetFieldsList(document.getElementById(String(\'GLyrNo\')).value, \'FieldssSearchGrp\'); UnLoadJsLayer(\'SL.js\'); ', false ); } else { ShowGLayer(1);} } else { HideGLayer(1); }" type="checkbox"></td><td width="80%"><a href="JavaScript: document.getElementById(String('LyrLstChk1')).checked = true; document.getElementById(String('LyrLstChk1')).onchange(); document.getElementById(String('LyrLstZom1')).onclick();"><b>SL</b></a></td><td width="10%"><button id="LyrLstZom1" class="Btn" onclick="JavaScript: SetGLayerExtend(1) ;" title="zoom">zoom</button><br /></td></tr>
+                        </table>
+                    </div>
+                    <div id="LayersSearchDiv" class="HiddenDiv">
+                        <table class="MnuBar"><tr><td>Layers Search<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
+                        <table class="FormTbl">
+                            <tr>
+                                <td class="FormTblLeft">
+                                    Layers
+                                </td>
+                                <td class="FormTblRight">
+                                    <select class="DropDown" id="GLyrNo" onchange="JavaScript: GetFieldsList(document.getElementById(String('GLyrNo')).value, 'FieldssSearchGrp'); document.getElementById(String('GFldNo')).value = GetSearchFldNo(document.getElementById(String('GLyrNo')).value); document.getElementById(String('LyrLstChk' + this.value)).checked = true; document.getElementById(String('LyrLstChk' + this.value)).onchange(); document.getElementById(String('LayersSearchDataDiv')).innerHTML = ''; ViewSelectedGFeatures(document.getElementById(String('GLyrNo')).value,document.getElementById(String('GFldNo')).value + 1, 'LayersSearchDataDiv',document.getElementById(String('GRDuplicate')).checked);">
+                                        <optgroup id="LayersSearchGrp" label="Layers">
+                                            <option value="0">none</option>
+                                            <option value="1">SL</option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="FormTblLeft">
+                                    Fields
+                                </td>
+                                <td class="FormTblRight">
+                                    <select class="DropDown" id="GFldNo" onchange="JavaScript: SetSearchFldNo(document.getElementById(String('GLyrNo')).value, this.value);">
+                                        <optgroup id="FieldssSearchGrp" label="Fields">
+                                            <option value="0">none</option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="FormTblLeft">
+                                    From
+                                </td>
+                                <td class="FormTblRight">
+                                    <input class="InputStyle" type="search" id="GLbl1Val" value="" size="22">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="FormTblLeft">
+                                    To
+                                </td>
+                                <td class="FormTblRight">
+                                    <input class="InputStyle" type="search" id="GLbl2Val" value="" size="22">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <table>
+                                        <tr>
+                                            <td><button class="Btn" onclick="JavaScript: if ((GLayers[document.getElementById(String('GLyrNo')).value])) { HideGoogleDirection(102, 'DirectLayersSearchDiv'); ShowDiv('LayersSearchDataDiv'); FindFeatByBuffer(document.getElementById(String('GLyrNo')).value,document.getElementById(String('GFldNo')).value,GpsVar.GpsLat,GpsVar.GpsLng, document.getElementById(String('GBufVal')).value * 1000, 'LayersSearchDataDiv', 'cyan', null,document.getElementById(String('GRDuplicate')).checked); }" title="Find By GPS">GPS</button></td>
+                                            <td><button class="Btn" onclick="JavaScript: if ((GLayers[document.getElementById(String('GLyrNo')).value])) { HideGoogleDirection(102, 'DirectLayersSearchDiv'); ShowDiv('LayersSearchDataDiv'); FindFeatByBuffer(document.getElementById(String('GLyrNo')).value,document.getElementById(String('GFldNo')).value,GMouseVar.ClickLat,GMouseVar.ClickLng, document.getElementById(String('GBufVal')).value * 1000, 'LayersSearchDataDiv', 'cyan', null,document.getElementById(String('GRDuplicate')).checked); }" title="Find By GPS">Click</button></td>
+                                            <td><input class="InputStyle" type="search" id="GBufVal" value="1" size="1"></td>
+                                            <td>km</td>
+                                            <td><input id="GRDuplicate" type="checkbox" checked>Duplicate</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <button class="Btn" onclick="JavaScript: if ((GLayers[document.getElementById(String('GLyrNo')).value])) { HideGoogleDirection(102, 'DirectLayersSearchDiv'); ShowDiv('LayersSearchDataDiv'); FindFeatByValue(document.getElementById(String('GLyrNo')).value,document.getElementById(String('GFldNo')).value, document.getElementById(String('GLbl1Val')).value, document.getElementById(String('GLbl2Val')).value, 'LayersSearchDataDiv', 'cyan', null,document.getElementById(String('GRDuplicate')).checked); }" title="Find">Find</button>
+                                    <button class="Btn" onclick="JavaScript: UnSelectGLayer(document.getElementById(String('GLyrNo')).value); HideDiv('LayersSearchDataDiv'); ClearGBufferCircle();" title="Clear">Clear</button>
+                                    <button class="Btn" onclick="JavaScript: ShowGLayer(102); SetGDirEnd(102);" title="Target">Target</button>
+                                    <button class="Btn" onclick="JavaScript: MyGPSClick(); ShowGLayer(100); SetGDirStart(102); HideDiv('LayersSearchDataDiv'); CalcRoute(102,document.getElementById('TravelMode').value,'DirectLayersSearchDiv');" title="Path">Goto</button>
+                                    <button class="Btn" onclick="JavaScript: HideGoogleDirection(102,'DirectLayersSearchDiv'); ShowDiv('LayersSearchDataDiv');" title="Hide">Hide</button>
+                                    <button class="Btn" onclick="JavaScript: CopyFromDiv1ToDiv2('LayersSearchDataDiv','InternalFrmContent') ; ShowDiv('InternalFrm'); " title="Clear">Open</button><br />
+                                </td>
+                            </tr>
+                        </table>
+                        <table id="LayersSearchDataDiv" class="FindHeaderTbl"></table>
+                        <div id="DirectLayersSearchDiv" class="FindDataDiv"></div>
+                    </div>
+                    <div id="LayersTablesDiv" class="HiddenDiv">
+                        <table class="MnuBar"><tr><td>Tables Search<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
+                        <table class="FormTbl">
+                            <tr>
+                                <td class="FormTblLeft"><b>Sectors</b></td>
+                                <td class="FormTblRight">
+                                    <select class="DropDown" name="TblMFld1ID" id="TblMFld1ID"
+                                            onclick="JavaScript:if (AccSigned == 1) { if (this.length <= 1) {
+                                            SendFuncPostDB('SectorsNames.asp', '', 'TblMFld1Div' , FTablesMDB);
+                                            this.disabled = true; this.disabled = false;
+                                            }}"
+                                            onchange="JavaScript:
+                                            TblMFld1Val = this.value;
+                                            SendFuncPostDB('TablesNames.asp', 'SectorID=' + encodeURIComponent(TblMFld1Val), 'TblMFld2Div', FTablesMDB);
+                                            TblMFld2Val = '0 , 0 , 0';
+                                            document.getElementById('TblMFld2ID').value = '0 , 0 , 0';
+                                            SendFuncPostDB('FieldsNames.asp', 'TblNm=' , 'TblMFld4Div', FTablesMDB);
+                                            TblMFld4Val = '00000';
+                                            document.getElementById('TblMFld4ID').value = '00000';
+                                            ">
+                                        <optgroup id="TblMFld1Div" label="Sectors">
+                                            <option value="00000">none</option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="FormTblLeft"><b>Tables</b></td>
+                                <td class="FormTblRight">
+                                    <select class="DropDown" name="TblMFld2ID" id="TblMFld2ID"
+                                            onchange="JavaScript:
+                                            TblMFld2Val = this.value;
+                                            eval('OpenGClickLayer(' + String(this.value) + ') ;');
+                                            eval('SetGClickTable(' + String(this.value) + ') ;');
+                                            SendFuncPostDB('FieldsNames.asp', 'TblNm=' + encodeURIComponent(TblMFldTblNm), 'TblMFld4Div', FTablesMDB);
+                                            TblMFld4Val = '00000';
+                                            document.getElementById('TblMFld4ID').value = '00000';
+                                            TblMFld5Val = '';
+                                            document.getElementById('Lbl1').value = TblMFld5Val;
+                                            TblMFld6Val = '';
+                                            document.getElementById('Lbl2').value = TblMFld6Val;
+                                            SavedQry = '';
+                                            SavedQryNo = 0;
+                                            document.getElementById('SavedQryNo').innerHTML = ' ' + SavedQryNo + ' Saved Qry';
+                                            ">
+                                        <optgroup id="TblMFld2Div" label="Tables">
+                                            <option value="0 , 0 , 0">none</option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                        <div id="ViewModeTr" style="display: none;">
+                            <input type="radio" id="TablesViewMode" name="TablesDataMode" onclick="JavaScript: TblMFld3Val = this.value;" value="View" checked>View
+                            <input type="radio" id="TablesEditMode" name="TablesDataMode" onclick="JavaScript: TblMFld3Val = this.value;" value="Edit">Edit
+                        </div>
+                        <div id="ViewSearchTr" style="display: none;">
+                            <table class="FormTbl">
+                                <tr>
+                                    <td class="FormTblLeft"><b>Fields</b></td>
+                                    <td class="FormTblRight">
+                                        <select class="DropDown" name="TblMFld4ID" id="TblMFld4ID"
+                                                onchange="JavaScript:
+                                                TblMFld4Val = this.value;
+                                                TblMFld5Val = '';
+                                                document.getElementById('Lbl1').value = TblMFld5Val;
+                                                TblMFld6Val = '';
+                                                document.getElementById('Lbl2').value = TblMFld6Val;
+                                                ">
+                                            <optgroup id="TblMFld4Div" label="Fields">
+                                                <option value="00000">none</option>
+                                            </optgroup>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="FormTblLeft"><b>From</b></td>
+                                    <td class="FormTblRight"><input id="Lbl1" class="InputStyle" type="text" onchange="JavaScript: TblMFld5Val = this.value;" /></td>
+                                </tr>
+                                <tr>
+                                    <td class="FormTblLeft"><b>To</b></td>
+                                    <td class="FormTblRight"><input id="Lbl2" class="InputStyle" type="text" onchange="JavaScript: TblMFld6Val = this.value;" /></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <button class="Btn" onclick="JavaScript:
+                                    if ((AccSigned == 1) && (TblMFld4Val != '00000') && (TblMFldTblNm != '0')) {
+                                        HideAllDataFrm();
+                                        HideGoogleDirection(102, 'DirectLayersTablesDiv');
+                                        ShowDiv('LayersTablesDataDiv');
+                                        SendFuncPostDB('TablesQryView.asp', 'SavedQry=' + encodeURIComponent(SavedQry) + '&TblNm=' + encodeURIComponent(TblMFldTblNm) + '&FldNm=' + encodeURIComponent(TblMFld4Val) + '&Lbl1=' + encodeURIComponent(TblMFld5Val) + '&Lbl2=' + encodeURIComponent(TblMFld6Val), 'LayersTablesDataDiv', FTablesMDB);
+                                        CopyFromDiv1ToDiv2('LayersTablesDataDiv','InternalFrmContent') ;
+                                        SavedQryNo = SavedQryNo + 1; document.getElementById('SavedQryNo').innerHTML = ' ' + SavedQryNo + ' Saved Qry';
+                                        TablesRecClickVal = 1;
+                                    }
+                                    " title="Find">
+                                            Find
+                                        </button>
+                                        <!--<button class="Btn" onclick="JavaScript: UnSelectGLayer(document.getElementById(String('GLyrNo')).value);" title="Clear">Clear</button>-->
+                                        <button class="Btn" onclick="JavaScript: ShowGLayer(102); SetGDirEnd(102);" title="Target">Target</button>
+                                        <button class="Btn" onclick="JavaScript: MyGPSClick(); ShowGLayer(100); SetGDirStart(102); HideDiv('LayersTablesDataDiv'); CalcRoute(102,document.getElementById('TravelMode').value,'DirectLayersTablesDiv');" title="Path">Goto</button>
+                                        <button class="Btn" onclick="JavaScript: HideGoogleDirection(102,'DirectLayersTablesDiv'); ShowDiv('LayersTablesDataDiv');" title="Hide">Hide</button>
+                                        <button class="Btn" onclick="JavaScript: SavedQry = ''; SavedQryNo = 0; document.getElementById('SavedQryNo').innerHTML = ' ' + SavedQryNo + ' Saved Qry';" title="Clear">Clear</button>
+                                        <button class="Btn" onclick="JavaScript: CopyFromDiv1ToDiv2('LayersTablesDataDiv','InternalFrmContent') ; ShowDiv('InternalFrm'); " title="Clear">Open</button><br />
+                                        <span id="SavedQryNo"> 0 Saved Qry</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <table id="LayersTablesDataDiv" class="FindHeaderTbl"></table>
+                        <div id="DirectLayersTablesDiv" class="FindDataDiv"></div>
+                    </div>
+                    <div id="CollectorDiv" class="HiddenDiv">
+                        <table class="MnuBar"><tr><td>Data Collector<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
+                        <table class="FormTbl">
+                            <tr>
+                                <td class="FormTblLeft"><b>Cat 1</b></td>
+                                <td class="FormTblRight">
+                                    <select class="DropDown" name="SrchMFld1ID" id="SrchMFld1ID"
+                                            onclick="JavaScript:if (AccSigned == 1) { if (this.length <= 1) {
+                                            SendFuncPostDB('RecQryFields.asp', 'TblNm=Points&UsrNm=' + encodeURIComponent(AccUsrNm) + '&Field1=', 'SrchMFld1Div' , FDataMDB);
+                                            this.disabled = true; this.disabled = false;
+                                            }}"
+                                            onchange="JavaScript:
+                                            SrchMFld1Val = this.value;
+                                            SendFuncPostDB('RecQryFields.asp', 'TblNm=Points&UsrNm=' + encodeURIComponent(AccUsrNm) + '&Field1=' + encodeURIComponent(SrchMFld1Val) + '&Field2=', 'SrchMFld2Div', FDataMDB);
+                                            SrchMFld2Val = '00000';
+                                            document.getElementById('SrchMFld2ID').value = '00000' ;
+                                            SendFuncPostDB('RecQryFields.asp', 'TblNm=Points&UsrNm=' + encodeURIComponent(AccUsrNm) + '&Field1=' + encodeURIComponent(SrchMFld1Val) + '&Field2=' + encodeURIComponent(SrchMFld2Val) + '&Field3=', 'SrchMFld3Div' , FDataMDB);
+                                            SrchMFld3Val = '00000';
+                                            document.getElementById('SrchMFld3ID').value = '00000';
+                                            HideDiv('CollectorDataDiv');
+                                            HideDiv('EditFrm');
+                                            HideGLayer(111, 0);">
+                                        <optgroup id="SrchMFld1Div">
+                                            <option value="00000">none</option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="FormTblLeft"><b>Cat 2</b></td>
+                                <td class="FormTblRight">
+                                    <select class="DropDown" name="SrchMFld2ID" id="SrchMFld2ID"
+                                            onchange="JavaScript:
+                                            SrchMFld2Val = this.value;
+                                            SendFuncPostDB('RecQryFields.asp', 'TblNm=Points&UsrNm=' + encodeURIComponent(AccUsrNm) + '&Field1=' + encodeURIComponent(SrchMFld1Val) + '&Field2=' + encodeURIComponent(SrchMFld2Val) + '&Field3=', 'SrchMFld3Div' , FDataMDB);
+                                            SrchMFld3Val = '00000';
+                                            document.getElementById('SrchMFld3ID').value = '00000';
+                                            HideDiv('CollectorDataDiv');
+                                            HideDiv('EditFrm');
+                                            HideGLayer(111, 0);">
+                                        <optgroup id="SrchMFld2Div">
+                                            <option value="00000">none</option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="FormTblLeft"><b>Cat 3</b></td>
+                                <td class="FormTblRight">
+                                    <select class="DropDown" name="SrchMFld3ID" id="SrchMFld3ID"
+                                            onclick="JavaScript:if (AccSigned == 1) { if (this.length <= 1) {
+                                            SendFuncPostDB('RecQryFields.asp', 'TblNm=Points&UsrNm=' + encodeURIComponent(AccUsrNm) + '&Field1=' + encodeURIComponent(SrchMFld1Val) + '&Field2=' + encodeURIComponent(SrchMFld2Val) + '&Field3=', 'SrchMFld3Div' , FDataMDB);
+                                            this.disabled = true; this.disabled = false;
+                                            }}"
+                                            onchange="JavaScript:
+                                            SrchMFld3Val = this.value;
+                                            HideDiv('CollectorDataDiv');
+                                            HideDiv('EditFrm');
+                                            HideGLayer(111, 0);">
+                                        <optgroup id="SrchMFld3Div">
+                                            <option value="00000">none</option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="FormTblLeft"><b>Label</b></td>
+                                <td class="FormTblRight">
+                                    <input class="InputStyle" type="text"
+                                           onchange="JavaScript:
+                                           SrchMFld4Val = this.value;
+                                           HideDiv('CollectorDataDiv');
+                                           HideDiv('EditFrm');
+                                           HideGLayer(111, 0);" />
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="FormTbl">
+                            <tr>
+                                <td>
+                                    <button class="Btn" value="Add Point" onclick="JavaScript:
+                                    if (AccSigned == 1) {
+                                        HideAllDataFrm();
+                                        if (!RecEditChanged) {
+                                            AddPointClick();
+                                        }
+                                    }" title="Add Point">
+                                        Add
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="Btn" value="View Points" onclick="JavaScript:
+                                    if (AccSigned == 1) {
+                                        HideAllDataFrm();
+                                        if (!RecEditChanged) {
+                                            SendFuncPostDB('RecQryView.asp', 'TblNm=Points&UsrNm=' + encodeURIComponent(AccUsrNm) + '&Field1=' + encodeURIComponent(SrchMFld1Val) + '&Field2=' + encodeURIComponent(SrchMFld2Val) + '&Field3=' + encodeURIComponent(SrchMFld3Val) + '&Lbl1=' + encodeURIComponent(SrchMFld4Val), 'CollectorDataDiv' , FDataMDB);
+                                            CopyFromDiv1ToDiv2('CollectorDataDiv','InternalFrmContent') ;
+                                            SetGLayerExtend(111);
+                                            ShowDiv('CollectorDataDiv');
+                                        }
+                                    }
+                                    " title="View Points">
+                                        View
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="Btn" value="Hide Points" onclick="JavaScript: HideGLayer(111, 0);" title="Hide Points">Hide</button>
+                                </td>
+                                <td>
+                                    <button class="Btn" value="Refresh" onclick="JavaScript: SendFuncPostDB('RecQryFields.asp', 'TblNm=Points&UsrNm=' + encodeURIComponent(AccUsrNm) + '&Field1=', 'SrchMFld1Div' , FDataMDB); document.getElementById('SrchMFld1ID').onchange();" title="Refresh">Refresh</button>
+                                </td>
+                                <td>
+                                    <button class="Btn" onclick="JavaScript: CopyFromDiv1ToDiv2('CollectorDataDiv','InternalFrmContent') ; ShowDiv('InternalFrm'); " title="Clear">Open</button>
+                                </td>
+                            </tr>
+                        </table>
+                        <table id="CollectorDataDiv" class="FindHeaderTbl"></table>
+                    </div>
+                    <div id="GpsDiv" class="HiddenDiv">
+                        <table class="MnuBar"><tr><td>GPS Tracking<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
+                        <table class="FormTbl">
+                            <tr>
+                                <td>Lat <span id="GpsLat">null</span></td>
+                            </tr>
+                            <tr>
+                                <td>Lng <span id="GpsLng">null</span></td>
+                            </tr>
+                            <tr>
+                                <td>Speed <span id="GpsSpeed">null</span></td>
+                            </tr>
+                            <tr>
+                                <td>Accuracy <span id="GpsAccuracy">null</span></td>
+                            </tr>
+                            <tr>
+                                <td>Altitude <span id="GpsAltitude">null</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <!--<input id="GPSAutoSave" onchange="JavaScript: if (this.checked) { GPSAutoSave = 1; } else { GPSAutoSave = 0; } SaveAccCookies();" type="checkbox"> Auto Save-->
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <hr />
+                                    <button class="Btn" onclick="JavaScript: MyGPSClick(); ShowGLayer(100);" title="Goto GPS">Goto</button>
+                                    <button class="Btn" onclick="JavaScript: MyGPSSaveClick(); ShowGLayer(100);" title="Save GPS">Save</button>
+                                    <button class="Btn" onclick="JavaScript: HideGLayer(100, 1);" title="Hide GPS">Hide</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <br />
+                                    <button class="Btn" onclick="JavaScript: ShowGTrafficLayer(1);" title="Show Traffic">Show Traffic</button>
+                                    <button class="Btn" onclick="JavaScript: HideGTrafficLayer(1);" title="Hide Traffic">Hide Traffic</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="GoogleSearchDiv" class="HiddenDiv">
+                        <table class="MnuBar"><tr><td>Google Search<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
+                        <table class="FormTbl">
+                            <tr>
+                                <td style="text-align:right;">
+                                    <button class="Btn" onclick="JavaScript: ShowGLayer(101); ShowDiv('GeoDataDiv'); SetGLayerExtend(101);" title="Show">Show</button>
+                                    <button class="Btn" onclick="JavaScript: HideGLayer(101, null); HideDiv('GeoDataDiv');" title="Hide">Hide</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input class="InputStyle" type="search" id="GAdr" value="" size="22">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button class="Btn" onclick="JavaScript: if (document.getElementById(String('GAdr')).value != '') { HideGoogleDirection(102, 'DirectGeoDiv'); ShowDiv('GeoDataDiv'); GetGAddressPlaces(1, document.getElementById(String('GAdr')).value, 101, 'GeoDataDiv', 'places', 'Green', 'yellow', null); } " title="Find">Find</button>
+                                    <button class="Btn" onclick="JavaScript: ShowGLayer(102); SetGDirEnd(102);" title="Target">Target</button>
+                                    <button class="Btn" onclick="JavaScript: MyGPSClick(); ShowGLayer(100); SetGDirStart(102); HideDiv('GeoDataDiv'); CalcRoute(102,document.getElementById('TravelMode').value,'DirectGeoDiv');" title="Path">Goto</button>
+                                    <button class="Btn" onclick="JavaScript: HideGoogleDirection(102,'DirectGeoDiv'); ShowDiv('GeoDataDiv');" title="Hide">Hide</button>
+                                </td>
+                            </tr>
+                        </table>
+                        <table id="GeoDataDiv" class="FindHeaderTbl"></table>
+                        <div id="DirectGeoDiv" class="FindDataDiv"></div>
+                    </div>
+                    <div id="ShortestPathDiv" class="HiddenDiv">
+                        <table class="MnuBar"><tr><td>Shortest Path<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
+                        <table class="FormTbl">
+                            <tr>
+                                <td class="FormTblLeft"><b>Mode</b></td>
+                                <td class="FormTblRight">
+                                    <select class="DropDown" id="TravelMode">
+                                        <option value="DRIVING" selected>DRIVING</option>
+                                        <option value="WALKING">WALKING</option>
+                                        <option value="BICYCLING">BICYCLING</option>
+                                        <option value="TRANSIT">TRANSIT</option>
+                                    </select>
+                                    <script>document.getElementById('TravelMode').value = 'DRIVING';</script>
+                                </td>
+                            </tr>
+                        </table>
+                        <hr />
+                        <table class="FormTbl">
+                            <tr>
+                                <td>
+                                    <button class="Btn" onclick="JavaScript: ShowGLayer(102); SetGDirStart(102);" title="Start Point">Start</button>
+                                    <button class="Btn" onclick="JavaScript: ShowGLayer(102); SetGDirEnd(102);" title="End Point">End</button>
+                                    <button class="Btn" onclick="JavaScript: HideDiv('DistanceDiv'); ShowGoogleDirection(102,'DirectPanelDiv');" title="Show Path">Show</button>
+                                    <button class="Btn" onclick="JavaScript: HideDiv('DistanceDiv'); HideGoogleDirection(102,'DirectPanelDiv');" title="Hide Path">Hide</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button class="Btn" onclick="JavaScript: HideDiv('DistanceDiv'); CalcRoute(102,document.getElementById('TravelMode').value,'DirectPanelDiv');" title="Shortest Path">Shortest</button>
+                                    <button class="Btn" onclick="JavaScript: HideDiv('DirectPanelDiv'); CalcDistance(102,'DistanceDiv');" title="Distance">Distance</button>
+                                    <button class="Btn" onclick="JavaScript: MyGPSClick(); ShowGLayer(100); SetGDirStart(102); HideDiv('DistanceDiv'); CalcRoute(102,document.getElementById('TravelMode').value,'DirectPanelDiv');" title="Path">Goto</button>
+                                </td>
+                            </tr>
+                        </table>
+                        <div id="DistanceDiv" class="FindDataDiv" style="display: none;"></div>
+                        <div id="DirectPanelDiv" class="FindDataDiv" style="display: none;"></div>
+                    </div>
+                </div>
+            </td>
+            <td id="GoogleTD" class="GooglePrt">
+                <div id="GooglePrtDiv" style="position: relative; width: 100%;">
+                    <div id="GoogleDiv" style="width:100%; height:200px;"></div>
+                    <div id="FullExtentGBtn" style="position: absolute; top: 5pt; right: 40pt; z-index: 0; direction: ltr;">
+                        <button class="Btn" onclick="JavaScript: SetGfullExtend();" title="Full Extent">Full Extent</button>
+                    </div>
+                    <div id="RefreshGBtn" style="position: absolute; bottom: 25pt; left: 5pt; z-index: 0; direction: ltr;">
+                        <button class="Btn" onclick="JavaScript: window.location.reload();" title="Refresh">Refresh</button>
+                    </div>
+                    <div id="MouseOverCoords" style="position: absolute; bottom: 0pt; left: 100pt; z-index: 0; direction: ltr; font-weight:bold; background-color: #F0F0F0;">
+                        Click Point =<br />Lat: 00° 00' 00.000" <br />Lng: 00° 00' 00.000"
+                    </div>
+                    <div id="ZoomGRangeDiv" style="position: absolute; bottom: 5pt; left: 250pt; z-index: 0; direction: ltr;">
+                        <form onchange="JavaScript:SetGMapOptions(1, Number(document.getElementById('ZoomGRange').value), null, null, null, null, null, null, null, null);">
+                            <input id="ZoomGRange" type="range" min="1" max="22" value="12" step="1" style="width:0px; height:auto;">
+                        </form>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr id="FooterTR">
+            <td>
+                <select class="DropDown" id="LangID" onchange="JavaScript: try { localStorage.LangID = document.getElementById('LangID').value; } catch (e) { }">
+                    <option value="ar"> Arabic </option>
+                    <option value="bg"> Bulgarian </option>
+                    <option value="bn"> Bengali </option>
+                    <option value="ca"> Catalan </option>
+                    <option value="cs"> Czech </option>
+                    <option value="da"> Danish </option>
+                    <option value="de"> German </option>
+                    <option value="el"> Greek </option>
+                    <option value="en"> English </option>
+                    <option value="en-AU"> English (Australian) </option>
+                    <option value="en-GB"> English (Great Britain) </option>
+                    <option value="es"> Spanish </option>
+                    <option value="eu"> Basque </option>
+                    <option value="fa"> Farsi </option>
+                    <option value="fi"> Finnish </option>
+                    <option value="fil"> Filipino </option>
+                    <option value="fr"> French </option>
+                    <option value="gl"> Galician </option>
+                    <option value="gu"> Gujarati </option>
+                    <option value="hi"> Hindi </option>
+                    <option value="hr"> Croatian </option>
+                    <option value="hu"> Hungarian </option>
+                    <option value="id"> Indonesian </option>
+                    <option value="it"> Italian </option>
+                    <option value="iw"> Hebrew </option>
+                    <option value="ja"> Japanese </option>
+                    <option value="kn"> Kannada </option>
+                    <option value="ko"> Korean </option>
+                    <option value="lt"> Lithuanian </option>
+                    <option value="lv"> Latvian </option>
+                    <option value="ml"> Malayalam </option>
+                    <option value="mr"> Marathi </option>
+                    <option value="nl"> Dutch </option>
+                    <option value="no"> Norwegian </option>
+                    <option value="pl"> Polish </option>
+                    <option value="pt"> Portuguese </option>
+                    <option value="pt-BR"> Portuguese (Brazil) </option>
+                    <option value="pt-PT"> Portuguese (Portugal) </option>
+                    <option value="ro"> Romanian </option>
+                    <option value="ru"> Russian </option>
+                    <option value="sk"> Slovak </option>
+                    <option value="sl"> Slovenian </option>
+                    <option value="sr"> Serbian </option>
+                    <option value="sv"> Swedish </option>
+                    <option value="ta"> Tamil </option>
+                    <option value="te"> Telugu </option>
+                    <option value="th"> Thai </option>
+                    <option value="tl"> Tagalog </option>
+                    <option value="tr"> Turkish </option>
+                    <option value="uk"> Ukrainian </option>
+                    <option value="vi"> Vietnamese </option>
+                    <option value="zh-CN"> Chinese (Simplified) </option>
+                    <option value="zh-TW"> Chinese (Traditional) </option>
+                </select>
+            </td>
+            <td class="FooterPrt"><a href="javascript:PrivacyID = PrivacyID * -1 ;if (PrivacyID > 0) {HideDiv('PrivacyFrm');} else {ShowDiv('PrivacyFrm');}"><b></b></a></td>
+        </tr>
+    </table>
+    <div id="ResultDiv" style="width:0; height:0; display:none;"></div>
+    <div id="LayersSearchBak" style="width:0; height:0; display:none;"></div>
+    <iframe id="ResultFrm" name="ResultFrm" style="width:0; height:0; display:none;"></iframe>
+    <div id="EditFrm" class="EditFrm" style="display:none;" onclick="BringtoFront('EditFrm');">
+        <table id="EditFrmHeader" class="MnuBar" style="cursor: move;z-index: 1;"><tr><td><span id="EditFrmHeaderTitle">Modification Form</span><button id="EditFrmHeaderBtnClose" class="BtnClose" onclick="JavaScript: HideDiv('EditFrm');" title="Close">Close</button></td></tr></table>
+        <div id="EditFrmContent">
+            <b>Sorry, Can not Connect to Server</b>
+        </div>
+    </div>
+    <div id="ExternalFrm" class="ExternalFrm" style="display:none;" onclick="BringtoFront('ExternalFrm');">
+        <table id="ExternalFrmHeader" class="MnuBar" style="cursor: move;z-index: 1;"><tr><td><span id="ExternalTitle">External Data</span><button class="BtnClose" onclick="JavaScript: HideDiv('ExternalFrm');" title="Close">Close</button></td></tr></table>
+        <div id="ExternalFrmContent">
+            <iframe id="ExternalFile" name="ExternalFile" onload="javascript: try { ShowDiv('ExternalFrm'); } catch (err) { }" src="" style="display:block; border:none;"></iframe><br />
+        </div>
+    </div>
+    <div id="InternalFrm" class="PrivacyFrm" style="display:none;" onclick="BringtoFront('InternalFrm');">
+        <table id="InternalFrmHeader" class="MnuBar" style="cursor: move;z-index: 1;"><tr><td><span id="InternalTitle">Internal Data</span><button class="BtnClose" onclick="JavaScript: HideDiv('InternalFrm');" title="Close">Close</button></td></tr></table>
+        <Table id="InternalFrmContent" class="FindHeaderTbl"></Table>
+    </div>
+    <div id="PrivacyFrm" class="PrivacyFrm" style="display:none;" onclick="BringtoFront('PrivacyFrm');">
+        <table id="PrivacyFrmHeader" class="MnuBar" style="cursor: move;z-index: 1;"><tr><td>Help and Privacy Policy<button class="BtnClose" onclick="JavaScript: PrivacyID = PrivacyID * -1; HideDiv('PrivacyFrm');" title="Close">Close</button></td></tr></table>
+        <div>
+            <table>
+                <tr>
+                    <td>
+                        <span style="font-size:large;"><u>Smart GIS GPS Tracking Software Help</u></span><br />
+                        Thank you for your interest in testing and evaluating GPS Tracking Google Map from Smart GIS and in order to track your mobile device from your PC, Kindly please Sign up in this Application and then for more information kindly please visit <a href="http://freesmartgis.blogspot.com/" target="ExternalFile">http://freesmartgis.blogspot.com/</a> and kindly download and setup <a href="https://drive.google.com/file/d/0B2qR4wxKKE_VUmR6V2hYRHRqb2c/view?usp=sharing" target="ExternalFile">Smart GIS Software on your PC</a> and kindly Download and open the following <a href="https://drive.google.com/file/d/0B2qR4wxKKE_VR1dtUlFOeDVRZ00/view?usp=sharing" target="ExternalFile">Monitoring GPS Project</a> by Smart GIS Software<br /><br />
+                        And in First layer SmartGISPoints kindly press right click and press Layer Properities and press VB Script tab and complete the following TblNm=  Points UsrNm= your own user name Pswrd= your own password<br /><br />
+                        And in second layer SmartGISUsers kindly press right click and press Layer Properities and press VB Script tab and complete the following TblNm=  Users  UsrNm= your own user name Pswrd= your own password<br /><br />
+                        <span style="font-size:large;"><u>Privacy Policy</u></span><br />
+                        At Smart GIS Software, we're working hard to protect your privacy and your 'Personally identifiable information' (PII).<br />
+                        <br /><b><u>What personal information do we collect from the people that visit our blog, website or app?</u></b><br />
+                        When registering on our site, as appropriate, you may be asked to enter your name, email address, mailing address, phone number, Location or other details to help you with your experience.<br />
+                        <br /><b><u>When do we collect information?</u></b><br />
+                        We collect information from you when you register on our site or enter information on our site.<br />
+                        <br /><b><u>How do we use your information?</u></b><br />
+                        We do not use the information we collect from you when you register.<br />
+                        <br /><b><u>How do we protect visitor information?</u></b><br />
+                        Our website is scanned on a regular basis for security holes and known vulnerabilities in order to make your visit to our site as safe as possible.<br />
+                        We use regular Malware Scanning.<br />
+                        Your personal information is contained behind secured networks and is only accessible by a limited number of persons who have special access rights to such systems, and are required to keep the information confidential.<br />
+                        <br /><b><u>Do we use 'cookies'?</u></b><br />
+                        We do not use cookies for tracking purposes.<br />
+                        <br /><b><u>Third Party Disclosure</u></b><br />
+                        We do not sell, trade, or otherwise transfer to outside parties your personally identifiable information.<br />
+                        <br /><b><u>Google</u></b><br />
+                        We have not enabled Google AdSense on our site and we may not do so in the future.<br />
+                        <br /><b><u>Contacting Us</u></b><br />
+                        If there are any questions regarding this privacy policy you may contact us using the information below.<br />
+                        <br /><b><u>Salsabeel Mohamed Elshayal & Yaseen Mohamed Elshayal</u></b><br />
+                        <a href="http://freesmartgis.blogspot.com/" target="ExternalFile">http://freesmartgis.blogspot.com/</a><br />
+                        8 Taha Houssin St., Zamalek<br />
+                        Cairo<br />
+                        Egypt<br />
+                        <a href="mailto:FreeSmartGIS@gmail.com" target="ExternalFile">FreeSmartGIS@gmail.com</a><br />
+                        <a href="mailto:SmartGIS@hotmail.com" target="ExternalFile">SmartGIS@hotmail.com</a><br />
+                        01222113080<br />01281421662<br />01550585159<br />
+                        <br />
+                        Last Edited on 14 February, 2018<br /><br />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
