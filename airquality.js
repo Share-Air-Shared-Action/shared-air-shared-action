@@ -115,7 +115,7 @@ function initMap() {
 function renderSummaryPage() {
 
 
- load_shapefile();
+ load_shapefile(community);
 
   var centerloc;
 
@@ -170,9 +170,22 @@ function renderSummaryPage() {
 
 // function to load the content of the shapefile
 
-function load_shapefile(){
+function load_shapefile(community){
 	
+     if (community == "SE"){
 	document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+} else if (community == "SL"){
+ document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+
+} else if (community == "PC"){
+ document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+} else if (community == "NB") {
+ document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+} else if (community == "PC") {
+ document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+} else {
+ document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+}
 }
 
 
