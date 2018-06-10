@@ -115,7 +115,7 @@ function initMap() {
 function renderSummaryPage() {
 
 
- load_shapefile(community);
+
 
   var centerloc;
 
@@ -164,6 +164,7 @@ function renderSummaryPage() {
   // // Load previous selection if available
   // loadPreviousSelection();
 
+  load_shapefile(community);
   fetchPollutant(community);
 }
 
@@ -171,18 +172,19 @@ function renderSummaryPage() {
 // function to load the content of the shapefile
 
 function load_shapefile(community){
-	
-     if (community == "SE"){
-	document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+
+  //  alert("community is " + community);     	
+     if (community == "SE") {
+	document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SE/index.html" width="1000" height="600" ></object>';
 } else if (community == "SL"){
  document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
 
 } else if (community == "PC"){
- document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+ document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/PC/index.html" width="1000" height="600" ></object>';
 } else if (community == "NB") {
- document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
-} else if (community == "PC") {
- document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
+ document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/NB/index.html" width="1000" height="600" ></object>';
+} else if (community == "LV") {
+ document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/LV/index.html" width="1000" height="600" ></object>';
 } else {
  document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
 }
