@@ -688,7 +688,7 @@ Made in Egypt
             SetUsersMDB('UsersList.mdb');
             SetLayersListMDB('LayersList or none.mdb');
             SetLayersTablesMDB('LayersTables.mdb');
-            SetGMap(1, 'GoogleDiv', 12, 41.8598175048828, -87.6188354492188, google.maps.MapTypeId.ROADMAP, true, true, false, true, true);
+            SetGMap(1, 'GoogleDiv', 12, 41.6524848937988, -87.5999603271484, google.maps.MapTypeId.ROADMAP, true, true, false, true, true);
             SetGLabelClsNm('GoogleLabel');
             SetGMapEventFunc('MyMapsEventFunc');
             SetGMapMouseMoveFunc('MyMapsMouseMoveFunc');
@@ -787,7 +787,7 @@ Made in Egypt
                         <table class="MnuBar"><tr><td>Layers View<button class="BtnClose" onclick="JavaScript: RightArrowFunc();" title="Close">X</button></td></tr></table>
                         <div id="LayersListGrp" class="VisDiv"></div>
                         <table style="width: 100%;">
-                            <tr><td width="10%"><input id="LyrLstChk1" onchange="JavaScript: if (this.checked) { if (!GLayers[1]) { LoadJsLayer('SL.js' ,'SetSLGLayer(1) ; RefreshGMap(); GetFieldsList(document.getElementById(String(\'GLyrNo\')).value, \'FieldssSearchGrp\'); UnLoadJsLayer(\'SL.js\'); ', false ); } else { ShowGLayer(1);} } else { HideGLayer(1); }" type="checkbox"></td><td width="80%"><a href="JavaScript: document.getElementById(String('LyrLstChk1')).checked = true; document.getElementById(String('LyrLstChk1')).onchange(); document.getElementById(String('LyrLstZom1')).onclick();"><b>SL</b></a></td><td width="10%"><button id="LyrLstZom1" class="Btn" onclick="JavaScript: SetGLayerExtend(1) ;" title="zoom">zoom</button><br /></td></tr>
+                            <tr><td width="10%"><input id="LyrLstChk1" onchange="JavaScript: if (this.checked) { if (!GLayers[1]) { LoadJsLayer('PC.js' ,'SetPCGLayer(1) ; RefreshGMap(); GetFieldsList(document.getElementById(String(\'GLyrNo\')).value, \'FieldssSearchGrp\'); UnLoadJsLayer(\'PC.js\'); ', false ); } else { ShowGLayer(1);} } else { HideGLayer(1); }" type="checkbox"></td><td width="80%"><a href="JavaScript: document.getElementById(String('LyrLstChk1')).checked = true; document.getElementById(String('LyrLstChk1')).onchange(); document.getElementById(String('LyrLstZom1')).onclick();"><b>PC</b></a></td><td width="10%"><button id="LyrLstZom1" class="Btn" onclick="JavaScript: SetGLayerExtend(1) ;" title="zoom">zoom</button><br /></td></tr>
                         </table>
                     </div>
                     <div id="LayersSearchDiv" class="HiddenDiv">
@@ -801,7 +801,7 @@ Made in Egypt
                                     <select class="DropDown" id="GLyrNo" onchange="JavaScript: GetFieldsList(document.getElementById(String('GLyrNo')).value, 'FieldssSearchGrp'); document.getElementById(String('GFldNo')).value = GetSearchFldNo(document.getElementById(String('GLyrNo')).value); document.getElementById(String('LyrLstChk' + this.value)).checked = true; document.getElementById(String('LyrLstChk' + this.value)).onchange(); document.getElementById(String('LayersSearchDataDiv')).innerHTML = ''; ViewSelectedGFeatures(document.getElementById(String('GLyrNo')).value,document.getElementById(String('GFldNo')).value + 1, 'LayersSearchDataDiv',document.getElementById(String('GRDuplicate')).checked);">
                                         <optgroup id="LayersSearchGrp" label="Layers">
                                             <option value="0">none</option>
-                                            <option value="1">SL</option>
+                                            <option value="1">PC</option>
                                         </optgroup>
                                     </select>
                                 </td>
