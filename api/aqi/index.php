@@ -9,7 +9,7 @@ header('Content-Type: application/json');
         "scale": {
             "good": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [4.4, 4.4],
+                "y": ["4.4", "4.4"],
                 "fill": "tozeroy",
                 "type": "scatter",
                 "mode": "none",
@@ -18,7 +18,7 @@ header('Content-Type: application/json');
             },
             "moderate": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [9.4, 9.4],
+                "y": ["9.4", "9.4"],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
@@ -27,7 +27,7 @@ header('Content-Type: application/json');
             },
             "unhfsg": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [12.4, 12.4],
+                "y": ["12.4", "12.4"],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
@@ -36,7 +36,7 @@ header('Content-Type: application/json');
             },
             "unhealthy": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [15.4, 15.4],
+                "y": ["15.4", "15.4"],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
@@ -45,7 +45,7 @@ header('Content-Type: application/json');
             },
             "veryunhealthy": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [30.4, 30.4],
+                "y": ["30.4", "30.4"],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
@@ -54,7 +54,7 @@ header('Content-Type: application/json');
             },
             "hazardous": {
                 "x": ["1980-01-01 00:00:00", "2500-01-01 00:00:00"],
-                "y": [99999, 99999],
+                "y": ["99999", "99999"],
                 "fill": "tonexty",
                 "type": "scatter",
                 "mode": "none",
