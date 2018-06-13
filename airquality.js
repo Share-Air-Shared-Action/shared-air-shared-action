@@ -6,7 +6,6 @@ var markers = [];
 var routes = [];
 var rectangles = [];
 var selectedLineData = [];
-var heatmapdata = [];
 
 // Initialize variables for each selection menu
 var selected_community;
@@ -17,33 +16,6 @@ var selected_sensor;
 var selected_pollutantHTML;
 const COMPARE = "compare";
 const AVERAGE = "average";
-
-var communityNames = new Map();
-communityNames.set("SE","South East");
-communityNames.set("LV","Little Village");
-communityNames.set("SL","South Loop");
-communityNames.set("NB","Northbrook");
-communityNames.set("AG","Altgeld Garden");
-
-var pollutantScale = new Map();
-pollutantScale.set("CO",[0.0,4.4,9.4,12.4,15.4,30.4,99999]);
-pollutantScale.set("NO2",[0.0,0.053,0.1,0.36,0.649,1.249,99999]);
-pollutantScale.set("O3",[0.0,0.054,0.070,0.085,0.105,0.200,99999]);
-pollutantScale.set("PM2.5",[0.0,12.0,35.4,55.4,150.4,250.4,99999]);
-pollutantScale.set("PM10",[0,54,154,254,354,424,99999]);
-
-var pollutantColors = [];
-pollutantColors.push("rgba(0,228,0,0.5)"	,"rgba(0,228,0,0.5)"	,"rgba(0,228,0,0.5)",	"rgba(0,228,0,0.5)"	,"rgba(0,228,0,0.5)");
-pollutantColors.push("rgba(255,255,0,0.5)",	"rgba(255,255,0,0.5)",	"rgba(255,255,0,0.5)"	,"rgba(255,255,0,0.5)",	"rgba(255,255,0,0.5)");
-pollutantColors.push("rgba(255,126,0,0.5)",	"rgba(255,126,0,0.5)"	,"rgba(255,126,0,0.5)"	,"rgba(255,126,0,0.5)",	"rgba(255,126,0,0.5)");
-pollutantColors.push("rgba(255,0,0,0.5)"	,"rgba(255,0,0,0.5)",	"rgba(255,0,0,0.5)"	,"rgba(255,0,0,0.5)",	"rgba(255,0,0,0.5)");
-pollutantColors.push("rgba(153,0,76,0.5)",	"rgba(153,0,76,0.5)",	"rgba(153,0,76,0.5)"	,"rgba(153,0,76,0.5)",	"rgba(153,0,76,0.5)");
-pollutantColors.push("rgba(126,0,35,0.5)",	"rgba(126,0,35,0.5)",	"rgba(126,0,35,0.5)",	"rgba(126,0,35,0.5)",	"rgba(126,0,35,0.5)");
-
-// Adding sentence case operation to String variable
-String.prototype.toSentenceCase = function() {
-  return this.charAt(0).toUpperCase() + this.slice(1);
-}
 
 // Load in the communities into the dropdown
 $.getJSON("/airquality/api/communities/", function(communities) {
@@ -142,6 +114,9 @@ function initMap() {
 
 function renderSummaryPage() {
 
+
+
+
   var centerloc;
 
   // read GET parameter from URL string
@@ -154,7 +129,6 @@ function renderSummaryPage() {
 
   //    var centerloc  = new google.maps.LatLng(41.700564, -87.530184);
 
-$("#page-subheading").append("Summary statistics for "+communityNames.get(community));
 
   // Center the map on the community selected
   if (community == "SE") {
@@ -185,7 +159,7 @@ $("#page-subheading").append("Summary statistics for "+communityNames.get(commun
   };
 
   // Create the map and store it in the variable
-  airQualityMap = new google.maps.Map(mapCanvas, mapOptions);
+//  airQualityMap = new google.maps.Map(mapCanvas, mapOptions);
 
   // // Load previous selection if available
   // loadPreviousSelection();
@@ -194,15 +168,17 @@ $("#page-subheading").append("Summary statistics for "+communityNames.get(commun
   fetchPollutant(community);
 }
 
+
 // function to load the content of the shapefile
 
 function load_shapefile(community){
 
+  //  alert("community is " + community);     	
      if (community == "SE") {
         document.getElementById("community-name").innerHTML="Summary Statistics for South East";
 	document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SE/index.html" width="1000" height="600" ></object>';
 } else if (community == "SL"){
-
+          
        document.getElementById("community-name").innerHTML="Summary Statistics for South Loop";
        document.getElementById("map").innerHTML='<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
 
@@ -223,7 +199,11 @@ function load_shapefile(community){
 }
 }
 
+
+
+
 function fetchPollutant(community) {
+
   var api = AVERAGE;
 
   $.getJSON("/airquality/api/aqi/", function(aqivals) {
@@ -247,49 +227,31 @@ function fetchPollutant(community) {
       },
       "CO": {
         "manufacturers": ["airterrier_co"]
-      },
-      "PM1.0": {
-        "manufacturers": ["airterrier_pm1.0", "purpleairprimary_pm1.0"]
-      },
-      "PM2.5": {
-        "manufacturers": ["airterrier_pm2.5", "purpleairprimary_pm2.5", "metone_pm2.5"]
-      },
-      "PM10": {
-        "manufacturers": ["airterrier_pm10", "purpleairprimary_pm10", "metone_pm10"]
+        // },
+        // "PM1.0": {
+        //   "manufacturers": ["airterrier_pm1.0", "purpleairprimary_pm1.0"]
+        // },
+        // "PM2.5": {
+        //   "manufacturers": ["airterrier_pm2.5", "purpleairprimary_pm2.5", "metone_pm2.5"]
+        // },
+        // "PM10": {
+        //   "manufacturers": ["airterrier_pm10", "purpleairprimary_pm10", "metone_pm10"]
       }
     };
-    var aqivals1 = JSON.parse(JSON.stringify(aqivals));
+
     // plot bar chart for displaying pollutant average as percentage shares
-    fetchAQISharesData(aqivals1, pollutants, api, community).then((pollutantAVG) => {
-      console.log("Calling plotAQIShares");
-      return aggregateAQIShares(aqivals1, pollutantAVG);
-    }).then((percentageBreakdown)=>{
-      plotAQIShares(percentageBreakdown,community);
-    });
-  });
-}
-
-function fetchAQISharesData(aqivals, pollutants, api, community) {
-  return new Promise(function(resolve, reject) {
-
-    var pollutantAVG = new Map();
-
-    var promises = [];
+    fetchAQISharesData(aqivals, pollutants, api, community);
 
     // loop through each pollutant and generate graph
     for (const pollutant of Object.keys(pollutants)) {
+
       // fetches average reading from database and calls function for ploting graph
-      promises.push(getAveragePollutantData(pollutants[pollutant].manufacturers, pollutant, api, community, aqivals).then((pollutantavg) => {
-        // return value contains the overall average pollutant used for plotting AQI share graph
-        pollutantAVG.set(pollutant, pollutantavg);
-      }));
+      getAveragePollutantData(pollutants[pollutant].manufacturers, pollutant, api, community, aqivals);
+
     }
 
-    Promise.all(promises).then(() => {
-      resolve(pollutantAVG);
-    });
   });
-} // function fetchAQISharesData
+}
 
 /**
  * fetches average reading from database and calls function for ploting graph
@@ -297,45 +259,50 @@ function fetchAQISharesData(aqivals, pollutants, api, community) {
  *
  */
 function getAveragePollutantData(manufacturer, pollutant, api, community, aqivals) {
-  return new Promise((resolve, reject) => {
+  // return new Promise((resolve, reject) => {
 
-    // boolean variable to identify any data retrieved for pollutant
-    var haserrors = true;
+  // boolean variable to identify any data retrieved for pollutant
+  var haserrors = true;
 
-    // store the pollutant data to display using chart
-    var data = [];
+  // store the pollutant data to display using chart
+  var data = [];
 
-    var promises = [];
+  var promises = [];
 
-    manufacturer.forEach(function(item) {
-      // creating a promise call, handling success case in then block and error in catch block
-      promises.push(fetchGraphData(item, pollutant, api, "season", community)
-        .then(function(result) {
-          data.push(result);
-          haserrors = haserrors && false;
-        }).catch(function(error) {
-          console.warn(error);
-        }) // catch
-      ); // push
-
-    }); // foreach
-
-    // executes promises to fetch pollutant data from all manufacturer
-    Promise.all(promises).then(function() {
-
-        if (data.length == 0 || data.length == 1 && data[0].season.length == 0) {
-          console.warn("The selected pollutant did not return any data.")
-        }
-
-        // plot chart when all the data for pollutant is fetched
-        resolve(plotAveragePollutantChart(community, data, pollutant, aqivals));
-      })
-      .catch(function(error) {
+  manufacturer.forEach(function(item) {
+    // creating a promise call, handling success case in then block and error in catch block
+    promises.push(fetchGraphData(item, pollutant, api, "season", community)
+      .then(function(result) {
+        data.push(result);
+        haserrors = haserrors && false;
+      }).catch(function(error) {
         console.warn(error);
-        $("#dropdown-helptext").html("<span style='color: red;'>The " + pollutant + " pollutant did not return any data.</span>");
-        resetMapAndChart(false);
-      });
+      }) // catch
+    ) // push
+
   });
+  // }); // foreach
+
+  // executes promises to fetch pollutant data from all manufacturer
+  Promise.all(promises).then(function() {
+
+      if (data.length == 0 || data.length == 1 && data[0].season.length == 0) {
+        console.warn("The selected pollutant did not return any data.")
+      }
+
+      // plot chart when all the data for pollutant is fetched
+      plotAveragePollutantChart(community, data, pollutant, aqivals);
+    })
+    .catch(function(error) {
+      console.warn(error);
+      $("#dropdown-helptext").html("<span style='color: red;'>The " + pollutant + " pollutant did not return any data.</span>");
+      resetMapAndChart(false);
+    });
+  //});
+}
+
+String.prototype.toSentenceCase = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
 /**
@@ -345,163 +312,155 @@ function getAveragePollutantData(manufacturer, pollutant, api, community, aqival
  * @param  {string} aqivals
  */
 function plotAveragePollutantChart(community, data, pollutant, aqivals) {
-  return new Promise(function(resolve, reject) {
 
-    // to identify the max value in y axis
-    var ydata = [];
+  // to identify the max value in y axis
+  var ydata = [];
 
-    // variable that will aggreate from all the manufacturer data
-    var summer = [];
-    var winter = [];
-    var summeravg = 0.0;
-    var winteravg = 0.0;
+  // variable that will aggreate from all the manufacturer data
+  var summer = [];
+  var winter = [];
+  var summeravg = 0.0;
+  var winteravg = 0.0;
 
-    var timeofday = new Map();
-    timeofday.set("Morning", 0.0);
-    timeofday.set("Midday", 0.0);
-    timeofday.set("Afternoon", 0.0);
-    timeofday.set("Evening", 0.0);
-    timeofday.set("Overnight", 0.0);
+  var timeofday = new Map();
+  timeofday.set("Morning", 0.0);
+  timeofday.set("Midday", 0.0);
+  timeofday.set("Afternoon", 0.0);
+  timeofday.set("Evening", 0.0);
+  timeofday.set("Overnight", 0.0);
 
-    var summertime = new Map(timeofday);
-    var wintertime = new Map(timeofday);
+  var summertime = new Map(timeofday);
+  var wintertime = new Map(timeofday);
 
-    // if more than one manufacturer then calculate concat the data from all to calculate max height of y-axis
-    for (var i = 0; i < data.length; i++) {
+  // if more than one manufacturer then calculate concat the data from all to calculate max height of y-axis
+  for (var i = 0; i < data.length; i++) {
 
-      // divide the data among summer and winter as grouped bar chart
-      for (let j = 0; j < data[i].season.length; j++) {
+    // divide the data among summer and winter as grouped bar chart
+    for (let j = 0; j < data[i].season.length; j++) {
 
-        let key = data[i].section[j].toSentenceCase();
-        let value = data[i].val[j];
+      let key = data[i].section[j].toSentenceCase();
+      let value = data[i].val[j];
 
-        // build seperate array for summer and winter for bar chart display
-        if (data[i].season[j] == "Summer") {
-          summertime.set(key, summertime.get(key) + value);
-          // average is calcuated by dividing every consequtive value by 2, if the value is first then it is added with itself for calculating average
-          summeravg = ((summeravg == 0.0 ? value : summeravg) + value) / 2;
-        } else {
-          wintertime.set(key, wintertime.get(key) + value);
-          winteravg = ((winteravg == 0.0 ? value : winteravg) + value) / 2;
-        }
+      // build seperate array for summer and winter for bar chart display
+      if (data[i].season[j] == "Summer") {
+        summertime.set(key, summertime.get(key) + value);
+        // average is calcuated by dividing every consequtive value by 2, if the value is first then it is added with itself for calculating average
+        summeravg = ((summeravg == 0.0 ? value : summeravg) + value) / 2;
+      } else {
+        wintertime.set(key, wintertime.get(key) + value);
+        winteravg = ((winteravg == 0.0 ? value : winteravg) + value) / 2;
       }
-      // append to the array to create a linear array across all manufacturer to calculate the max height of y axis
-      ydata.concat(data[i].val);
     }
+    // append to the array to create a linear array across all manufacturer to calculate the max height of y axis
+    ydata.concat(data[i].val);
+    console.log(ydata);
+  }
 
-    // Max data point
-    var max_data = Math.max.apply(null, ydata);
+  // Max data point
+  var max_data = Math.max.apply(null, ydata);
 
-    // add 24 hours average reading
-    summertime.set("All day", summeravg);
-    wintertime.set("All day", winteravg);
+  // add 24 hours average reading
+  summertime.set("All day", summeravg);
+  wintertime.set("All day", winteravg);
 
-    let xaxis = Array.from(summertime.keys());
-    let summervalues = [];
-    let wintervalues = [];
+  let xaxis = Array.from(summertime.keys());
+  let summervalues = [];
+  let wintervalues = [];
 
-    xaxis.forEach((key) => {
-      summervalues.push(summertime.get(key))
-    });
-    xaxis.forEach((key) => {
-      wintervalues.push(wintertime.get(key))
-    });
-
-    var summerplotdata = {
-      "x": xaxis,
-      "y": summervalues,
-      "text": summervalues.map(x => x + "\n" + " summer"),
-      "textposition": "outside",
-      "hoverinfo": 'none',
-      "name": "Summer",
-      "type": "bar",
-      "mode": "markers",
-      "showlegend": false
-    };
-
-    var winterplotdata = {
-      "x": xaxis,
-      "y": wintervalues,
-      "text": wintervalues.map(x => x + "\n" + " winter"),
-      "text": "winter",
-      "textposition": "outside",
-      "hoverinfo": 'none',
-      "name": "Winter",
-      "type": "bar",
-      "mode": "markers",
-      "showlegend": false
-    };
-
-
-
-    // Set the chart width to the width of the chart's HTML element
-    var chart_width = $("#pollutant-" + pollutant.toLowerCase() + "-chart").width();
-
-    // Set layout settings
-    var layout = {
-      title: "Average reading for " + aqivals[pollutant].name + " pollutant for " + community + " neighborhood",
-      yaxis: {
-        title: "Pollutant",
-        range: [0, max_data + (0.1 * max_data)]
-      },
-      textposition: 'auto',
-      hoverinfo: 'none',
-      xaxis: {
-        range: xaxis,
-        title: 'Day breakdown'
-      },
-      width: chart_width - 25,
-      height: 700,
-      autosize: true,
-      barmode: 'group'
-    }; // layout
-
-    if (aqivals.hasOwnProperty(pollutant)) {
-      if (aqivals[pollutant].hasOwnProperty("unit")) {
-        layout.yaxis.title = aqivals[pollutant].unit;
-      }
-
-
-      if (aqivals[pollutant].hasOwnProperty("scale")) {
-        $.each(aqivals[pollutant].scale, function(thisscale) {
-          aqivals[pollutant].scale[thisscale].x[0] = "0";
-          aqivals[pollutant].scale[thisscale].x[1] = "0";
-        });
-        // TODO: Check that each bar is not individually colored
-        colorBars(winterplotdata, aqivals, pollutant)
-          .then((plotdata) => {
-            winterplotdata = plotdata;
-            return colorBars(summerplotdata, aqivals, pollutant);
-          })
-          .then((plotdata) => {
-            summerplotdata = plotdata;
-
-            // setting the value of y for pollutant scale to 0
-            $.each(aqivals[pollutant].scale, function(thisscale) {
-              aqivals[pollutant].scale[thisscale].y[0] = max_data;
-              aqivals[pollutant].scale[thisscale].y[1] = max_data;
-            });
-            return;
-          })
-          .then(() => {
-            Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
-            //Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata], layout);
-          });
-        // return result to plot AQI shares graph
-        console.log(pollutant + ":" + (summeravg + winteravg) / 2);
-        resolve((summeravg + winteravg) / 2);
-      }
-      // return empty result for AQI not available
-      resolve();
-    }
+  xaxis.forEach((key) => {
+    summervalues.push(summertime.get(key))
   });
+  xaxis.forEach((key) => {
+    wintervalues.push(wintertime.get(key))
+  });
+
+  var summerplotdata = {
+    "x": xaxis,
+    "y": summervalues,
+    "text": summervalues.map(x=>x+"\n"+" summer"),
+    "textposition": "outside",
+    "hoverinfo": 'none',
+    "name": "Summer",
+    "type": "bar",
+    "mode": "markers"
+  };
+
+  var winterplotdata = {
+    "x": xaxis,
+    "y": wintervalues,
+    "text": wintervalues.map(x=>x+"\n"+" winter"),
+    "text":"winter",
+    "textposition": "outside",
+    "hoverinfo": 'none',
+    "name": "Winter",
+    "type": "bar",
+    "mode": "markers"
+  };
+
+
+
+  // Set the chart width to the width of the chart's HTML element
+  var chart_width = $("#pollutant-" + pollutant.toLowerCase() + "-chart").width();
+
+  // Set layout settings
+  var layout = {
+    title: "Average reading for " + aqivals[pollutant].name + " pollutant for " + community + " neighborhood",
+    yaxis: {
+      title: "Pollutant",
+      range: [0, max_data + (0.1 * max_data)]
+    },
+    textposition: 'auto',
+    hoverinfo: 'none',
+    xaxis: {
+      range: xaxis,
+      title: 'Day breakdown'
+    },
+    width: chart_width - 25,
+    height: 700,
+    autosize: true,
+    barmode: 'group'
+  }; // layout
+
+  if (aqivals.hasOwnProperty(pollutant)) {
+    if (aqivals[pollutant].hasOwnProperty("unit")) {
+      layout.yaxis.title = aqivals[pollutant].unit;
+    }
+
+
+    if (aqivals[pollutant].hasOwnProperty("scale")) {
+      $.each(aqivals[pollutant].scale, function(thisscale) {
+        aqivals[pollutant].scale[thisscale].x[0] = "0";
+        aqivals[pollutant].scale[thisscale].x[1] = "0";
+      });
+      colorBars(winterplotdata,aqivals,pollutant)
+      .then((plotdata)=>{
+        winterplotdata=plotdata;
+        return colorBars(summerplotdata,aqivals,pollutant);
+      })
+      .then((plotdata)=>{
+        summerplotdata=plotdata;
+        return;
+      })
+      .then(()=>{
+        console.log(layout);
+        //Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata,aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+        Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata], layout);
+      })
+    } else {
+      Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata], layout);
+    }
+  } else {
+    Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [winterplotdata, summerplotdata], layout);
+  }
+
 } // function plotComparisonChart
 
-function colorBars(plotdata, aqivals, pollutant) {
+function colorBars(plotdata,aqivals, pollutant) {
   return new Promise(function(resolve, reject) {
 
     // color values for each bar
-    let color = [];
+    var color = [];
+
     // color the bar
     $.each(plotdata.y, function(yindex) {
       var yvalue = plotdata.y[yindex];
@@ -519,6 +478,7 @@ function colorBars(plotdata, aqivals, pollutant) {
         color.push(aqivals[pollutant].scale.hazardous.fillcolor);
       }
     });
+
     plotdata["marker"] = {
       "color": color
     };
@@ -526,8 +486,7 @@ function colorBars(plotdata, aqivals, pollutant) {
     resolve(plotdata);
 
   });
-} // function colorBars
-
+}
 /**
  * Creates markers and adds each sensor the list
  * @param  {string} manufacturer The name of the API folder to open.
@@ -1009,11 +968,9 @@ function fetchGraphData(manufacturer, pollutant, api, season, community) {
     // Request the data from API
     d3.json(url, function(error, data) {
       if (error) {
-        console.warn(url);
         console.warn(error);
         reject(error);
       }
-      console.log(pollutant + ":" + manufacturer);
       if (data.section.length == 0) {
         console.warn("No data returned for " + community + " community");
         reject("The selected pollutant did not return any data.");
@@ -1085,8 +1042,7 @@ function plotComparisonChart(season, data, pollutant, sensorcategory) {
       },
       width: chart_width - 25,
       height: 700,
-      autosize: true,
-      showlegend: false
+      autosize: true
     }; // layout
 
     if (aqivals.hasOwnProperty(pollutant)) {
@@ -1138,123 +1094,50 @@ function plotComparisonChart(season, data, pollutant, sensorcategory) {
 
 } // function plotComparisonChart
 
-function plotAQIShares(percentageBreakdown,community) {
+function fetchAQISharesData(aqivals, pollutants, api, community) {
+  // loop through each pollutant and generate graph
+  for (const pollutant of Object.keys(pollutants)) {
 
-  // Set the chart width to the width of the chart's HTML element
-  var chart_width = $("#aqi-shares-chart").width();
-  var transpose = m => m[0].map((x,i) => m.map(x => x[i]));
-  console.log("here");
-  percentageBreakdown=transpose(percentageBreakdown);
+    // fetches average reading from database and calls function for ploting graph
+    getAveragePollutantData(pollutants[pollutant].manufacturers, pollutant, api, community, aqivals);
 
-  var good = {
-  x: ['CO', 'NO2', 'O3','PM2.5','PM10'],
-  y: percentageBreakdown[0],
-  type: 'bar',
-  color:pollutantColors[0],
-  showlegend: false
-};
-  var moderate = {
-  x: ['CO', 'NO2', 'O3','PM2.5','PM10'],
-  y: percentageBreakdown[1],
-  type: 'bar',
-  color:pollutantColors[1],
-  showlegend: false
-};
-  var unhfsg = {
-  x: ['CO', 'NO2', 'O3','PM2.5','PM10'],
-  y: percentageBreakdown[2],
-  type: 'bar',
-  color:pollutantColors[2],
-  showlegend: false
-};
-  var unhealthy = {
-  x: ['CO', 'NO2', 'O3','PM2.5','PM10'],
-  y: percentageBreakdown[3],
-  type: 'bar',
-  color:pollutantColors[3],
-  showlegend: false
-};
-  var veryunhealthy = {
-  x: ['CO', 'NO2', 'O3','PM2.5','PM10'],
-  y: percentageBreakdown[4],
-  type: 'bar',
-  color:pollutantColors[4],
-  showlegend: false
-};
-  var hazardous = {
-  x: ['CO', 'NO2', 'O3','PM2.5','PM10'],
-  y: percentageBreakdown[5],
-  type: 'bar',
-  color:pollutantColors[5],
-  showlegend: false
-};
-
-  // Set layout settings
-  var layout = {
-    title: "AQI readings for " + community + " neighborhood",
-    textposition: 'auto',
-    yaxis:{
-      title:'Percentage'
-    },
-    xaxis:{
-      title:'Pollutants'
-    },
-    hoverinfo: 'none',
-    width: chart_width - 25,
-    height: 700,
-    autosize: true,
-    barmode: 'stack',
-    showlegend:false
-  }; // layout
-  Plotly.newPlot("aqi-shares-chart", [good,moderate,unhfsg,unhealthy,veryunhealthy,hazardous], layout);
+  }
 }
-
-function aggregateAQIShares(aqivals, pollutantAVG) {
-  return new Promise(function(resolve, reject) {
-    var transPercent;
-    var percentageBreakdown = [];
-    var loopIndex = 0;
-    // loop through each pollutant and generate graph
-    for (let [key, value] of pollutantAVG) {
-      console.log(key + ":" + value);
-      console.log(typeof value != "undefined");
-      if (typeof value != "undefined") {
-        calculateAQIShares(aqivals, key, value).then((breakdown) => {
-          console.log(breakdown);
-          percentageBreakdown.push(breakdown);
-          loopIndex++;
-        });
-      }
-    }
-    resolve(percentageBreakdown);
-  });
-
-} // function aggregateAQIShares
 /**
  * divide the percentage breakdown of pollutant on different scales
  * @param aqivals    contains the pollutant scales and color for it's scale
  * @param pollutant  type of pollutant
  */
-function calculateAQIShares(aqivals, pollutant, pollutantAVG) {
-  return new Promise(function(resolve, reject) {
-    console.log(pollutant);
-    var scale = pollutantScale.get(pollutant);
-    // if pollutantAVG is zero then set to first value to scale
-    var total = pollutantAVG==0?scale[1]:pollutantAVG;
-    console.log(scale);
-    var percentageBreakdown = [];
-    // breaks down the pollutant total value in percent for each pollutant measure (ex: good, moderate, unhfsg, ... )
-    for (let j = 1, diffTotal = total; j<scale.length ; j++) {
-      var numerator = 0;
-      // Calculate each scales share
-      // if the remaining share (diffTotal) is greater than the scale (scale[i]-scale[i-1]) then assign the difference (scale[i]-scale[i-1]) for calculating the percentage else use the remaining (diffTotal) for calculating the percentage
-        numerator = (diffTotal - (scale[j] - scale[j - 1]) > 0) ? (scale[j] - scale[j - 1]) : diffTotal;
-        diffTotal-=numerator;
-      percentageBreakdown.push(numerator / total * 100);
-    } // for loop
-    resolve(percentageBreakdown);
-  });
-} // function calculateAQIShares
+function plotAQIShares(aqivals, pollutant) {
+
+  var scale = [];
+  scale.push(aqivals[pollutant].scale.good.y[0]);
+  scale.push(aqivals[pollutant].scale.moderate.y[0]);
+  scale.push(aqivals[pollutant].scale.unhfsg.y[0]);
+  scale.push(aqivals[pollutant].scale.unhealthy.y[0]);
+  scale.push(aqivals[pollutant].scale.veryunhealthy.y[0]);
+  scale.push(aqivals[pollutant].scale.hazardous.y[0]);
+
+  var percentageBreakdown = [];
+  const total = pollutantAGG.get(pollutant);
+  var diffTotal = total;
+
+
+  // breaks down the pollutant total value in percent for each pollutant measure (ex: good, moderate, unhfsg, ... )
+  for (var i = 0; i < scale.length; i++) {
+    var numerator;
+    // Calculate each scales share
+    // if the remaining share (diffTotal) is greater than the scale (scale[i]-scale[i-1]) then assign the difference (scale[i]-scale[i-1]) for calculating the percentage else use the remaining (diffTotal) for calculating the percentage
+    if (i = 0) {
+      numerator = (diffTotal - scale[i] > 0) ? (scale[i] - scale[i - 1]) : diffTotal;
+    } else {
+      numerator = (diffTotal - (scale[i] - scale[i - 1]) > 0) ? (scale[i] - scale[i - 1]) : diffTotal;
+    }
+    percentageBreakdown.push(numerator / total * 100);
+  } // for loop
+
+
+} // function plotAQIShares
 
 /**
  * Builds a Plot.ly chart from using the provided parameters.
@@ -1376,10 +1259,10 @@ function plotSummaryChart(community, season, data, pollutant, sensorcategory) {
 
         Plotly.newPlot("comparison-chart", [plotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardousaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
       } else {
-        Plotly.newPlot("comparison-chart", [plotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+        Plotly.newPlot("comparison-chart", [plotdataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
       }
     } else {
-      Plotly.newPlot("comparison-chart", [plotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
+      Plotly.newPlot("comparison-chart", [plotdataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
     }
     //Plotly.newPlot("chart", dataaqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous , layout);
 
@@ -1387,7 +1270,8 @@ function plotSummaryChart(community, season, data, pollutant, sensorcategory) {
 
   }); // getJSON aqi
 
-} // function plotSummaryChart
+} // function plotComparisonChart
+
 
 /**
  * Populates the pollutant menu with the available pollutants based on the sensor category.
@@ -1634,6 +1518,8 @@ function loadMobile(manufacturer, community, season) {
     }
   });
 }
+
+var heatmapdata = [];
 
 /**
  * Creates the Polyline from the route's lat/longs.
@@ -2191,3 +2077,4 @@ function initIntro() {
 //         }
 //     }
 // }
+
