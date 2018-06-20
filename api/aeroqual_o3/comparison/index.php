@@ -14,7 +14,7 @@ $season = $_GET['season'];
 
 
 // Build the SQL query
-$query = 'select location.community as x, coalesce(aeroqualo3.y,0) as y from (select community from stationarylocations group by community) location left join (SELECT aeroqualo3.community AS x, ROUND(CAST(AVG(o3ppm) as NUMERIC),3) AS y FROM aeroqualo3 WHERE season=$1 AND error IS distinct FROM 1 GROUP BY aeroqualo3.community) aeroqualo3 on location.community=aeroqualo3.x';
+$query = 'select location.community as x, coalesce(aeroqualo3.y,0) as y from (select community from stationarylocations group by community) location left join (SELECT aeroqualo3.community AS x, ROUND(CAST(AVG(o3ppm) as NUMERIC),3) AS y FROM aeroqualo3 WHERE season=$1 AND error IS distinct FROM 1 GROUP BY aeroqualo3.community) aeroqualo3 on location.community=aeroqualo3.x order by location.community';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season)) or die (return_error("Query failed.", pg_last_error()));
