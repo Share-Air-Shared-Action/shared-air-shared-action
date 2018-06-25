@@ -213,6 +213,14 @@ function load_shapefile(community) {
  * @param  {String} community     The name of the neighborhood
  */
 function fetchPollutant(community) {
+
+  $("#aqi-shares-chart").html("<h4 color='#FE2E2E'>Loading ... AQI reading graph for "+community+" neighborhood.</h4>");
+  $("#pollutant-no2-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of NO<sub>2</sub> for "+community+" neighborhood.</h4>");
+  $("#pollutant-co-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of CO for "+community+" neighborhood.</h4>");
+  $("#pollutant-o3-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of O<sub>3</sub> for "+community+" neighborhood.</h4>");
+  $("#pollutant-pm2.5-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of PM<sub>2.5</sub> for "+community+" neighborhood.</h4>");
+  $("#pollutant-pm10-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of PM<sub>10</sub> for "+community+" neighborhood.</h4>");
+
   var api = AVERAGE;
 
   $.getJSON("/airquality/api/aqi/", function(aqivals) {
@@ -374,7 +382,6 @@ function aggregateAQIReading(community, data, pollutant) {
     var aggData = new Map();
     var totalCount = 0;
     var values = [];
-
     for (let i = 0; i < data.length; i++) {
       let loopdata = JSON.parse(JSON.stringify(data[i]));
       let keys = Object.keys(loopdata.aqi);
@@ -417,11 +424,11 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
     var allvalues = [];
     var timeofday = new Map();
 
-    timeofday.set("Morning", 0.0);
-    timeofday.set("Midday", 0.0);
-    timeofday.set("Afternoon", 0.0);
-    timeofday.set("Evening", 0.0);
-    timeofday.set("Overnight", 0.0);
+    timeofday.set("Morning", []);
+    timeofday.set("Midday", []);
+    timeofday.set("Afternoon", []);
+    timeofday.set("Evening", []);
+    timeofday.set("Overnight", []);
 
     var summertime = new Map(timeofday);
     var wintertime = new Map(timeofday);
@@ -437,17 +444,27 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
         allvalues.push(value);
         // build seperate array for summer and winter for bar chart display
         if (data[i].season[j] == "Summer") {
-          summertime.set(key, summertime.get(key) == 0.0 ? value : (summertime.get(key) + value) / 2);
+          // append the new value to the array
+          summertime.set(key,summertime.get(key).concat(value) );
           // average is calcuated by dividing every consequtive value by 2, if the value is first then it is added with itself for calculating average
           summersum.push(value);
         } else {
-          wintertime.set(key, wintertime.get(key) == 0.0 ? value : (wintertime.get(key) + value) / 2);
+          // append the new value to the array
+          wintertime.set(key, wintertime.get(key).concat(value));
           wintersum.push(value);
         }
       }
       // append to the array to create a linear array across all manufacturer to calculate the max height of y axis
       ydata.concat(data[i].val);
     }
+
+    // add the array from each manufacturer and calculate the average
+    summertime.forEach((value,key,map)=>{
+      map.set(key,value.reduce((a,b)=>a+b,0)/value.length);
+    });
+    wintertime.forEach((value,key,map)=>{
+      map.set(key,value.reduce((a,b)=>a+b,0)/value.length);
+    });
 
     // Max data point
     var max_data = Math.max.apply(null, ydata);
@@ -548,6 +565,7 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
             return;
           })
           .then(() => {
+            $("#pollutant-" + pollutant.toLowerCase() + "-chart").html("");
             Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [summerplotdata, winterplotdata, aqivals[pollutant].scale.good, aqivals[pollutant].scale.moderate, aqivals[pollutant].scale.unhfsg, aqivals[pollutant].scale.unhealthy, aqivals[pollutant].scale.veryunhealthy, aqivals[pollutant].scale.hazardous], layout);
             //Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [summerplotdata, winterplotdata], layout);
           });
@@ -576,7 +594,7 @@ function colorBars(plotdata, aqivals, pollutant, width) {
     // color the bar
     var pollutantRange = pollutantScale.get(pollutant);
     $.each(plotdata.y, function(yindex) {
-      var yvalue = plotdata.y[yindex];
+      var yvalue = plotdata.y[yindex]?plotdata.y[yindex]:0;
       if (yvalue >= pollutantRange[0] && yvalue < pollutantRange[1]) {
         color.push(aqivals[pollutant].scale.good.fillcolor);
       } else if (yvalue >= pollutantRange[1] && yvalue < pollutantRange[2]) {
@@ -1302,7 +1320,7 @@ function plotAQIShares(pollutants, percentageBreakdown, community) {
     barmode: 'stack',
     showlegend: false
   }; // layout
-
+  $("#aqi-shares-chart").html("");
   Plotly.newPlot("aqi-shares-chart", [good, moderate, unhfsg, unhealthy, veryunhealthy, hazardous], layout);
 
 } // function plotAQIShares

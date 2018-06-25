@@ -18,7 +18,7 @@ $measurement_type = 'CO2 concentration';
 // Build the SQL query
 // Agregates from airterrier and wundergound indvidual for each date and then joined
 $query = "select season, day_section, ROUND(cast(avg(measured_value) as NUMERIC),3) val from (select season, case when tod >= 6 and tod < 10 then 'morning' when tod >= 10 and tod < 14 then 'midday' when tod >= 14 and tod < 16 then 'afternoon' when tod >= 16 and tod < 20 then 'evening' when tod >= 20 and tod < 24 or tod >= 0 and tod < 6  then 'overnight' end day_section, measured_value from
-(select season,to_char(time,'HH24')::integer  tod, measured_value from airterrier where upper(substr(session_title,0,3))=$2 and season='Summer' or season='Winter' and error is distinct from 1 AND measurement_type = $1 ) part_1) part_2 group by season,day_section";
+(select season,to_char(time,'HH24')::integer  tod, measured_value from airterrier where upper(substr(session_title,0,3))=$2 and (season='Summer' or season='Winter') and error is distinct from 1 AND measurement_type = $1 ) part_1) part_2 group by season,day_section";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($measurement_type,$community)) or die (return_error("Query failed.", pg_last_error()));
