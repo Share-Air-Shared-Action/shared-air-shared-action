@@ -1,5 +1,11 @@
 // Initialize the variable for the map
 var airQualityMap;
+var communityNames = new Map();
+communityNames.set("SE", "South East");
+communityNames.set("SL", "South Loop");
+communityNames.set("PC", "Altgeld Garden");
+communityNames.set("NB", "Northbrook");
+communityNames.set("LV", "Little Village");
 
 // Initialize arrays for markers and routes
 var markers = [];
@@ -18,6 +24,9 @@ var selected_pollutantHTML;
 const COMPARE = "compare";
 const AVERAGE = "average";
 const AQIREADING = "aqi_reading";
+const STATIONARY_REP = "Stationary (Reported Values)";
+const STATIONARY_15MIN = "Stationary (15 minutes averages)";
+const STATIONARY_1HR = "Stationary (1 hour averages)";
 
 // pollutant category that have AQI scales
 var pollutantScale = new Map();
@@ -128,7 +137,7 @@ function initMap() {
 }
 
 /**
- * Loads the Google Map object for view summary statistics page on callback from Google Maps API
+ * Loads the Google Map object for view summary statistics page on callback from Google Maps API and loads the community specific summary data
  */
 function renderSummaryPage() {
 
@@ -136,77 +145,45 @@ function renderSummaryPage() {
   var urlString = window.location.href;
   var url = new URL(urlString);
   var community = url.searchParams.get("community");
-  fetchPollutant(community);
 
-  var centerloc;
-  // Get the map object
-  var mapCanvas = document.getElementById('map');
-
-  //    var centerloc  = new google.maps.LatLng(41.700564, -87.530184);
-
-  // Center the map on the community selected
-  if (community == "SE") {
-    centerloc = new google.maps.LatLng(41.700564, -87.530184);
-  } else if (community == "SL") {
-    centerloc = new google.maps.LatLng(41.867463, -87.627174);
-  } else if (community == "NB") {
-
-    centerloc = new google.maps.LatLng(42.13999619, -87.79922692);
-
-  } else if (community == "PC") {
-    centerloc = new google.maps.LatLng(41.65842, -87.6084);
-  } else if (community == "LV") {
-    centerloc = new google.maps.LatLng(41.846744, -87.707265);
+  // fetch data and render map if the community is recognizable
+  if (communityNames.has(community)) {
+    fetchPollutant(community);
+    loadShapefile(community);
   } else {
-    centerloc = new google.maps.LatLng(41.7923412, -87.6030669);
+    // center the map to chicago and display the error message
+    $("#community-name").text("The " + community + " neighborhood could not be identified");
+    var location = new google.maps.LatLng(41.7923412, -87.6030669);
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 10,
+      center: location,
+      panControl: true,
+      scrollwheel: false,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+  } // if else
+
+} // function renderSummaryPage
+
+/**
+ * function to load shape file and display map for listed communityNames
+ * * @param  {string}  community     Name of the community to display the summary page
+ */
+function loadShapefile(community) {
+
+  $("#community-name").text("Summary Statistics for " + communityNames.get(community));
+  if (community != "NB") {
+    $("#map").append('<object type="text/html"  data="/airquality/shape_file/' + community + '/index.html" width="1000" height="600" ></object>');
+  } else {
+    // Centering at Northbrook as shapefile is not avaliable for it
+    var location = new google.maps.LatLng(42.13999619, -87.79922692);
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 12,
+      center: location
+    });
   }
 
-  // Set the map options
-  var mapOptions = {
-    center: centerloc,
-    zoom: 10,
-    panControl: true,
-    scrollwheel: false,
-    mapTypeId: google.maps.MapTypeId.ROADMAP
-  };
-
-  // Create the map and store it in the variable
-  airQualityMap = new google.maps.Map(mapCanvas, mapOptions);
-
-  // // Load previous selection if available
-  // loadPreviousSelection();
-
-  load_shapefile(community);
-}
-
-// function to load the content of the shapefile
-
-function load_shapefile(community) {
-
-  if (community == "SE") {
-    document.getElementById("community-name").innerHTML = "Summary Statistics for South East";
-    document.getElementById("map").innerHTML = '<object type="text/html"  data="/airquality/shape_file/SE/index.html" width="1000" height="600" ></object>';
-  } else if (community == "SL") {
-
-    document.getElementById("community-name").innerHTML = "Summary Statistics for South Loop";
-    document.getElementById("map").innerHTML = '<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
-
-  } else if (community == "PC") {
-
-    document.getElementById("community-name").innerHTML = "Summary Statistics for Altgeld Garden";
-    document.getElementById("map").innerHTML = '<object type="text/html"  data="/airquality/shape_file/PC/index.html" width="1000" height="600" ></object>';
-  } else if (community == "NB") {
-
-    document.getElementById("community-name").innerHTML = "Summary Statistics for Northbrook";
-    document.getElementById("map").innerHTML = '<object type="text/html"  data="/airquality/shape_file/NB/index.html" width="1000" height="600" ></object>';
-  } else if (community == "LV") {
-
-    document.getElementById("community-name").innerHTML = "Summary Statistics for Little Village";
-    document.getElementById("map").innerHTML = '<object type="text/html"  data="/airquality/shape_file/LV/index.html" width="1000" height="600" ></object>';
-  } else {
-    document.getElementById("map").innerHTML = '<object type="text/html"  data="/airquality/shape_file/SL/index.html" width="1000" height="600" ></object>';
-  }
-}
+} // function loadShapefile
 
 /**
  * called when view-summary page is called to display the chart
@@ -214,12 +191,12 @@ function load_shapefile(community) {
  */
 function fetchPollutant(community) {
 
-  $("#aqi-shares-chart").html("<h4 color='#FE2E2E'>Loading ... AQI reading graph for "+community+" neighborhood.</h4>");
-  $("#pollutant-no2-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of NO<sub>2</sub> for "+community+" neighborhood.</h4>");
-  $("#pollutant-co-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of CO for "+community+" neighborhood.</h4>");
-  $("#pollutant-o3-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of O<sub>3</sub> for "+community+" neighborhood.</h4>");
-  $("#pollutant-pm2.5-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of PM<sub>2.5</sub> for "+community+" neighborhood.</h4>");
-  $("#pollutant-pm10-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of PM<sub>10</sub> for "+community+" neighborhood.</h4>");
+  $("#aqi-shares-chart").html("<h4 color='#FE2E2E'>Loading ... AQI reading graph for " + community + " neighborhood.</h4>");
+  $("#pollutant-no2-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of NO<sub>2</sub> for " + community + " neighborhood.</h4>");
+  $("#pollutant-co-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of CO for " + community + " neighborhood.</h4>");
+  $("#pollutant-o3-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of O<sub>3</sub> for " + community + " neighborhood.</h4>");
+  $("#pollutant-pm2.5-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of PM<sub>2.5</sub> for " + community + " neighborhood.</h4>");
+  $("#pollutant-pm10-chart").html("<h4 color='#FE2E2E'>Loading ... Average reading graph of PM<sub>10</sub> for " + community + " neighborhood.</h4>");
 
   var api = AVERAGE;
 
@@ -311,8 +288,6 @@ function fetchAQISharesData(aqivals, pollutants, api, community) {
 
   }); // promise
 } // function fetchAQISharesData
-
-
 
 /**
  * fetches average reading from database and calls function for ploting graph
@@ -445,7 +420,7 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
         // build seperate array for summer and winter for bar chart display
         if (data[i].season[j] == "Summer") {
           // append the new value to the array
-          summertime.set(key,summertime.get(key).concat(value) );
+          summertime.set(key, summertime.get(key).concat(value));
           // average is calcuated by dividing every consequtive value by 2, if the value is first then it is added with itself for calculating average
           summersum.push(value);
         } else {
@@ -459,11 +434,11 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
     }
 
     // add the array from each manufacturer and calculate the average
-    summertime.forEach((value,key,map)=>{
-      map.set(key,value.reduce((a,b)=>a+b,0)/value.length);
+    summertime.forEach((value, key, map) => {
+      map.set(key, value.reduce((a, b) => a + b, 0) / value.length);
     });
-    wintertime.forEach((value,key,map)=>{
-      map.set(key,value.reduce((a,b)=>a+b,0)/value.length);
+    wintertime.forEach((value, key, map) => {
+      map.set(key, value.reduce((a, b) => a + b, 0) / value.length);
     });
 
     // Max data point
@@ -594,7 +569,7 @@ function colorBars(plotdata, aqivals, pollutant, width) {
     // color the bar
     var pollutantRange = pollutantScale.get(pollutant);
     $.each(plotdata.y, function(yindex) {
-      var yvalue = plotdata.y[yindex]?plotdata.y[yindex]:0;
+      var yvalue = plotdata.y[yindex] ? plotdata.y[yindex] : 0;
       if (yvalue >= pollutantRange[0] && yvalue < pollutantRange[1]) {
         color.push(aqivals[pollutant].scale.good.fillcolor);
       } else if (yvalue >= pollutantRange[1] && yvalue < pollutantRange[2]) {
@@ -779,9 +754,13 @@ function createMarkers(manufacturer, community, season, pollutant) {
  */
 function buildChart(manufacturer, device, pollutant, season, scrollto, community) {
 
+  // Identify whether the chart to display is reported or 15 min average
+  var sensorcategory = $("#selected-sensorcategory").text();
+  // Identify whether the chart type to be displayed is reported chart or 15mins average or 1 hour average
+  var chart = "chart";
+  chart += (sensorcategory === STATIONARY_1HR) ? "_1hr" : "_15min";
   // Build the API URL
-  var url = "/airquality/api/" + manufacturer + "/chart/?device=" + device + "&season=" + season + "&community=" + community;
-
+  var url = "/airquality/api/" + manufacturer + "/" + chart + "/?device=" + device + "&season=" + season + "&community=" + community;
   // Request the data from API
   d3.json(url, function(error, data) {
     if (error) {
@@ -805,11 +784,19 @@ function buildChart(manufacturer, device, pollutant, season, scrollto, community
 
     // Set the chart width to the width of the chart's HTML element
     var chart_width = $("#chart").width();
-
+    var title = "";
+    // Assigning chart title based on whether the chart is 15 min or 1 hour average or the normal chart
+    if (chart == "chart_15min") {
+      title = "15 minute averages of ";
+    } else if (chart == "chart_1hr") {
+      title = "1 hour averages of ";
+    }
+    title += device + " data for " + season + " season";
     // Set layout settings
     var layout = {
       barmode: "group",
-      title: device + " data for " + season + " season",
+      // If the chart display 15 min average changing the Title
+      title: title,
       yaxis: {
         title: pollutant,
         range: [0, max_data + (0.1 * max_data)]
@@ -985,7 +972,7 @@ function loadManufacturers(sensorcategory, pollutant, api) {
         } else if (pollutant == "PM10") {
           manufacturer.push("airterrier_pm10");
         }
-      } else if (sensorcategory == "Stationary") {
+      } else if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
         if (pollutant == "NO2") {
           manufacturer.push("aeroqual_no2");
         } else if (pollutant == "O3") {
@@ -1466,7 +1453,7 @@ function loadAvailablePollutants(sensorcategory) {
   $("#selected-pollutant").text("Pollutant");
 
   // Build the list
-  if (sensorcategory == "Stationary") {
+  if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
     // NO2, O3, PM1.0, PM2.5, PM10
     $("#dropdown-pollutant-container ul").append("<li><a>NO<sub>2</sub></a></li>");
     $("#dropdown-pollutant-container ul").append("<li><a>O<sub>3</sub></a></li>");
@@ -1519,17 +1506,17 @@ function updateMap(pollutant, sensorcategory, community, season) {
       $("#dropdown-helptext").html("Loading...");
     }
   } else if (selected_pollutant == "NO2") {
-    if (sensorcategory == "Stationary") {
+    if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
       createMarkers("aeroqual_no2", community, season, pollutant);
       showSensorPicker();
     }
   } else if (selected_pollutant == "O3") {
-    if (sensorcategory == "Stationary") {
+    if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
       createMarkers("aeroqual_o3", community, season, pollutant);
       showSensorPicker();
     }
   } else if (selected_pollutant == "PM1.0") {
-    if (sensorcategory == "Stationary") {
+    if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
       createMarkers("purpleairprimary_pm1.0", community, season, pollutant);
       showSensorPicker();
     } else if (sensorcategory == "Mobile") {
@@ -1537,7 +1524,7 @@ function updateMap(pollutant, sensorcategory, community, season) {
       $("#dropdown-helptext").html("Loading...");
     }
   } else if (selected_pollutant == "PM2.5") {
-    if (sensorcategory == "Stationary") {
+    if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
       createMarkers("purpleairprimary_pm2.5", community, season, pollutant);
       createMarkers("metone_pm2.5", community, season, pollutant);
       showSensorPicker();
@@ -1546,7 +1533,7 @@ function updateMap(pollutant, sensorcategory, community, season) {
       $("#dropdown-helptext").html("Loading...");
     }
   } else if (selected_pollutant == "PM10") {
-    if (sensorcategory == "Stationary") {
+    if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
       // Load purpleairprimary_pm10
       createMarkers("purpleairprimary_pm10", community, season, pollutant);
       createMarkers("metone_pm10", community, season, pollutant);
@@ -1563,7 +1550,7 @@ function updateMap(pollutant, sensorcategory, community, season) {
  */
 function showSensorPicker() {
   $("#dropdown-sensor-container").css("display", "inherit");
-  if (selected_sensorcategory == "Stationary") {
+  if (selected_sensorcategory == STATIONARY_REP || selected_sensorcategory == STATIONARY_15MIN || selected_sensorcategory == STATIONARY_1HR) {
     $("#selected-sensor").text("Sensor");
   } else {
     $("#selected-sensor").text("Route");
@@ -1666,7 +1653,7 @@ function resetMapAndChart(resetSensorList) {
   if (resetSensorList) {
     // Reset the sensor list
     $("#dropdown-sensor-container li").remove();
-    if (selected_sensorcategory == "Stationary") {
+    if (selected_sensorcategory == STATIONARY_REP || selected_sensorcategory == STATIONARY_15MIN || selected_sensorcategory == STATIONARY_1HR) {
       $("#selected-sensor").text("Sensor");
     } else {
       $("#selected-sensor").text("Route");
@@ -2180,7 +2167,7 @@ function updateSummaryHeaders(pollutant, sensorcategory) {
   var pollutantUnit = pollutant;
 
   var avgdesc;
-  if (sensorcategory == "Stationary") {
+  if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
     avgdesc = "24-hour ";
   } else if (sensorcategory == "Mobile") {
     avgdesc = "Route ";
@@ -2204,7 +2191,7 @@ function initIntro() {
         selectSeason("Summer");
         break;
       case "dropdown-sensorcategory-container":
-        selectSensorCategory("Stationary");
+        selectSensorCategory(STATIONARY_REP);
         break;
       case "dropdown-pollutant-container":
         selectPollutant("PM2.5");

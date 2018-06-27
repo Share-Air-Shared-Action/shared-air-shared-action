@@ -568,7 +568,7 @@ Made in Egypt
             WinHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || screen.height);
 
             document.getElementById(String('LeftPrtDiv')).style.width = String((WinWidth * LeftWid) + 'px');
-            document.getElementById(String('GoogleDiv')).style.width = String((WinWidth * GoogleWid) + 'px');
+            document.getElementById(String('GoogleDiv')).style.width = String("100%");//String((WinWidth * GoogleWid) + 'px');
 
             document.getElementById(String('GoogleDiv')).style.height = String((WinHeight * 0.85) + 'px');
             document.getElementById('MouseOverCoords').style.left = String((WinWidth * GoogleWid * 0.20) + 'px');
@@ -682,9 +682,9 @@ Made in Egypt
                 navigator.splashscreen.hide();
             } catch (e) { }
             OnResizeFunc();
-			
-			
-			
+
+
+
 			LoadJsLayer('LV.js' ,'SetLVGLayer(1) ; RefreshGMap(); GetFieldsList(document.getElementById(String(\'GLyrNo\')).value, \'FieldssSearchGrp\'); UnLoadJsLayer(\'LV.js\'); ', false );
 
             SetDataFuncPath('/SmartGISweb/');
@@ -702,13 +702,13 @@ Made in Egypt
             SetGpsMoveFunc('MyGPSMove');
             SetGpsClickFunc('MyGPSClick');
             SetGInputSearchBox(1, 'GAdr', 101, 'GeoDataDiv', 'Places', 'Green', 'yellow', null);
-            ShowGTrafficLayer(1);
+            hideGTrafficLayer(1);
             try { document.getElementById('LayersSearchBak').innerHTML = document.getElementById('LayersSearchGrp').innerHTML; } catch (err) { }
             try { LoadAccCookies(); } catch (err) { }
             try { LogInFunc(); } catch (err) { }
             LeftArrowFunc();
             dragDiv('EditFrm'); dragDiv('PrivacyFrm'); dragDiv('InternalFrm'); dragDiv('ExternalFrm');
-			
+
 			RightArrowFunc();
         }
 
@@ -716,7 +716,7 @@ Made in Egypt
 </head>
 <body class="MainBody" onload="JavaScript: OnLoadFunc();" onresize="JavaScript: OnResizeFunc();">
     <table class="MainLayoutTbl">
-        <tr id="HeaderTR">
+        <tr id="HeaderTR" hidden>
             <td colspan="2">
                 <div id="HeaderDiv" class="HeaderPrt">
                     <div id="BannerDiv" class="BannerPrt">
@@ -726,12 +726,12 @@ Made in Egypt
             </td>
         </tr>
         <tr id="BodyTR">
-            <td id="LeftTD" class="LeftPrt">
+            <td id="LeftTD" class="LeftPrt" hidden>
                 <div id="LeftPrtDiv" class="LeftPrt">
                     <div id="MenuDiv" style="position: relative; top: 0pt; left: 0pt; z-index: 1;">
                         <nav class="NavPrt">
                             <ul class="hmenu">
-                                
+
                             </ul>
                         </nav>
                     </div>
@@ -1193,8 +1193,8 @@ Made in Egypt
             <td id="GoogleTD" class="GooglePrt">
                 <div id="GooglePrtDiv" style="position: relative; width: 100%;">
                     <div id="GoogleDiv" style="width:100%; height:200px;"></div>
-                    
-                    
+
+
                     <div id="MouseOverCoords" style="position: absolute; bottom: 0pt; left: 100pt; z-index: 0; direction: ltr; font-weight:bold; background-color: #F0F0F0;">
                         Click Point =<br />Lat: 00° 00' 00.000" <br />Lng: 00° 00' 00.000"
                     </div>
@@ -1206,9 +1206,9 @@ Made in Egypt
                 </div>
             </td>
         </tr>
-        <tr id="FooterTR">
+        <tr id="FooterTR" hidden>
             <td>
-                <select class="DropDown" id="LangID" onchange="JavaScript: try { localStorage.LangID = document.getElementById('LangID').value; } catch (e) { }">
+                <select class="DropDown" id="LangID" onchange="JavaScript: try { localStorage.LangID = document.getElementById('LangID').value; } catch (e) { }" hidden>
                     <option value="ar"> Arabic </option>
                     <option value="bg"> Bulgarian </option>
                     <option value="bn"> Bengali </option>
@@ -1264,7 +1264,7 @@ Made in Egypt
                     <option value="zh-TW"> Chinese (Traditional) </option>
                 </select>
             </td>
-           
+
         </tr>
     </table>
     <div id="ResultDiv" style="width:0; height:0; display:none;"></div>
@@ -1333,4 +1333,3 @@ Made in Egypt
     </div>
 </body>
 </html>
-
