@@ -243,7 +243,15 @@ function fetchPollutant(community) {
     fetchAQISharesData(aqivals1, pollutants, api, community).then((result) => {
       //return aggregateAQIShares(aqivals1, pollutantAVG);
       console.log(result);
-      return plotAQIShares(result.names, result.readings, community);
+      let pollutantNames=[];
+      let pollutantReadings=[];
+      result.forEach((value,key,map)=>{
+        pollutantNames.push(key);
+        pollutantReadings.push(value);
+      });
+      console.log(pollutantNames);
+      console.log(pollutantReadings);
+      return plotAQIShares(pollutantNames, pollutantReadings, community);
     }); // fetchAQISharesData call
 
   }); // getJSON
@@ -259,7 +267,7 @@ function fetchPollutant(community) {
 function fetchAQISharesData(aqivals, pollutants, api, community) {
   return new Promise(function(resolve, reject) {
 
-    var pollutantAVG = [];
+    var pollutantAVG = new Map();
     var promises = [];
     var aqipromises = [];
     var selectedpollutant = [];
@@ -268,22 +276,22 @@ function fetchAQISharesData(aqivals, pollutants, api, community) {
     for (const pollutant of Object.keys(pollutants)) {
       // skip if aqi is not present
       if (pollutants[pollutant].hasaqi) {
-        selectedpollutant.push(pollutant);
+        //selectedpollutant.push(pollutant);
         // fetches average reading from database and calls function for ploting graph
         getAveragePollutantData(pollutants[pollutant].manufacturers, pollutant, AVERAGE, community, aqivals);
 
         aqipromises.push(getAveragePollutantData(pollutants[pollutant].manufacturers, pollutant, AQIREADING, community, aqivals).then((pollutantavg) => {
           // return value contains the overall average pollutant used for plotting AQI share graph
-          pollutantAVG.push(pollutantavg);
+          console.log(pollutant);
+          console.log(pollutantavg);
+          //pollutantAVG.push(pollutantavg);
+          pollutantAVG.set(pollutant,pollutantavg);
         }));
       } // if
     } // for loop
 
     Promise.all(aqipromises).then(() => {
-      resolve({
-        names: selectedpollutant,
-        readings: pollutantAVG
-      });
+      resolve(pollutantAVG);
     }); // Promise all
 
   }); // promise
@@ -322,7 +330,7 @@ function getAveragePollutantData(manufacturer, pollutant, api, community, aqival
     Promise.all(promises).then(function() {
 
         if (data.length == 0) {
-          console.warn("The selected pollutant did not return any data.")
+          console.warn("The "+pollutant+" pollutant for "+manufacturer+" manufacturer did not return any data.")
         }
         if (api == AVERAGE) {
           // plot average chart when all the data for pollutant is fetched
@@ -338,7 +346,7 @@ function getAveragePollutantData(manufacturer, pollutant, api, community, aqival
       }) // Promise all
       .catch(function(error) {
         console.warn(error);
-        $("#dropdown-helptext").html("<span style='color: red;'>The " + pollutant + " pollutant did not return any data.</span>");
+        $("#dropdown-helptext").html("<span class='error-message'>The " + pollutant + " pollutant did not return any data.</span>");
         resetMapAndChart(false);
       }); // catch
 
@@ -433,97 +441,112 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
       ydata.concat(data[i].val);
     }
 
-    // add the array from each manufacturer and calculate the average
-    summertime.forEach((value, key, map) => {
-      map.set(key, value.reduce((a, b) => a + b, 0) / value.length);
-    });
-    wintertime.forEach((value, key, map) => {
-      map.set(key, value.reduce((a, b) => a + b, 0) / value.length);
-    });
-
-    // Max data point
-    var max_data = Math.max.apply(null, ydata);
-
-    // add 24 hours average reading
-    summertime.set("All day", (summersum.reduce((a, b) => a + b, 0) / summersum.length));
-    wintertime.set("All day", (wintersum.reduce((a, b) => a + b, 0) / wintersum.length));
-
-    let xaxis = Array.from(summertime.keys());
-    let xaxisNames = ["Morning (09AM-10AM)", "Midday (10AM-2PM)", "Afternoon (2PM-4PM)", "Evening (4PM-8PM)", "Overnight (8PM-6AM)", "All day "];
-    let summervalues = [];
-    let wintervalues = [];
-
-    // populating the values of for summer and winter averages
-    xaxis.forEach((key) => {
-      if (summertime.get(key) < 1.0) {
-        summervalues.push(Math.round(summertime.get(key) * 100) / 100); // rounding to two decimal places
-      } else {
-        summervalues.push(Math.round(summertime.get(key)));
-      }
-    });
-    xaxis.forEach((key) => {
-      if (wintertime.get(key) < 1.0) {
-        wintervalues.push(Math.round(wintertime.get(key) * 100) / 100);
-      } else {
-        wintervalues.push(Math.round(wintertime.get(key)));
+    let dataError = true;
+    allvalues.forEach((element)=>{
+      if(!isNaN(element)){
+        dataError=false;
       }
     });
 
-    var summerplotdata = {
-      "x": xaxisNames,
-      "y": summervalues,
-      "text": summervalues,
-      "textposition": "outside",
-      "hoverinfo": 'none',
-      "name": "Summer",
-      "type": "bar",
-      "mode": "markers",
-    };
+    // if no data to display return with a error message
+    if(dataError){
+      console.log(pollutant+":"+dataError);
+      $("#pollutant-" + pollutant.toLowerCase() + "-chart").html("<h4 class='error-message'>No data readings available for "+pollutant+" in " + communityNames.get(community) + " neighborhood.</h4>");
+      resolve(dataError);
+    } else {
 
-    var winterplotdata = {
-      "x": xaxisNames,
-      "y": wintervalues,
-      "text": wintervalues,
-      "textposition": "outside",
-      "hoverinfo": 'none',
-      "name": "Winter",
-      "type": "bar",
-      "mode": "markers",
-    };
+      console.log("after");
+      // add the array from each manufacturer and calculate the average
+      summertime.forEach((value, key, map) => {
+        map.set(key, value.reduce((a, b) => a + b, 0) / value.length);
+      });
+      wintertime.forEach((value, key, map) => {
+        map.set(key, value.reduce((a, b) => a + b, 0) / value.length);
+      });
 
-    // Set the chart width to the width of the chart's HTML element
-    var chart_width = $("#pollutant-" + pollutant.toLowerCase() + "-chart").width();
+      // Max data point
+      var max_data = Math.max.apply(null, ydata);
 
-    // Set layout settings
-    var layout = {
-      title: "Average reading for " + aqivals[pollutant].name + " pollutant for " + community + " neighborhood",
-      yaxis: {
-        title: "Pollutant",
-        range: [0, max_data + (0.1 * max_data)]
-      },
-      textposition: 'auto',
-      hoverinfo: 'none',
-      // xaxis: {
-      //   range: xaxisNames,
-      //   title: 'Day breakdown'
-      // },
-      width: chart_width - 25,
-      height: 700,
-      autosize: true,
-      barmode: 'group'
-    }; // layout
+      // add 24 hours average reading
+      summertime.set("All day", (summersum.reduce((a, b) => a + b, 0) / summersum.length));
+      wintertime.set("All day", (wintersum.reduce((a, b) => a + b, 0) / wintersum.length));
 
-    if (aqivals.hasOwnProperty(pollutant)) {
-      if (aqivals[pollutant].hasOwnProperty("unit")) {
-        layout.yaxis.title = aqivals[pollutant].unit;
-      }
+      let xaxis = Array.from(summertime.keys());
+      let xaxisNames = ["Morning (09AM-10AM)", "Midday (10AM-2PM)", "Afternoon (2PM-4PM)", "Evening (4PM-8PM)", "Overnight (8PM-6AM)", "All day "];
+      let summervalues = [];
+      let wintervalues = [];
 
-      if (aqivals[pollutant].hasOwnProperty("scale")) {
-        $.each(aqivals[pollutant].scale, function(thisscale) {
-          aqivals[pollutant].scale[thisscale].x[0] = "0";
-          aqivals[pollutant].scale[thisscale].x[1] = "0";
-        });
-        colorBars(winterplotdata, aqivals, pollutant, 2) // width of line = 2
+      // populating the values of for summer and winter averages
+      xaxis.forEach((key) => {
+        if (summertime.get(key) < 1.0) {
+          summervalues.push(Math.round(summertime.get(key) * 100) / 100); // rounding to two decimal places
+        } else {
+          summervalues.push(Math.round(summertime.get(key)));
+        }
+      });
+      xaxis.forEach((key) => {
+        if (wintertime.get(key) < 1.0) {
+          wintervalues.push(Math.round(wintertime.get(key) * 100) / 100);
+        } else {
+          wintervalues.push(Math.round(wintertime.get(key)));
+        }
+      });
+
+      var summerplotdata = {
+        "x": xaxisNames,
+        "y": summervalues,
+        "text": summervalues,
+        "textposition": "outside",
+        "hoverinfo": 'none',
+        "name": "Summer",
+        "type": "bar",
+        "mode": "markers",
+      };
+
+      var winterplotdata = {
+        "x": xaxisNames,
+        "y": wintervalues,
+        "text": wintervalues,
+        "textposition": "outside",
+        "hoverinfo": 'none',
+        "name": "Winter",
+        "type": "bar",
+        "mode": "markers",
+      };
+
+      // Set the chart width to the width of the chart's HTML element
+      var chart_width = $("#pollutant-" + pollutant.toLowerCase() + "-chart").width();
+
+      // Set layout settings
+      var layout = {
+        title: "Average reading for " + aqivals[pollutant].name + " pollutant for " + community + " neighborhood",
+        yaxis: {
+          title: "Pollutant",
+          range: [0, max_data + (0.1 * max_data)]
+        },
+        textposition: 'auto',
+        hoverinfo: 'none',
+        // xaxis: {
+        //   range: xaxisNames,
+        //   title: 'Day breakdown'
+        // },
+        width: chart_width - 25,
+        height: 700,
+        autosize: true,
+        barmode: 'group'
+      }; // layout
+
+      if (aqivals.hasOwnProperty(pollutant)) {
+        if (aqivals[pollutant].hasOwnProperty("unit")) {
+          layout.yaxis.title = aqivals[pollutant].unit;
+        }
+
+        if (aqivals[pollutant].hasOwnProperty("scale")) {
+          $.each(aqivals[pollutant].scale, function(thisscale) {
+            aqivals[pollutant].scale[thisscale].x[0] = "0";
+            aqivals[pollutant].scale[thisscale].x[1] = "0";
+          });
+          colorBars(winterplotdata, aqivals, pollutant, 2) // width of line = 2
           .then((plotdata) => {
             winterplotdata = plotdata;
             return colorBars(summerplotdata, aqivals, pollutant, 0.5); // width of line = 0.5
@@ -545,12 +568,13 @@ function plotAveragePollutantChart(community, data, pollutant, aqivals) {
             //Plotly.newPlot("pollutant-" + pollutant.toLowerCase() + "-chart", [summerplotdata, winterplotdata], layout);
           });
 
-        // return result to plot AQI shares graph
-        resolve(allvalues.length > 0 ? allvalues.reduce((a, b) => a + b) / allvalues.length : 0);
+          // return result to plot AQI shares graph
+          resolve(allvalues.length > 0 ? allvalues.reduce((a, b) => a + b) / allvalues.length : 0);
+        }
+        // return empty result for AQI not available
+        resolve();
       }
-      // return empty result for AQI not available
-      resolve();
-    }
+    } // if-else
   });
 } // function plotComparisonChart
 
@@ -603,8 +627,9 @@ function colorBars(plotdata, aqivals, pollutant, width) {
  * @param  {string} season       The name of the season from which you want to get data.
  * @param  {string} pollutant    The name of the pollutant
  */
-function createMarkers(manufacturer, community, season, pollutant) {
+function createMarkers(manufacturer, community, season, pollutant, manufacturerChecked) {
   // Create colored markers for each different AQI
+  $("#dropdown-helptext").html("Loading the sensors ...");
   var aqi = {
     unknown: {
       path: google.maps.SymbolPath.CIRCLE,
@@ -661,12 +686,23 @@ function createMarkers(manufacturer, community, season, pollutant) {
   $.getJSON("/airquality/api/aqi/", function(aqivals) {
     // Send the request to the api for the specified manufacturer
     $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season + "&community=" + community, function(devices) {
-      if (!(devices)) {
-        $("#dropdown-sensor-container").css("display", "none");
-        $("#dropdown-helptext").html("Loading or no sensors found with the selected parameters.");
-      } else {
-        $("#dropdown-helptext").html("Loading...");
+      manufacturerChecked.set(manufacturer,true);
+      console.log(manufacturerChecked);
+      var displayError = new Boolean(true);
+      for(var key of manufacturerChecked){
+        console.log(manufacturerChecked.get(key[0]));
+        if(!manufacturerChecked.get(key[0])){
+          displayError = false;
+        }
       }
+      // Display info or error message based on the number of manufacturer checked
+        console.log(displayError);
+        if (!(devices)&&displayError) {
+          $("#dropdown-sensor-container").css("display", "none");
+          $("#dropdown-helptext").html("<span class='error-message'>No sensors found with the selected parameters.</span>");
+        } else {
+          $("#dropdown-helptext").html("Loading...");
+        }
       // For each device returned
       $.each(devices, function(key, device) {
         // If the device is in the community
@@ -758,17 +794,21 @@ function buildChart(manufacturer, device, pollutant, season, scrollto, community
   var sensorcategory = $("#selected-sensorcategory").text();
   // Identify whether the chart type to be displayed is reported chart or 15mins average or 1 hour average
   var chart = "chart";
-  chart += (sensorcategory === STATIONARY_1HR) ? "_1hr" : "_15min";
+  if(sensorcategory === STATIONARY_1HR){
+    chart+="_1hr";
+  }else if(sensorcategory === STATIONARY_15MIN){
+    chart+="_15min";
+  }
   // Build the API URL
   var url = "/airquality/api/" + manufacturer + "/" + chart + "/?device=" + device + "&season=" + season + "&community=" + community;
   // Request the data from API
   d3.json(url, function(error, data) {
     if (error) {
       return console.warn(error);
-      $("#dropdown-helptext").html("<span style='color: red;'>" + error + "</span>");
+      $("#dropdown-helptext").html("<span class='error-message'>" + error + "</span>");
     }
     if (data.x.length == 0) {
-      $("#dropdown-helptext").html("<span style='color: red;'>The selected sensor did not return any data.</span>");
+      $("#dropdown-helptext").html("<span class='error-message'>The selected sensor did not return any data.</span>");
       resetMapAndChart(false);
       return console.warn("The selected sensor did not return any data.");
     } else {
@@ -1021,6 +1061,7 @@ function plotCommunities(season, sensorcategory, pollutant, api) {
           haserrors = haserrors && false;
         }).catch(function(error) {
           console.warn(error);
+          $("#dropdown-helptext").html("<span class='error-message'>The selected pollutant did not return any data.</span>");
         }) // catch
       ) // push
     }); // foreach
@@ -1037,7 +1078,7 @@ function plotCommunities(season, sensorcategory, pollutant, api) {
       })
       .catch(function(error) {
         console.warn(error);
-        $("#dropdown-helptext").html("<span style='color: red;'>The selected pollutant did not return any data.</span>");
+        $("#dropdown-helptext").html("<span class='error-message'>The selected pollutant did not return any data.</span>");
         resetMapAndChart(false);
       });
 
@@ -1490,57 +1531,60 @@ function loadAvailablePollutants(sensorcategory) {
  * @param  {string} season         The name of the season from which you want to get data.
  */
 function updateMap(pollutant, sensorcategory, community, season) {
+  // Identifies whether all the sensor are tested and display error message
+  var manufacturerChecked = new Map();
   if (pollutant == "CO") {
     if (sensorcategory == "Mobile") {
       loadMobile("airterrier_co", community, season);
-      $("#dropdown-helptext").html("Loading...");
     }
   } else if (selected_pollutant == "CO2") {
     if (sensorcategory == "Mobile") {
       loadMobile("airterrier_co2", community, season);
-      $("#dropdown-helptext").html("Loading...");
     }
   } else if (selected_pollutant == "NO") {
     if (sensorcategory == "Mobile") {
       loadMobile("airterrier_no", community, season);
-      $("#dropdown-helptext").html("Loading...");
     }
   } else if (selected_pollutant == "NO2") {
     if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
-      createMarkers("aeroqual_no2", community, season, pollutant);
+      manufacturerChecked.set("aeroqual_no2",false);
+      createMarkers("aeroqual_no2", community, season, pollutant,manufacturerChecked);
       showSensorPicker();
     }
   } else if (selected_pollutant == "O3") {
     if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
-      createMarkers("aeroqual_o3", community, season, pollutant);
+      manufacturerChecked.set("aeroqual_o3",false);
+      createMarkers("aeroqual_o3", community, season, pollutant,manufacturerChecked);
       showSensorPicker();
     }
   } else if (selected_pollutant == "PM1.0") {
     if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
-      createMarkers("purpleairprimary_pm1.0", community, season, pollutant);
+      manufacturerChecked.set("purpleairprimary_pm1.0",false);
+      createMarkers("purpleairprimary_pm1.0", community, season, pollutant,manufacturerChecked);
       showSensorPicker();
     } else if (sensorcategory == "Mobile") {
       loadMobile("airterrier_pm1.0", community, season);
-      $("#dropdown-helptext").html("Loading...");
     }
   } else if (selected_pollutant == "PM2.5") {
     if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
-      createMarkers("purpleairprimary_pm2.5", community, season, pollutant);
-      createMarkers("metone_pm2.5", community, season, pollutant);
+      manufacturerChecked.set("purpleairprimary_pm2.5",false);
+      manufacturerChecked.set("metone_pm2.5",false);
+      createMarkers("purpleairprimary_pm2.5", community, season, pollutant,manufacturerChecked);
+      createMarkers("metone_pm2.5", community, season, pollutant,manufacturerChecked);
       showSensorPicker();
     } else if (sensorcategory == "Mobile") {
       loadMobile("airterrier_pm2.5", community, season);
-      $("#dropdown-helptext").html("Loading...");
     }
   } else if (selected_pollutant == "PM10") {
     if (sensorcategory == STATIONARY_REP || sensorcategory == STATIONARY_15MIN || sensorcategory == STATIONARY_1HR) {
+      manufacturerChecked.set("purpleairprimary_pm10",false);
+      manufacturerChecked.set("metone_pm10",false);
       // Load purpleairprimary_pm10
-      createMarkers("purpleairprimary_pm10", community, season, pollutant);
-      createMarkers("metone_pm10", community, season, pollutant);
+      createMarkers("purpleairprimary_pm10", community, season, pollutant,manufacturerChecked);
+      createMarkers("metone_pm10", community, season, pollutant,manufacturerChecked);
       showSensorPicker();
     } else if (sensorcategory == "Mobile") {
       loadMobile("airterrier_pm10", community, season);
-      $("#dropdown-helptext").html("Loading...");
     }
   }
 }
@@ -1668,6 +1712,7 @@ function resetMapAndChart(resetSensorList) {
  * @param  {string} season       The name of the season from which you want to get data.
  */
 function loadMobile(manufacturer, community, season) {
+  $("#dropdown-helptext").html("Loading the sensors routes ...");
   var bounds = new google.maps.LatLngBounds();
   $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season, function(eachroute) {
     var numRoutesDisplayed = 0;
@@ -1678,7 +1723,7 @@ function loadMobile(manufacturer, community, season) {
       }
     });
     if (numRoutesDisplayed == 0) {
-      $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+      $("#dropdown-helptext").html("<span class='error-message'>No sensors found with the selected parameters.</span>");
     } else {
       $("#dropdown-helptext").html("");
       showSensorPicker();
@@ -1740,7 +1785,7 @@ function createLine(manufacturer, route, season) {
       $("#selected-sensor").text("Route");
       $("#dropdown-helptext").html("");
     } else {
-      $("#dropdown-helptext").html("<span style='color: red;'>No sensors found with the selected parameters.</span>");
+      $("#dropdown-helptext").html("<span class='error-message'>No sensors found with the selected parameters.</span>");
     }
   });
 }

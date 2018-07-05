@@ -1,63 +1,68 @@
 body {
-    font-family: 'Montserrat', sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 #map, #map-container {
-    min-height: 500px;
+  min-height: 500px;
 }
 
 .row {
-    margin: 10px 0;
+  margin: 10px 0;
 }
 
 .dropdown button {
-    width: 100%;
-    margin-top: 10px;
+  width: 100%;
+  margin-top: 10px;
 }
 
 .dropdown-menu {
-    width: 100%;
+  width: 100%;
 }
 
 #dropdown-sensor-container .dropdown-menu li a {
-    text-transform: uppercase;
+  text-transform: uppercase;
 }
 
 .container {
-    width: 98% !important;
+  width: 98% !important;
 }
 
 table {
-    width: 100%;
+  width: 100%;
 }
 
 th {
-    padding: 5px !important;
-    color: #fff;
-    text-align: center !important;
+  padding: 5px !important;
+  color: #fff;
+  text-align: center !important;
 }
 
 td {
-    padding:5px !important;
-    text-align: right !important;
+  padding: 5px !important;
+  text-align: right !important;
 }
 
 #summary-table-container {
-    min-height: 200px;
+  min-height: 200px;
 }
 
 table, th, td {
-   border: 1px solid black;
+  border: 1px solid black;
 }
 
 .dynatable-processing {
-    top: -28px !important;
+  top: -28px !important;
 }
 
 .introjs-helperNumberLayer {
-    display: none;
+  display: none;
 }
-#summary-table caption {
-text-align: right;
 
+#summary-table caption {
+  text-align: right;
+}
+
+.error-message {
+  color: #cc0000;
+  font-weight: bold;
 }
