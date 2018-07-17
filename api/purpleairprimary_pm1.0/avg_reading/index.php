@@ -15,7 +15,7 @@ $community = $_GET['community'];
 
 // Build the SQL query
 $query = "select season, day_section, ROUND(CAST(AVG(pm1_cf_atm_ugm3) as NUMERIC),3) val from (select season, case when tod >= 6 and tod < 10 then 'morning' when tod >= 10 and tod < 14 then 'midday' when tod >= 14 and tod < 16 then 'afternoon' when tod >= 16 and tod < 20 then 'evening' when tod >= 20 and tod < 24 or tod >= 0 and tod < 6  then 'overnight' end day_section, pm1_cf_atm_ugm3 from
-(select season,to_char(created_at,'HH24')::integer tod, pm1_cf_atm_ugm3 from purpleair where community=$1 and (season='Summer' or season='Winter') and error is distinct from 1) part_1) part_2 group by season,day_section";
+(select season,to_char(created_at,'HH24')::integer tod, pm1_cf_atm_ugm3 from purpleair where community=$1 and (season='Summer' or season='Winter') and flag is null) part_1) part_2 group by season,day_section";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($community)) or die (return_error("Query failed.", pg_last_error()));

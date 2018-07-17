@@ -20,7 +20,7 @@ $sensor_name='AirBeam2-PM10';
 
 
 // Build the SQL query
-$query = 'select upper(substr(session_title,0,3)) as community, sum(case when measured_value < 54 then 1 else 0 end) as good, sum(case when measured_value > 54 and measured_value < 154 then 1 else 0 end) as moderate, sum(case when measured_value > 154 and measured_value < 254 then 1 else 0 end) as unhfsg, sum(case when measured_value > 254 and measured_value < 354 then 1 else 0 end) as unhealthy, sum(case when measured_value > 354 and measured_value < 424 then 1 else 0 end) as very_unhealthy, sum(case when measured_value > 424 then 1 else 0 end) as hazardous, count(*) as total from airterrier where upper(substr(session_title,0,3))=$1 and error is distinct from 1 and measurement_type = $2 and sensor_name=$3 group by upper(substr(session_title,0,3))';
+$query = 'select community as community, sum(case when measured_value < 54 then 1 else 0 end) as good, sum(case when measured_value > 54 and measured_value < 154 then 1 else 0 end) as moderate, sum(case when measured_value > 154 and measured_value < 254 then 1 else 0 end) as unhfsg, sum(case when measured_value > 254 and measured_value < 354 then 1 else 0 end) as unhealthy, sum(case when measured_value > 354 and measured_value < 424 then 1 else 0 end) as very_unhealthy, sum(case when measured_value > 424 then 1 else 0 end) as hazardous, count(*) as total from airterrier where community=$1 and flag is null and measurement_type = $2 and sensor_name=$3 group by community';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($community, $measurement_type,$sensor_name)) or die (return_error("Query failed.", pg_last_error()));

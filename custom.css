@@ -31,13 +31,13 @@ table {
   width: 100%;
 }
 
-th {
+#summary-table th {
   padding: 5px !important;
   color: #fff;
   text-align: center !important;
 }
 
-td {
+#summary-table td {
   padding: 5px !important;
   text-align: right !important;
 }
@@ -65,4 +65,59 @@ table, th, td {
 .error-message {
   color: #cc0000;
   font-weight: bold;
+}
+
+/* ------------------------ Download Table Page -------------------------- */
+#download-table-page {
+  width: 80%;
+  margin: 2% auto 6%;
+}
+
+#download-table-page h4 {
+  text-align: center;
+  font-weight: bold;
+}
+
+#download-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid black;
+  align:center;
+}
+
+#download-table th {
+  color: white;
+}
+#download-table tr td:nth-child(1) {
+  text-align:left;
+  width:10%;
+  vertical-align: middle;
+}
+
+#download-table tr td:nth-child(2) {
+  align:center;
+  width: 70%;
+}
+
+#download-table tr td:nth-child(3) {
+  align:center;
+  width: 11%;
+  vertical-align: middle;
+}
+
+#download-table tr td:nth-child(4) {
+  text-align:center;
+  width: 9%;
+  vertical-align: middle;
+}
+
+
+#download-table a {
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+  background-color: #e7e7e7;
+  color: black;
+  opacity: 40%;
 }

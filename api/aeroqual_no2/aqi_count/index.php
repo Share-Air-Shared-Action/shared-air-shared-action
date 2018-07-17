@@ -14,7 +14,7 @@ $community = $_GET['community'];
 
 
 // Build the SQL query
-$query = 'select community, sum(case when no2ppm<0.053 then 1 else 0 end) as good,  sum(case when no2ppm>0.053 and no2ppm<0.1 then 1 else 0 end) as moderate,  sum(case when no2ppm>0.1 and no2ppm<0.36 then 1 else 0 end) as unhfsg,  sum(case when no2ppm>0.36 and no2ppm<0.649 then 1 else 0 end) as unhealthy,  sum(case when no2ppm>0.649 and no2ppm<1.249 then 1 else 0 end) as veryunhealthy,  sum(case when no2ppm>1.249 then 1 else 0 end) as hazardous, count(*) as total  from aeroqualno2 where community=$1 and error is distinct from 1 group by community';
+$query = 'select community, sum(case when no2ppm<0.053 then 1 else 0 end) as good,  sum(case when no2ppm>0.053 and no2ppm<0.1 then 1 else 0 end) as moderate,  sum(case when no2ppm>0.1 and no2ppm<0.36 then 1 else 0 end) as unhfsg,  sum(case when no2ppm>0.36 and no2ppm<0.649 then 1 else 0 end) as unhealthy,  sum(case when no2ppm>0.649 and no2ppm<1.249 then 1 else 0 end) as veryunhealthy,  sum(case when no2ppm>1.249 then 1 else 0 end) as hazardous, count(*) as total  from aeroqualno2 where community=$1 and flag is null group by community';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($community)) or die (return_error("Query failed.", pg_last_error()));

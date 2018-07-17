@@ -16,7 +16,7 @@ $device = $_GET['device'];
 $season = $_GET['season'];
 
 // Build the SQL query
-$query = "SELECT time AS x, measured_value AS y FROM airterrier WHERE measurement_type = 'CO concentration' AND session_title = $1 AND season = $2 AND error IS DISTINCT FROM 1  ORDER BY time";
+$query = "SELECT time AS x, measured_value AS y FROM airterrier WHERE measurement_type = 'CO concentration' AND session_title = $1 AND season = $2 AND flag is null  ORDER BY time";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season)) or die (return_error("Query failed.", pg_last_error()));

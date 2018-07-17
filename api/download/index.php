@@ -29,31 +29,31 @@ print("<h1>Download started. Please allow any popups.</h1>");
 // Build the SQL query for airterrier
 $filename =  $community . "_" . $season . "_airterrier.csv";
 // Execute the command to create csv for airterrier
-exec($execConn. " (SELECT * FROM airterrier WHERE upper(SUBSTRING(session_title, 1, 2)) = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
+exec($execConn. " (SELECT * FROM airterrier WHERE upper(SUBSTRING(session_title, 1, 2)) = '" . $community . "' AND season = '" . $season . "' AND error IS NOT NULL) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
 // Download the file to client
 print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 // Build the SQL query for aeroqualno2
 $filename = $community . "_" . $season . "_aeroqualno2.csv";
-exec($execConn. " (SELECT * FROM aeroqualno2 WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
+exec($execConn. " (SELECT * FROM aeroqualno2 WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS NOT NULL) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
 print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 // Build the SQL query for aeroqualo3
 $filename = $community . "_" . $season . "_aeroqualo3.csv";
-exec($execConn. " (SELECT * FROM aeroqualo3 WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
+exec($execConn. " (SELECT * FROM aeroqualo3 WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS NOT NULL) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
 print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 
 // Build the SQL query for metone
 $filename = $community . "_" . $season . "_metone.csv";
-exec($execConn. " (SELECT * FROM metone WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
+exec($execConn. " (SELECT * FROM metone WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS NOT NULL) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
 print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 
 // Build the SQL query for purpleairprimary
 $filename = $community . "_" . $season . "_purpleairprimary.csv";
 
-exec($execConn. " (SELECT * FROM purpleair WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS DISTINCT FROM 1) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
+exec($execConn. " (SELECT * FROM purpleair WHERE community = '" . $community . "' AND season = '" . $season . "' AND error IS NOT NULL) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
 print("<script>window.open('" . $outURL . $filename . "')</script>");
 
 

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Download SASA Tables</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../custom.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dynatable/0.3.1/jquery.dynatable.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/airquality/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/airquality/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/airquality/images/favicon-16x16.png">
+    <link rel="manifest" href="/airquality/images/manifest.json">
+    <link rel="mask-icon" href="/airquality/images/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="/airquality/images/favicon.ico">
+    <meta name="msapplication-config" content="/airquality/images/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+  </head>
+  <body >
+    <div class="container" id="download-table-page" align="center">
+      <div class="row">
+                <div class="col-md-1"></div>
+          <div class="col-md-10">
+              <img src="../images/logo.jpg" style="max-width: 100px; display: inline-block;">
+              <h1>Shared Air, Shared Action</h1>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+          <h4>Download SASA Tables</h4>
+          <table id="download-table" class="table table-bordered">
+            <thead><tr><th>Table Name</th><th>Table Description</th><th>Type</th><th>Download</th></tr></thead>
+            <tbody>
+<tr><td>purpleair</td><td>Data collected for stationary PM2.5 (purpleair.pm25_cf_atm_ugm3) , PM1 (purpleair.pm1_cf_atm_ugm3) and PM10 (purpleair.pm10_cf_atm_ugm3) pollutants. All the pollutant information is in the same row for each sensor monitor (purpleair.device_name) for the specific time (purpleair.created_at). The table is downloaded as five distinct files respective to each community.</td><td>pollutant data</td><td><a href="/airquality/api/download_tables/?table=purpleair" target="_blank">download</a></td></tr>
+<tr><td>metone</td><td>The stationary sensor data collected from MetOne devices for pollutant PM2.5 and PM10. Column unit_id signifies the device name, type is the type of pollutant and value column signifies the value of that pollutant.</td><td>pollutant data</td><td><a href="/airquality/api/download_tables/?table=metone" target="_blank">download</a></td></tr>
+<tr><td>aeroqualno2</td><td>The stationary sensor data for the Aeroqual NO2 pollutant. Column unit_id signifies the name of the device and column no2ppm signifies the value of NO2 for that device.</td><td>pollutant data</td><td><a href="/airquality/api/download_tables/?table=aeroqualno2" target="_blank">download</a></td></tr>
+<tr><td>aeroqualo3</td><td>The stationary sensor data for Aeroqual Ozone pollutant. Column unit_id signifies the name of the device and column o3ppm signifies the value of Ozone for that device.</td><td>pollutant data</td><td><a href="/airquality/api/download_tables/?table=aeroqualo3" target="_blank">download</a></td></tr>
+<tr><td>airterrier</td><td>Contains all mobile data. The pollutant type is identified by measurement_type column ("CO concentration";"CO2 concentration";"NO concentration";"Particulate Matter"). For "Particulate Matter" Column sensor_name will signifies the type of PM2.5("AirBeam2-PM2.5";"AirBeam-PM"); PM1("AirBeam2-PM1"); PM10("AirBeam2-PM10")</td><td>pollutant data</td><td><a href="/airquality/api/download_tables/?table=airterrier" target="_blank">download</a></td></tr>
+<tr><td>stationarylocations</td><td>Contains the location information of all the stationary sensor devices. Column data_completeness shows the overall percentage completeness of the device after analysis.</td><td>sensor location</td><td><a href="/airquality/api/download_tables/?table=stationarylocations" target="_blank">download</a></td></tr>
+<tr><td>wunderground</td><td>The weather information collected from wunderground website.</td><td>weather</td><td><a href="/airquality/api/download_tables/?table=wunderground" target="_blank">download</a></td></tr>
+<tr><td>airterrier_suspect</td><td>List of all suspect for airterrier table with the reason the data was identified as (suspect_reason) and the outcome (output,comments) after visual inspection.</td><td>suspect</td><td><a href="/airquality/api/download_tables/?table=airterrier_suspect" target="_blank">download</a></td></tr>
+<tr><td>purpleair_suspect</td><td>List of all suspect for purpleair table with the reason the data was identified as (suspect_reason) and the outcome (output,comments) after visual inspection.</td><td>suspect</td><td><a href="/airquality/api/download_tables/?table=purpleair_suspect" target="_blank">download</a></td></tr>
+<tr><td>metone_suspect</td><td>List of all suspect for metone table with the reason the data was identified as (suspect_reason) and the outcome (output,comments) after visual inspection.</td><td>suspect</td><td><a href="/airquality/api/download_tables/?table=metone_suspect" target="_blank">download</a></td></tr>
+<tr><td>aeroqualno2_suspect</td><td>List of all suspect for an aeroqualno2 table with the reason the data was identified as (suspect_reason) and the outcome (output,comments) after visual inspection.</td><td>suspect</td><td><a href="/airquality/api/download_tables/?table=aeroqualno2_suspect" target="_blank">download</a></td></tr>
+<tr><td>aeroqualo3_suspect</td><td>List of all suspect for an aeroqualo3 table with the reason the data was identified as (suspect_reason) and the outcome (output,comments) after visual inspection.</td><td>suspect</td><td><a href="/airquality/api/download_tables/?table=aeroqualo3_suspect" target="_blank">download</a></td></tr>
+<tr><td>sasa_no2_1hr</td><td>Hourly average data of SASA no2 pollutant</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_no2_1hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_o3_1hr</td><td>Hourly average data of SASA o3 pollutant</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_o3_1hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_pm25_1hr</td><td>Hourly average data of SASA pm25 pollutant</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_pm25_1hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_pm10_1hr</td><td>Hourly average data of SASA pm10 pollutant</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_pm10_1hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_o3_8hr</td><td>8 hour running average of o3 pollutant</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_o3_8hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_no2_24hr</td><td>Daily average data of SASA no2 devices</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_no2_24hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_o3_24hr</td><td>Daily average data of SASA o3 devices</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_o3_24hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_pm25_24hr</td><td>Daily average data of SASA pm25 devices</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_pm25_24hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_pm10_24hr</td><td>Daily average data of SASA pm10 devices</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_pm10_24hr" target="_blank">download</a></td></tr>
+<tr><td>sasa_no2_summary</td><td>Data summary statistics with mean, median, 25th percentile, 75th percentile, 99th percentile, minimum and maximum of SASA no2 devices</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_no2_summary" target="_blank">download</a></td></tr>
+<tr><td>sasa_o3_summary</td><td>Data summary statistics with mean, median, 25th percentile, 75th percentile, 99th percentile, minimum and maximum of SASA o3 devices</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_o3_summary" target="_blank">download</a></td></tr>
+<tr><td>sasa_pm25_summary</td><td>Data summary statistics with mean, median, 25th percentile, 75th percentile, 99th percentile, minimum and maximum of SASA pm25 devices</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_pm25_summary" target="_blank">download</a></td></tr>
+<tr><td>sasa_pm10_summary</td><td>Data summary statistics with mean, median, 25th percentile, 75th percentile, 99th percentile, minimum and maximum of SASA pm10 devices</td><td>SASA summary</td><td><a href="/airquality/api/download_tables/?table=sasa_pm10_summary" target="_blank">download</a></td></tr>
+<tr><td>epa_daily_co</td><td>Daily average data from the EPA Air data system for CO pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_daily_co" target="_blank">download</a></td></tr>
+<tr><td>epa_daily_no2</td><td>Daily average data from the EPA Air data system for the NO2 pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_daily_no2" target="_blank">download</a></td></tr>
+<tr><td>epa_daily_o3</td><td>Daily average data from the EPA Air data system for Ozone pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_daily_o3" target="_blank">download</a></td></tr>
+<tr><td>epa_daily_pm10</td><td>Daily average data from the EPA Air data system for the PM10 pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_daily_pm10" target="_blank">download</a></td></tr>
+<tr><td>epa_daily_pm25</td><td>Daily average data from the EPA Air data system for the PM25 pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_daily_pm25" target="_blank">download</a></td></tr>
+<tr><td>epa_hourly_co</td><td>Hourly average data from the EPA Air data system for CO pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_hourly_co" target="_blank">download</a></td></tr>
+<tr><td>epa_hourly_no2</td><td>Hourly average data from the EPA Air data system for the NO2 pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_hourly_no2" target="_blank">download</a></td></tr>
+<tr><td>epa_hourly_o3</td><td>Hourly average data from the EPA Air data system for Ozone pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_hourly_o3" target="_blank">download</a></td></tr>
+<tr><td>epa_hourly_pm10</td><td>Hourly average data from the EPA Air data system for the PM10 pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_hourly_pm10" target="_blank">download</a></td></tr>
+<tr><td>epa_hourly_pm25</td><td>Hourly average data from the EPA Air data system for the PM25 pollutant</td><td>EPA summary</td><td><a href="/airquality/api/download_tables/?table=epa_hourly_pm25" target="_blank">download</a></td></tr>
+<tr><td>database_table_lookup</td><td>List of tables and its description in the database</td><td>lookup</td><td><a href="/airquality/api/download_tables/?table=database_table_lookup" target="_blank">download</a></td></tr>
+<tr><td>flag_lookup</td><td>List of flags and its description used in QA/QC analysis</td><td>lookup</td><td><a href="/airquality/api/download_tables/?table=flag_lookup" target="_blank">download</a></td></tr>
+</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

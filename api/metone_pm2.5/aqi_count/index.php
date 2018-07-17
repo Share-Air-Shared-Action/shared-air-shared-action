@@ -14,7 +14,7 @@ $community = $_GET['community'];
 $type = 'pm25';
 
 // Build the SQL query
-$query = 'select community, sum(case when value < 12.0 then 1 else 0 end) as good, sum(case when value > 12.0 and value < 35.4 then 1 else 0 end) as moderate, sum(case when value > 35.4 and value < 55.4 then 1 else 0 end) as unhfsg, sum(case when value > 55.4 and value < 150.4 then 1 else 0 end) as unhealthy, sum(case when value > 150.4 and value < 250.4 then 1 else 0 end) as very_unhealthy, sum(case when value > 250.4 then 1 else 0 end) as hazardous, count(*) as total from metone where community=$1 and error is distinct from 1 AND type = $2 group by community';
+$query = 'select community, sum(case when value < 12.0 then 1 else 0 end) as good, sum(case when value > 12.0 and value < 35.4 then 1 else 0 end) as moderate, sum(case when value > 35.4 and value < 55.4 then 1 else 0 end) as unhfsg, sum(case when value > 55.4 and value < 150.4 then 1 else 0 end) as unhealthy, sum(case when value > 150.4 and value < 250.4 then 1 else 0 end) as very_unhealthy, sum(case when value > 250.4 then 1 else 0 end) as hazardous, count(*) as total from metone where community=$1 and flag is null AND type = $2 group by community';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($community, $type)) or die (return_error("Query failed.", pg_last_error()));

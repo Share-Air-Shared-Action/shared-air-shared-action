@@ -13,7 +13,7 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 $community = $_GET['community'];
 
 // Build the SQL query
-$query = 'select community, sum(case when pm10_cf_atm_ugm3 < 54 then 1 else 0 end) as good, sum(case when pm10_cf_atm_ugm3 > 54 and pm10_cf_atm_ugm3 < 154 then 1 else 0 end) as moderate, sum(case when pm10_cf_atm_ugm3 > 154 and pm10_cf_atm_ugm3 < 254 then 1 else 0 end) as unhfsg, sum(case when pm10_cf_atm_ugm3 > 254 and pm10_cf_atm_ugm3 < 354 then 1 else 0 end) as unhealthy, sum(case when pm10_cf_atm_ugm3 > 354 and pm10_cf_atm_ugm3 < 424 then 1 else 0 end) as very_unhealthy, sum(case when pm10_cf_atm_ugm3 > 250.4 then 1 else 0 end) as hazardous,count(*) as total from purpleair where community=$1 and error is distinct from 1 group by community';
+$query = 'select community, sum(case when pm10_cf_atm_ugm3 < 54 then 1 else 0 end) as good, sum(case when pm10_cf_atm_ugm3 > 54 and pm10_cf_atm_ugm3 < 154 then 1 else 0 end) as moderate, sum(case when pm10_cf_atm_ugm3 > 154 and pm10_cf_atm_ugm3 < 254 then 1 else 0 end) as unhfsg, sum(case when pm10_cf_atm_ugm3 > 254 and pm10_cf_atm_ugm3 < 354 then 1 else 0 end) as unhealthy, sum(case when pm10_cf_atm_ugm3 > 354 and pm10_cf_atm_ugm3 < 424 then 1 else 0 end) as very_unhealthy, sum(case when pm10_cf_atm_ugm3 > 250.4 then 1 else 0 end) as hazardous,count(*) as total from purpleair where community=$1 and flag is null group by community';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($community)) or die (return_error("Query failed.", pg_last_error()));

@@ -22,7 +22,7 @@ $sensor_name='AirBeam2-PM2.5';
 $sensor_name_comm='AirBeam-PM';
 
 // Build the SQL query
-$query = "SELECT time AS x, measured_value AS y FROM airterrier WHERE measurement_type = 'Particulate Matter' AND session_title = $1 AND season = $2  AND (sensor_name=$3 OR sensor_name=$4) AND error IS DISTINCT FROM 1  ORDER BY time";
+$query = "SELECT time AS x, measured_value AS y FROM airterrier WHERE measurement_type = 'Particulate Matter' AND session_title = $1 AND season = $2  AND (sensor_name=$3 OR sensor_name=$4) AND flag is null  ORDER BY time";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season,$sensor_name,$sensor_name_comm)) or die (return_error("Query failed.", pg_last_error()));

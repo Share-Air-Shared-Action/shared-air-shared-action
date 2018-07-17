@@ -14,7 +14,7 @@ $season = $_GET['season'];
 $measurement_type = 'NO concentration';
 
 // Build the SQL query
-$query = 'select location.community as x, coalesce(airterrier.y,0) as y from (select community from stationarylocations group by community) location left join (SELECT upper(substr(session_title,0,3)) AS x, ROUND(CAST(AVG(measured_value) as NUMERIC),3) AS y FROM airterrier WHERE measurement_type = $2 AND season=$1 AND error IS distinct FROM 1 GROUP BY upper(substr(session_title,0,3))) airterrier on location.community=airterrier.x order by location.community';
+$query = 'select location.community as x, coalesce(airterrier.y,0) as y from (select community from stationarylocations group by community) location left join (SELECT community AS x, ROUND(CAST(AVG(measured_value) as NUMERIC),3) AS y FROM airterrier WHERE measurement_type = $2 AND season=$1 AND flag is null GROUP BY community) airterrier on location.community=airterrier.x order by location.community';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season,$measurement_type)) or die (return_error("Query failed.", pg_last_error()));

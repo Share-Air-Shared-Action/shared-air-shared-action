@@ -17,7 +17,7 @@ $season = $_GET['season'];
 $sensor_name='AirBeam2-PM10';
 
 // Build the SQL query
-$query = "SELECT time AS x, measured_value AS y FROM airterrier WHERE measurement_type = 'Particulate Matter' AND session_title = $1 AND season = $2  AND sensor_name=$3 AND error IS DISTINCT FROM 1  ORDER BY time";
+$query = "SELECT time AS x, measured_value AS y FROM airterrier WHERE measurement_type = 'Particulate Matter' AND session_title = $1 AND season = $2  AND sensor_name=$3 AND flag is null  ORDER BY time";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($device, $season,$sensor_name)) or die (return_error("Query failed.", pg_last_error()));

@@ -16,7 +16,7 @@ $community = $_GET['community'];
 $measurement_type = 'CO concentration';
 
 // Build the SQL query
-$query = 'select upper(substr(session_title,0,3)) as community, sum(case when measured_value < 4.4 then 1 else 0 end) as good, sum(case when measured_value > 4.4 and measured_value < 9.4 then 1 else 0 end) as moderate, sum(case when measured_value > 9.4 and measured_value < 12.4 then 1 else 0 end) as unhfsg, sum(case when measured_value > 12.4 and measured_value < 15.4 then 1 else 0 end) as unhealthy, sum(case when measured_value > 15.4 and measured_value < 30.4 then 1 else 0 end) as very_unhealthy, sum(case when measured_value > 30.4 then 1 else 0 end) as hazardous, count(*) as total from airterrier where upper(substr(session_title,0,3))=$1 and error is distinct from 1 and measurement_type = $2 group by upper(substr(session_title,0,3))';
+$query = 'select community, sum(case when measured_value < 4.4 then 1 else 0 end) as good, sum(case when measured_value > 4.4 and measured_value < 9.4 then 1 else 0 end) as moderate, sum(case when measured_value > 9.4 and measured_value < 12.4 then 1 else 0 end) as unhfsg, sum(case when measured_value > 12.4 and measured_value < 15.4 then 1 else 0 end) as unhealthy, sum(case when measured_value > 15.4 and measured_value < 30.4 then 1 else 0 end) as very_unhealthy, sum(case when measured_value > 30.4 then 1 else 0 end) as hazardous, count(*) as total from airterrier where community=$1 and flag is null and measurement_type = $2 group by community';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($community, $measurement_type)) or die (return_error("Query failed.", pg_last_error()));

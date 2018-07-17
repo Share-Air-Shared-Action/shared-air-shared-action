@@ -13,7 +13,7 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 $community = $_GET['community'];
 
 // Build the SQL query
-$query = 'select community, sum(case when o3ppm<0.054 then 1 else 0 end) as good, sum(case when o3ppm>0.054 and o3ppm<0.070 then 1 else 0 end) as moderate, sum(case when o3ppm>0.070 and o3ppm<0.085 then 1 else 0 end) as unhfsg, sum(case when o3ppm>0.085 and o3ppm<0.105 then 1 else 0 end) as unhealthy, sum(case when o3ppm>0.105 and o3ppm<0.200 then 1 else 0 end) as very_unhealthy, sum(case when o3ppm>0.200 then 1 else 0 end) as hazardous, count(*) as total from aeroqualo3 where community=$1 and error is distinct from 1 group by community';
+$query = 'select community, sum(case when o3ppm<0.054 then 1 else 0 end) as good, sum(case when o3ppm>0.054 and o3ppm<0.070 then 1 else 0 end) as moderate, sum(case when o3ppm>0.070 and o3ppm<0.085 then 1 else 0 end) as unhfsg, sum(case when o3ppm>0.085 and o3ppm<0.105 then 1 else 0 end) as unhealthy, sum(case when o3ppm>0.105 and o3ppm<0.200 then 1 else 0 end) as very_unhealthy, sum(case when o3ppm>0.200 then 1 else 0 end) as hazardous, count(*) as total from aeroqualo3 where community=$1 and flag is null group by community';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($community)) or die (return_error("Query failed.", pg_last_error()));

@@ -14,7 +14,7 @@ $season = $_GET['season'];
 $sensor_name='AirBeam2-PM10';
 
 // Build the SQL query
-$query = "SELECT DISTINCT session_title, upper(SUBSTRING(session_title, 1, 2)) as community, season FROM airterrier WHERE measurement_type = 'Particulate Matter' AND season = $1 AND sensor_name=$2";
+$query = "SELECT DISTINCT session_title, community, season FROM airterrier WHERE measurement_type = 'Particulate Matter' AND season = $1 AND sensor_name=$2";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season,$sensor_name)) or die (return_error("Query failed.", pg_last_error()));

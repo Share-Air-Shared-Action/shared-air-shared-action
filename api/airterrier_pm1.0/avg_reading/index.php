@@ -19,7 +19,7 @@ $sensor_name='AirBeam2-PM1';
 // Build the SQL query
 // Agregates from airterrier and wundergound indvidual for each date and then joined
 $query = "select season, day_section, ROUND(cast(avg(measured_value) as NUMERIC),3) val from (select season, case when tod >= 6 and tod < 10 then 'morning' when tod >= 10 and tod < 14 then 'midday' when tod >= 14 and tod < 16 then 'afternoon' when tod >= 16 and tod < 20 then 'evening' when tod >= 20 and tod < 24 or tod >= 0 and tod < 6  then 'overnight' end day_section, measured_value from
-(select season,to_char(time,'HH24')::integer  tod, measured_value from airterrier where upper(substr(session_title,0,3))=$2 AND sensor_name=$3 AND (season='Summer' OR season='Winter') AND error IS DISTINCT FROM 1 AND measurement_type = $1 ) part_1) part_2 group by season,day_section";
+(select season,to_char(time,'HH24')::integer  tod, measured_value from airterrier where community=$2 AND sensor_name=$3 AND (season='Summer' OR season='Winter') AND flag is null AND measurement_type = $1 ) part_1) part_2 group by season,day_section";
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($measurement_type,$community,$sensor_name)) or die (return_error("Query failed.", pg_last_error()));

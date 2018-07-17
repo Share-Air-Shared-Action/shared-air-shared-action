@@ -1715,11 +1715,10 @@ function loadMobile(manufacturer, community, season) {
   $("#dropdown-helptext").html("Loading the sensors routes ...");
   var bounds = new google.maps.LatLngBounds();
   $.getJSON("/airquality/api/" + manufacturer + "/ids/?season=" + season, function(eachroute) {
-    var numRoutesDisplayed = 0;
+    var numRoutesDisplayed = eachroute.length;
     $.each(eachroute, function(route) {
       if (eachroute[route].community == community && eachroute[route].season == season) {
         createLine(manufacturer, eachroute[route].session_title, season);
-        numRoutesDisplayed++;
       }
     });
     if (numRoutesDisplayed == 0) {
