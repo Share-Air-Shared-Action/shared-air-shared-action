@@ -1,7 +1,7 @@
 <?php
 
 // Import the keys/secret variables
-include("../../keys.php");
+include("../keys.php");
 
 // Set the header Content-Type for JSON
 header('Content-Type: application/json');
@@ -9,21 +9,23 @@ header('Content-Type: application/json');
 // Open connection to database using variables set in keys
 $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbname . " user=" . $dbuser . " password=" . $dbpass) or die(return_error("Could not connect to database.", pg_last_error()));
 
-// Get the season from the URL parameter
-$season = $_GET['season'];
-$community = $_GET['community'];
-
-// Build the SQL query
-$query = "SELECT DISTINCT session_title, community, season FROM airterrier WHERE measurement_type = 'CO concentration' AND season = $1 AND community=$2 AND flag is null";
-
+$query = "select device_name from purpleair where (community='NB' and device_name not like '%BB') or (community!='NB' and device_name not like '%B') group by device_name order by device_name";
 // Run the query
-$result = pg_query_params($dbconn, $query, array($season,$community)) or die (return_error("Query failed.", pg_last_error()));
-
+$result = pg_query_params($dbconn, $query, array()) or die (return_error("Query 1 failed.", pg_last_error()));
 // Create JSON result
 $resultArray = pg_fetch_all($result);
 
+// Seperate out the X and Y (Time and values) data so that it can be charted by plot.ly
+$deviceName = [];
+
+foreach($resultArray as $item) {
+	$deviceName[] = $item['device_name'];
+}
+
+$returnarray = ["devices"=>$deviceName];
+
 // Encode the array as JSON and return it.
-echo json_encode($resultArray);
+echo json_encode($returnarray);
 
 // Free resultset
 pg_free_result($result);

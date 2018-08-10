@@ -1,4 +1,7 @@
 api/keys.php
 .DS_Store
 help/_docpress
+help/docs/_docpress.json
+docs/*.html
 docs
+purpleair-comparison.html

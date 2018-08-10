@@ -13,14 +13,15 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 $season = $_GET['season'];
 // When three distinct pm value is available
 $sensor_name='AirBeam2-PM2.5';
+$community = $_GET['community'];
 
 // When only one pm value available for session
 $sensor_name_comm='AirBeam-PM';
 // Build the SQL query
-$query = "SELECT DISTINCT session_title, community, season FROM airterrier WHERE measurement_type = 'Particulate Matter' AND season = $1 AND (sensor_name=$2 OR sensor_name=$3)";
+$query = "SELECT DISTINCT session_title, community, season FROM airterrier WHERE measurement_type = 'Particulate Matter' AND season = $1 AND (sensor_name=$2 OR sensor_name=$3) AND community=$4 AND flag is null";
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($season,$sensor_name,$sensor_name_comm)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($season,$sensor_name,$sensor_name_comm,$community)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);

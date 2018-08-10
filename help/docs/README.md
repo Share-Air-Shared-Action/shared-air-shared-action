@@ -6,6 +6,7 @@
     * [Pollutant Daily Aggregations](table.md)
     * [Route AQI Map](MobileRouteMap.md)
     * [Save Data as CSV](exportdata.md)
+    * [EPA Sensor location](epasensors.md)
 * Using the Data
     * [Fine Particulate Matter (PM<sub>2.5</sub>)](pm25.md)
 * [Useful Links](links.md)

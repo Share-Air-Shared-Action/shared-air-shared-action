@@ -23,16 +23,8 @@ print("<h1>Download started. Please allow any popups.</h1>");
 
 // Output the valid tables to the folder
 if ($table == "airterrier"){
-	exec($execConn. " (SELECT * FROM ". $table . " WHERE community='NB' and flag is distinct from 90) to '" . $outDirectory . $table . "_nb.csv' (format CSV,HEADER)\"");
-	print("<script>window.open('" . $outURL . $table . "_nb.csv')</script>");
-	exec($execConn. " (SELECT * FROM ". $table . " WHERE community='PC' and flag is distinct from 90) to '" . $outDirectory . $table . "_pc.csv' (format CSV,HEADER)\"");
-	print("<script>window.open('" . $outURL . $table . "_pc.csv')</script>");
-	exec($execConn. " (SELECT * FROM ". $table . " WHERE community='SE' and flag is distinct from 90) to '" . $outDirectory . $table . "_se.csv' (format CSV,HEADER)\"");
-	print("<script>window.open('" . $outURL . $table . "_se.csv')</script>");
-	exec($execConn. " (SELECT * FROM ". $table . " WHERE community='SL' and flag is distinct from 90) to '" . $outDirectory . $table . "_sl.csv' (format CSV,HEADER)\"");
-	print("<script>window.open('" . $outURL . $table . "_sl.csv')</script>");
-  exec($execConn. " (SELECT * FROM ". $table . " WHERE community='LV' and flag is distinct from 90) to '" . $outDirectory . $table . "_lv.csv' (format CSV,HEADER)\"");
-	print("<script>window.open('" . $outURL . $table . "_lv.csv')</script>");
+	print("<script>window.open('" . $outURL . $table . ".csv')</script>");
+	// exec($execConn. " (SELECT * FROM ". $table . " WHERE flag is distinct from 90) to '" . $outDirectory . $table . ".csv' (format CSV,HEADER)\"");
 } elseif ($table == "purpleair") {
 	exec($execConn. " (SELECT * FROM ". $table . "_lv WHERE flag is distinct from 90) to '" . $outDirectory . $table . "_lv.csv' (format CSV,HEADER)\"");
 	print("<script>window.open('" . $outURL . $table . "_lv.csv')</script>");
@@ -48,7 +40,7 @@ if ($table == "airterrier"){
   $filename = $table . ".csv";
   exec($execConn. " (SELECT * FROM ". $table . " WHERE flag is distinct from 90) to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
 	print("<script>window.open('" . $outURL . $filename . "')</script>");
-} elseif ( $table == "stationarylocations" || $table == "wunderground" || $table == "airterrier_suspect" || $table == "purpleair_suspect" || $table == "metone_suspect" || $table == "aeroqualno2_suspect" || $table == "aeroqualo3_suspect" || $table == "sasa_no2_1hr" || $table == "sasa_o3_1hr" || $table == "sasa_pm25_1hr" || $table == "sasa_pm10_1hr" || $table == "sasa_no2_24hr" || $table == "sasa_o3_24hr" || $table == "sasa_pm25_24hr" || $table == "sasa_pm10_24hr" || $table == "sasa_no2_summary" || $table == "sasa_o3_summary" || $table == "sasa_pm25_summary" || $table == "sasa_pm10_summary" || $table == "epa_daily_co" || $table == "epa_daily_no2" || $table == "epa_daily_o3" || $table == "epa_daily_pm10" || $table == "epa_daily_pm25" || $table == "epa_hourly_co" || $table == "epa_hourly_no2" || $table == "epa_hourly_o3" || $table == "epa_hourly_pm10" || $table == "epa_hourly_pm25" || $table == "database_table_lookup" || $table == "flag_lookup" || $table == "sasa_o3_8hr" ){
+} elseif ( $table == "stationarylocations" || $table == "wundergound" || $table == "airterrier_suspect" || $table == "purpleair_suspect" || $table == "metone_suspect" || $table == "aeroqualno2_suspect" || $table == "aeroqualo3_suspect" || $table == "sasa_no2_1hr" || $table == "sasa_o3_1hr" || $table == "sasa_pm25_1hr" || $table == "sasa_pm10_1hr" || $table == "sasa_no2_24hr" || $table == "sasa_o3_24hr" || $table == "sasa_pm25_24hr" || $table == "sasa_pm10_24hr" || $table == "sasa_no2_summary" || $table == "sasa_o3_summary" || $table == "sasa_pm25_summary" || $table == "sasa_pm10_summary" || $table == "epa_daily_co" || $table == "epa_daily_no2" || $table == "epa_daily_o3" || $table == "epa_daily_pm10" || $table == "epa_daily_pm25" || $table == "epa_hourly_co" || $table == "epa_hourly_no2" || $table == "epa_hourly_o3" || $table == "epa_hourly_pm10" || $table == "epa_hourly_pm25" || $table == "database_table_lookup" || $table == "flag_lookup" || $table == "sasa_o3_8hr" ){
   $filename = $table . ".csv";
   exec($execConn. " (SELECT * FROM ". $table . ") to '" . $outDirectory . $filename . "' (format CSV,HEADER)\"");
 	print("<script>window.open('" . $outURL . $filename . "')</script>");

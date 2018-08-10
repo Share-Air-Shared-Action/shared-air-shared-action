@@ -16,7 +16,7 @@ $season = $_GET['season'];
 $community = $_GET['community'];
 
 // Build the SQL query
-$query = 'SELECT DISTINCT purpleair.device_name as device, averages.average, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM purpleair INNER JOIN stationarylocations ON (purpleair.device_name = stationarylocations.unit_id) INNER JOIN (SELECT avg(pm10_cf_atm_ugm3) as average, device_name FROM purpleair WHERE season = $1 AND community = $2 AND flag is null GROUP BY device_name) as averages ON (averages.device_name = purpleair.device_name) WHERE purpleair.season = $1 AND purpleair.community = $2';
+$query = 'SELECT DISTINCT purpleair.device_name as device, averages.average, stationarylocations.latitude, stationarylocations.longitude, stationarylocations.community FROM purpleair INNER JOIN stationarylocations ON (purpleair.device_name = stationarylocations.unit_id) INNER JOIN (SELECT avg(pm10_cf_atm_ugm3) as average, device_name FROM purpleair WHERE season = $1 AND community = $2 AND flag is null GROUP BY device_name) as averages ON (averages.device_name = purpleair.device_name) WHERE purpleair.season = $1 AND purpleair.community = $2 and purpleair.flag is null';
 
 // Run the query
 $result = pg_query_params($dbconn, $query, array($season, $community)) or die (return_error("Query failed.", pg_last_error()));

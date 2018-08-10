@@ -62,9 +62,40 @@ table, th, td {
   text-align: right;
 }
 
-.error-message {
-  color: #cc0000;
+.info-message, .error-message {
+  color: black;
   font-weight: bold;
+  border: 1.5px solid black;
+  padding: 2em;
+  border-radius: 25px;
+}
+
+.info-message{
+  background-color: #E5FFCC;
+}
+
+.error-message {
+  background-color: #FFCCCC;
+}
+
+.error-text {
+  color: #800000;
+  font-weight: bold;
+}
+
+/* loading animation */
+.loading {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #000000; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* ------------------------ Download Table Page -------------------------- */
@@ -120,4 +151,42 @@ table, th, td {
   background-color: #e7e7e7;
   color: black;
   opacity: 40%;
+}
+
+/*------------------------------------------Scatter plot page --------------------------------- */
+.semi-square {
+   -webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+   border-radius: 5px;
+}
+
+.blue    { background-color: #3b8ec2; }
+
+.styled-select {
+   background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+   height: 29px;
+   overflow: hidden;
+   width: 240px;
+}
+
+.styled-select select {
+   background: transparent;
+   border: none;
+   font-size: 14px;
+   height: 29px;
+   padding: 5px; /* If you add too much padding here, the options won't show in IE */
+   width: 268px;
+}
+
+.styled-select.slate {
+   background: url(http://i62.tinypic.com/2e3ybe1.jpg) no-repeat right center;
+   height: 34px;
+   width: 240px;
+}
+
+.styled-select.slate select {
+   border: 1px solid #ccc;
+   font-size: 16px;
+   height: 34px;
+   width: 268px;
 }

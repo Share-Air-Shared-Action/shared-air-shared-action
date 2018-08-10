@@ -12,12 +12,13 @@ $dbconn = pg_connect("host=" . $dbhost . " port=". $dbport . " dbname=" . $dbnam
 // Get the season from the URL parameter
 $season = $_GET['season'];
 $sensor_name='AirBeam2-PM10';
+$community = $_GET['community'];
 
 // Build the SQL query
-$query = "SELECT DISTINCT session_title, community, season FROM airterrier WHERE measurement_type = 'Particulate Matter' AND season = $1 AND sensor_name=$2";
+$query = "SELECT DISTINCT session_title, community, season FROM airterrier WHERE measurement_type = 'Particulate Matter' AND season = $1 AND sensor_name=$2 AND community=$3 AND flag is null";
 
 // Run the query
-$result = pg_query_params($dbconn, $query, array($season,$sensor_name)) or die (return_error("Query failed.", pg_last_error()));
+$result = pg_query_params($dbconn, $query, array($season,$sensor_name,$community)) or die (return_error("Query failed.", pg_last_error()));
 
 // Create JSON result
 $resultArray = pg_fetch_all($result);
