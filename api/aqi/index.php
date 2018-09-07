@@ -132,7 +132,7 @@ header('Content-Type: application/json');
             }
         },
         "range": [0, 0.7],
-        "unit": "NO<sub>2</sub> (ppb)",
+        "unit": "NO<sub>2</sub> (ppm)",
         "name": "NO<sub>2</sub>"
     },
     "O3": {

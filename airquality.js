@@ -849,7 +849,6 @@ function buildChart(manufacturer, device, pollutant, season, scrollto, community
         autosize: false
       };
 
-      console.log(chart);
       // Remove the info text and plot graph in it's place
       console.log("Clearning the information");
 
@@ -911,6 +910,7 @@ function buildChart(manufacturer, device, pollutant, season, scrollto, community
         // Plot the data with AQI scale, unit, and range if they are available
         $.getJSON("/airquality/api/aqi/", function(aqivals) {
           // Clearing the info text
+          console.log(data);
           $("#chart").empty();
             if (aqivals.hasOwnProperty(pollutant)) {
               if (aqivals[pollutant].hasOwnProperty("unit")) {
@@ -935,6 +935,9 @@ function buildChart(manufacturer, device, pollutant, season, scrollto, community
         // Plot the data with AQI scale, unit, and range if they are available
         $.getJSON("/airquality/api/aqi/", function(aqivals) {
           // Clearing the info text
+
+          // adding color to the scatter plot based on presence or absence of comments
+          data['marker']={color :data.color};
           $("#chart").empty();
           if (aqivals.hasOwnProperty(pollutant)) {
             if (aqivals[pollutant].hasOwnProperty("unit")) {
